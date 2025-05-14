@@ -10,11 +10,38 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     public function product(){
-        $product = Product::with('img', 'variant', 'category')->get();
+        $product = Product::with('img', 'variant', 'category')->paginate(12);
         return response()->json([
             'status' => 200,
-            'message' => 'Product List',
+            'message' => 'Danh sách sản phẩm',
             'data' => $product
+        ],200);
+    }
+
+    public function hotProduct(){
+        $product = Product::with('img', 'variant', 'category')->where('hot', 1)->get();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Hot sản phẩm',
+            'data' => $product
+        ],200);
+    }
+
+    public function viewProduct(){
+        $product = Product::with('img', 'variant', 'category')->where('view', 1)->get();
+        return response()->json([
+            'status' => 200,
+            'message' => 'View sản phẩm',
+            'data' => $product
+        ],200);
+    }
+
+    public function category(){
+        $category = Category::with('product')->get();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách danh mục',
+            'data' => $category
         ],200);
     }
 
@@ -23,14 +50,34 @@ class ProductController extends Controller
         if($product){
             return response()->json([
                 'status' => 200,
-                'message' => 'Product Found',
+                'message' => 'Chi tiết sản phẩm',
                 'data' => $product
             ],200);
         }else{
             return response()->json([
                 'status' => 404,
-                'message' => 'Product Not Found',
+                'message' => 'Không tìm thấy sản phẩm',
             ],404);
+        }
+    }
+
+    public function searchProduct(Request $request){
+        $search = $request->input('search');
+        $product = Product::with('img', 'variant', 'category')
+            ->where('name', 'LIKE', "%{$search}%")
+            ->orWhere('description', 'LIKE', "%{$search}%")
+            ->get();
+        if($product->isEmpty()){
+            return response()->json([
+                'status' => 404,
+                'message' => 'Tôi dei',
+            ],404);
+        }else{
+            return response()->json([
+                'status' => 200,
+                'message' => 'Không tìm thấy sản phẩm',
+                'data' => $product
+            ],200);
         }
     }
 }

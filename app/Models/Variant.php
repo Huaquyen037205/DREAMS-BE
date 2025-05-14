@@ -9,6 +9,17 @@ class Variant extends Model
     use HasFactory;
 
     protected $table = 'variant';
+    protected $fillable = [
+        'product_id',
+        'img_id',
+        'size',
+        'color',
+        'stock_quantity',
+        'price',
+        'status',
+        'created_at',
+        'updated_at',
+    ];
 
     public function product()
     {
