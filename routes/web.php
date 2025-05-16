@@ -25,7 +25,6 @@ Route::prefix('/admin')->middleware(CheckAdmin::class)->group(function () {
     route::post('/addCategory', [AdminController::class, 'addCategory']);
     route::get('/product/{id}', [AdminController::class, 'editProduct']);
 
-
     //User
     route::get('/searchUser', [AdminUserController::class, 'searchUser']);
     route::get('/user', [AdminUserController::class, 'userAdmin']);

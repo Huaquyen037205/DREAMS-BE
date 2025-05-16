@@ -70,12 +70,12 @@ class ProductController extends Controller
         if($product->isEmpty()){
             return response()->json([
                 'status' => 404,
-                'message' => 'Tôi dei',
+                'message' => 'Không tìm thấy sản phẩm',
             ],404);
         }else{
             return response()->json([
                 'status' => 200,
-                'message' => 'Không tìm thấy sản phẩm',
+                'message' => 'Tôi dei',
                 'data' => $product
             ],200);
         }

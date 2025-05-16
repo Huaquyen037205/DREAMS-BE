@@ -4,17 +4,20 @@ namespace App\Models;
 use \Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Category extends Model
+class Shipping extends Model
 {
     use HasFactory;
-    protected $table = 'categories';
+
+    protected $table = 'shipping';
     protected $fillable = [
         'name',
-        'created_day',
+        'shipping_status',
+        'tracking_number',
     ];
 
-    public function product()
+    public function order()
     {
-        return $this->hasMany(Product::class, 'category_id', 'id');
+        return $this->hasMany(Order::class, 'shipping_id', 'id');
     }
+
 }

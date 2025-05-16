@@ -249,15 +249,58 @@ class AdminController extends Controller
     }
 
     public function addImg(Request $request){
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'url' => 'required|string|max:255',
-        ]);
-        $img = Img::create($request->all());
-        return response()->json([
-            'status' => 200,
-            'message' => 'Thêm ảnh sản phẩm thành công',
-            'data' => $img
-        ],200);
-    }
+        // $request->validate([
+        //     'product_id' => 'required|exists:products,id',
+        //     'name' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        // ]);
+            $img = new Img();
+            $img->product_id = $request->product_id;
+            $img->name = $request->name;
+
+            if ($img->save()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Thêm hình ảnh thành công',
+                    'data' => $img,
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Thêm hình ảnh thất bại',
+                ], 500);
+            }
+        }
+
+        public function editImg(Request $request, $id){
+            $img = Img::find($id);
+            if($img){
+                $img->update($request->all());
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Cập nhật hình ảnh thành công',
+                    'data' => $img
+                ],200);
+            }else{
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Không tìm thấy hình ảnh',
+                ],404);
+            }
+        }
+
+        public function deleteImg($id){
+            $img = Img::find($id);
+            if($img){
+                $img->delete();
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Xóa hình ảnh thành công',
+                ],200);
+            }else{
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Không tìm thấy hình ảnh',
+                ],404);
+            }
+        }
 }
