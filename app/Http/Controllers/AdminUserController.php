@@ -11,38 +11,48 @@ class AdminUserController extends Controller
 {
     public function loginAdmin(Request $request)
     {
-    $isLogin = Auth::attempt([
+        $isLogin = Auth::attempt([
         'email' => $request->email,
         'password' => $request->password
-    ]);
+        ]);
 
-    if ($isLogin) {
-        if (Auth::user()->role == 'admin') {
-            return response()->json([
-                'status' => 200,
-                'message' => 'Đăng nhập thành công',
-                'data' => Auth::user()
-            ], 200);
+        if ($isLogin) {
+            $user = Auth::user();
+
+            if ($user->is_active === 'off') {
+                Auth::logout();
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Tài khoản đã bị khóa',
+                ], 403);
+            }
+
+            if ($user->role === 'admin') {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Đăng nhập thành công',
+                    'data' => $user
+                ], 200);
+            } else {
+                Auth::logout();
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Không có quyền truy cập',
+                ], 403);
+            }
         } else {
-            Auth::logout();
             return response()->json([
-                'status' => 403,
-                'message' => 'Không có quyền truy cập',
-            ], 403);
+                'status' => 401,
+                'message' => 'Email hoặc mật khẩu không đúng',
+            ], 401);
         }
-    } else {
-        return response()->json([
-            'status' => 401,
-            'message' => 'Email hoặc mật khẩu không đúng',
-        ], 401);
     }
-}
 
     public function logoutAdmin(Request $request){
         auth()->logout();
         return response()->json([
             'status' => 200,
-            'message' => 'Logout Successful',
+            'message' => 'Đã đăng xuất',
         ], 200);
     }
 
@@ -64,36 +74,6 @@ class AdminUserController extends Controller
             'status' => 200,
             'message' => 'Tìm thấy người dùng',
             'data' => $user
-        ],200);
-    }
-
-    public function productAdmin(){
-        $product = Product::with('img', 'variant', 'category')->paginate(12);
-        return response()->json([
-            'status' => 200,
-            'message' => 'Product List',
-            'data' => $product
-        ],200);
-    }
-
-    public function searchProductAdmin(Request $request){
-        $search = $request->input('search');
-        $product = Product::where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('description', 'LIKE', "%{$search}%")
-                    ->paginate(12);
-        return response()->json([
-            'status' => 200,
-            'message' => 'Tìm thấy sản phẩm',
-            'data' => $product
-        ],200);
-    }
-
-    public function categoryAdmin(){
-        $category = Category::with('product')->get();
-        return response()->json([
-            'status' => 200,
-            'message' => 'Category List',
-            'data' => $category
         ],200);
     }
 
@@ -125,35 +105,7 @@ class AdminUserController extends Controller
         }
     }
 
-    // public function updateUser(Request $request, $id)
-    // {
-    //     $user = User::find($id);
-    //     if ($user) {
-    //         $user->name = $request->name;
-    //         $user->phone = $request->phone;
-    //         $user->email = $request->email;
-    //         $user->role = $request->role;
-    //         if ($user->save()) {
-    //             return response()->json([
-    //                 'status' => 200,
-    //                 'message' => 'Cập nhật người dùng thành công',
-    //                 'data' => $user
-    //             ], 200);
-    //         } else {
-    //             return response()->json([
-    //                 'status' => 422,
-    //                 'message' => 'Cập nhật người dùng thất bại',
-    //             ], 422);
-    //         }
-    //     } else {
-    //         return response()->json([
-    //             'status' => 404,
-    //             'message' => 'Người dùng không tồn tại',
-    //         ], 404);
-    //     }
-    // }
-
-  public function editUser(Request $request, $id)
+    public function editUser(Request $request, $id)
     {
         $user = User::find($id);
         if ($user) {
@@ -169,17 +121,41 @@ class AdminUserController extends Controller
                     'data' => $user
                 ], 200);
             } else {
+                    return response()->json([
+                        'status' => 422,
+                        'message' => 'Cập nhật người dùng thất bại',
+                    ], 422);
+                }
+            } else {
                 return response()->json([
-                    'status' => 422,
-                    'message' => 'Cập nhật người dùng thất bại',
-                ], 422);
+                    'status' => 404,
+                    'message' => 'Người dùng không tồn tại',
+                ], 404);
             }
-        } else {
+        }
+
+    public function setActiveUser(Request $request, $id)
+    {
+        $request->validate([
+        'is_active' => 'required|in:on,off',
+        ]);
+
+        $user = User::find($id);
+
+        if (!$user) {
             return response()->json([
                 'status' => 404,
                 'message' => 'Người dùng không tồn tại',
             ], 404);
         }
+
+        $user->is_active = $request->is_active;
+        $user->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => $request->is_active === 'on' ? 'Kích hoạt người dùng thành công' : 'Ngừng kích hoạt người dùng thành công',
+        ], 200);
     }
 
     public function deleteUser($id)

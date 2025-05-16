@@ -33,6 +33,7 @@ Route::post('/admin/addProduct', [AdminController::class, 'addProduct']);
 Route::delete('/admin/product/{id}', [AdminController::class, 'deleteProduct']);
 
 //Variant
+Route::get('/admin/variant', [AdminController::class, 'variantAdmin']);
 Route::post('/admin/addVariant', [AdminController::class, 'addVariant']);
 Route::patch('/admin/editVariant/{id}', [AdminController::class, 'editVariant']);
 Route::delete('/admin/deleteVariant/{id}', [AdminController::class, 'deleteVariant']);
@@ -68,6 +69,7 @@ Route::get('/admin/searchUser', [AdminUserController::class, 'searchUser']);
 Route::post('/admin/addUser', [AdminUserController::class, 'addUser']);
 Route::patch('/admin/updateUser/{id}', [AdminUserController::class, 'updateUser']);
 Route::patch('/admin/editUser/{id}', [AdminUserController::class, 'editUser']);
+Route::patch('/admin/setActive/{id}', [AdminUserController::class, 'setActiveUser']);
 Route::delete('/admin/deleteUser/{id}', [AdminUserController::class, 'deleteUser']);
 
 

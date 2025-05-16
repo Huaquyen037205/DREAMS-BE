@@ -4,7 +4,6 @@ use App\Models\Product;
 use App\Models\Img;
 use App\Models\Variant;
 use App\Models\Category;
-
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -13,59 +12,9 @@ class AdminController extends Controller
         $product = Product::with('img', 'variant', 'category')->paginate(12);
         return response()->json([
             'status' => 200,
-            'message' => 'Product List',
+            'message' => 'Danh sách sản phẩm',
             'data' => $product
         ],200);
-    }
-
-
-    public function updateProduct(Request $request, $id){
-        $product = Product::find($id);
-
-        if (!$product) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Product Not Found',
-            ], 404);
-        }
-
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'description' => 'nullable|string',
-            'status' => 'required|boolean',
-            'category_id' => 'required|exists:categories,id',
-            'imgs' => 'required|array',
-            'imgs.*' => 'required|string',
-            'variants' => 'required|array',
-            'variants.*.size' => 'required|string',
-            'variants.*.color' => 'required|string',
-            'variants.*.quantity' => 'required|integer',
-        ]);
-
-        $product->update($validatedData);
-
-        foreach ($request->imgs as $imgUrl) {
-            Img::create([
-                'product_id' => $id,
-                'url' => $imgUrl
-            ]);
-        }
-
-        foreach ($request->variants as $variant) {
-            Variant::create([
-                'product_id' => $id,
-                'size' => $variant['size'],
-                'color' => $variant['color'],
-                'quantity' => $variant['quantity']
-            ]);
-        }
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Product and related data updated successfully',
-            'data' => Product::with('img', 'variant')->find($id)
-        ], 200);
     }
 
       public function addProduct(Request $request){
@@ -77,20 +26,38 @@ class AdminController extends Controller
         ],200);
     }
 
-     public function editProduct($id){
-        $product = Product::with('img', 'variant', 'category')->where('id', $id)->first();
+     public function updateProduct(Request $request, $id){
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|integer',
+            'description' => 'nullable|string',
+            'status' => 'required|string',
+            'view' => 'nullable|integer',
+            'hot' => 'nullable|integer',
+        ]);
+
+        $product = Product::find($id);
         if($product){
-            return response()->json([
-                'status' => 200,
-                'message' => 'Product Found',
-                'data' => $product
-            ],200);
-        }else{
-            return response()->json([
-                'status' => 404,
-                'message' => 'Product Not Found',
-            ],404);
+            $product->name = $request->name;
+            $product->category_id = $request->category_id;
+            $product->description = $request->description;
+            $product->status = $request->status;
+            $product->view = $request->view;
+            $product->hot = $request->hot;
+            if($product->save()){
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Cập nhật sản phẩm thành công',
+                    'data' => $product
+                ],200);
+            }else{
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Không tìm thấy sản phẩm',
+                ],404);
+            }
         }
+
     }
 
     public function deleteProduct($id){
@@ -113,7 +80,7 @@ class AdminController extends Controller
         $category = Category::all();
         return response()->json([
             'status' => 200,
-            'message' => 'Category List',
+            'message' => 'Danh sách danh mục',
             'data' => $category
         ],200);
     }
@@ -122,7 +89,7 @@ class AdminController extends Controller
         $category = Category::create($request->all());
         return response()->json([
             'status' => 200,
-            'message' => 'Category Created',
+            'message' => 'Tạo danh mục thành công',
             'data' => $category
         ],200);
     }
@@ -140,13 +107,13 @@ class AdminController extends Controller
         if($category->save()){
             return response()->json([
                 'status' => 200,
-                'message' => 'Category Found',
+                'message' => 'Cập nhật danh mục thành công',
                 'data' => $category
             ],200);
         }else{
             return response()->json([
                 'status' => 404,
-                'message' => 'Category Not Found',
+                'message' => 'Không tìm thấy danh mục',
             ],404);
         }
     }
@@ -187,6 +154,15 @@ class AdminController extends Controller
         }
     }
 
+    public function variantAdmin(){
+        $variant = Variant::with('product', 'img')->paginate(12);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách biến thể sản phẩm',
+            'data' => $variant
+        ],200);
+    }
+
     public function addVariant(Request $request){
         $request->validate([
             'product_id' => 'required|exists:products,id',
@@ -195,6 +171,7 @@ class AdminController extends Controller
             'color' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',
             'price' => 'required|numeric',
+            'sale_price' => 'nullable|numeric',
             'status' => 'required|string|max:255',
         ]);
         $variant = Variant::create($request->all());
@@ -214,6 +191,7 @@ class AdminController extends Controller
             'color' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',
             'price' => 'required|numeric',
+            'sale_price' => 'nullable|numeric',
             'status' => 'required|string|max:255',
         ]);
         $variant = Variant::find($id);
@@ -271,36 +249,37 @@ class AdminController extends Controller
             }
         }
 
-        public function editImg(Request $request, $id){
-            $img = Img::find($id);
-            if($img){
-                $img->update($request->all());
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'Cập nhật hình ảnh thành công',
-                    'data' => $img
-                ],200);
-            }else{
+    public function editImg(Request $request, $id){
+        $img = Img::find($id);
+        if($img){
+            $img->update($request->all());
+            return response()->json([
+                'status' => 200,
+                'message' => 'Cập nhật hình ảnh thành công',
+                'data' => $img
+            ],200);
+        }
+            else{
                 return response()->json([
                     'status' => 404,
                     'message' => 'Không tìm thấy hình ảnh',
                 ],404);
             }
-        }
+    }
 
-        public function deleteImg($id){
-            $img = Img::find($id);
-            if($img){
-                $img->delete();
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'Xóa hình ảnh thành công',
-                ],200);
-            }else{
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Không tìm thấy hình ảnh',
-                ],404);
-            }
+    public function deleteImg($id){
+        $img = Img::find($id);
+        if($img){
+            $img->delete();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Xóa hình ảnh thành công',
+            ],200);
+        }else{
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy hình ảnh',
+            ],404);
         }
+    }
 }

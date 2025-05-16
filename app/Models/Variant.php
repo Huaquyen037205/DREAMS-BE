@@ -16,6 +16,7 @@ class Variant extends Model
         'color',
         'stock_quantity',
         'price',
+        'sale_price',
         'status',
         'created_at',
         'updated_at',
@@ -24,5 +25,10 @@ class Variant extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
+
+    public function img()
+    {
+        return $this->belongsTo(Img::class, 'img_id', 'id');
     }
 }
