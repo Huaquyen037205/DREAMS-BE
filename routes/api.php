@@ -13,6 +13,15 @@ Route::get('/hotProduct', [ProductController::class, 'hotProduct']);
 Route::get('/viewProduct', [ProductController::class, 'viewProduct']);
 Route::get('/product/{id}', [ProductController::class, 'productById']);
 Route::get('/search', [ProductController::class, 'searchProduct']);
+//Login, Register
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+route::post('/logout', [AuthController::class, 'logout']);
+Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
+route::post('/resetPassword', [AuthController::class, 'resetPassword']);
+route::get('/category/{id}', [ProductController::class, 'productByCategory']);
+Route::get('/products/price/{price}', [ProductController::class, 'productByprice']);
+Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
 
 
 

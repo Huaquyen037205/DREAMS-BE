@@ -80,4 +80,82 @@ class ProductController extends Controller
             ],200);
         }
     }
+
+    public function productByCategory($id){
+        $product = Product::with('img', 'variant', 'category')->where('category_id', $id)->get();
+        if($product->isEmpty()){
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ],404);
+        }else{
+            return response()->json([
+                'status' => 200,
+                'message' => 'Danh sách sản phẩm theo danh mục',
+                'data' => $product
+            ],200);
+        }
+    }
+
+    public function productByprice($price)
+    {
+    if (!is_numeric($price)) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Giá không hợp lệ',
+        ], 400);
+    }
+
+    $product = Product::with(['img', 'variant', 'category'])
+        ->whereHas('variant', function($query) use ($price) {
+            $query->whereRaw('COALESCE(sale_price, price) <= ?', [$price]);
+        })
+        ->get();
+
+    if ($product->isEmpty()) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Không tìm thấy sản phẩm',
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm theo giá',
+        'data' => $product
+    ], 200);
+}
+
+    public function SortByPrice(Request $request)
+    {
+        $price = $request->input('price');
+        $sort = $request->input('sort', 'asc');
+
+        if (!$price || !is_numeric($price)) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Giá không hợp lệ',
+            ], 400);
+        }
+
+        if (!in_array(strtolower($sort), ['asc', 'desc'])) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Sort không hợp lệ',
+            ], 400);
+        }
+
+        $products = Product::select('products.*')
+            ->join('variant', 'products.id', '=', 'variant.product_id')
+            ->with(['img', 'variant', 'category'])
+            ->whereRaw('COALESCE(variant.sale_price, variant.price) <= ?', [$price])
+            ->orderByRaw('COALESCE(variant.sale_price, variant.price) ' . $sort)
+            ->distinct()
+            ->get();
+            return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách sản phẩm theo giá',
+            'data' => $products
+        ], 200);
+    }
 }

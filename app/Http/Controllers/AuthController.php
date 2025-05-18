@@ -24,7 +24,32 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Đăng nhập thành công',
+                'data' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Đăng nhập thất bại'
+            ], 401);
+        }
+    }
 
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Đăng xuất thành công'
+        ], 200);
+    }
 }
 
 
