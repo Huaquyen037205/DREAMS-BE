@@ -9,16 +9,16 @@
 <body class="bg-gray-100 font-sans flex items-center justify-center min-h-screen">
   <div class="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
     <h2 class="text-2xl font-bold text-indigo-600 mb-6 text-center">Quên Mật Khẩu</h2>
-       @if(session('error'))
+        @if(session('error'))
         <div class="mb-4 text-red-600 text-center">
             {{ session('error') }}
         </div>
-    @endif
-    @if(session('status'))
-        <div class="mb-4 text-green-600 text-center">
-            {{ session('status') }}
-        </div>
-    @endif
+        @endif
+        @if(session('status'))
+            <div class="mb-4 text-green-600 text-center">
+                {{ session('status') }}
+            </div>
+        @endif
     <form action="{{ url('/admin/forgotPassword') }}" method="POST">
       @csrf
       <div class="mb-4">

@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use App\Mail\ResetPasswordMail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -68,7 +72,7 @@ class AuthController extends Controller
     {
         $user = User::where('email', $request->email)->first();
         if ($user) {
-            $token = Str(random(8));
+            $token = Str::random(8);
 
             DB::table('password_resets')->updateOrInsert(
                 ['email' => $user->email],
@@ -96,8 +100,8 @@ class AuthController extends Controller
 
     public function resetPassword(Request $request)
     {
-       $email = $request->email->query('email');
-       $token = $request->token->query('token');
+       $email = $request->query('email');
+       $token = $request->query('token');
 
          $reset = DB::table('password_resets')->where([
               ['email', $email],
@@ -108,7 +112,7 @@ class AuthController extends Controller
             return response('Link đặt lại mật khẩu không hợp lệ, hoặc hết hạn', 404);
          }
 
-         $newPassword = Hash::make($request->password);
+         $newPassword = Str::random(8);
          $user = User::where('email', $email)->first();
          if($user){
             $user->password = Hash::make($newPassword);

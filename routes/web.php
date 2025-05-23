@@ -13,13 +13,19 @@ Route::get('/', [PageController::class, 'home']);
 Route::get('/login', [PageController::class, 'login']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/reset-password', [AuthController::class, 'resetPassword']);
 Route::post('/logout', [AuthController::class, 'logout']);
+
+//product routes
 route::get('/product', [ProductController::class, 'product']);
 route::get('/hotProduct', [ProductController::class, 'hotProduct']);
 route::get('/viewProduct', [ProductController::class, 'viewProduct']);
 route::get('/category', [ProductController::class, 'category']);
 route::get('/product/{id}', [ProductController::class, 'productById']);
 route::get('/search', [ProductController::class, 'searchProduct']);
+
+
+
 
 // Admin Routes
 Route::get('/admin/login', [PageController::class, 'loginAdmin']);

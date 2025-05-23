@@ -1,7 +1,7 @@
-<p>Xin chào {{ $user->name }},</p>
+<p>DREAMS, xin chào {{ $user->name }},</p>
 <p>Bạn vừa yêu cầu đặt lại mật khẩu. Nhấn vào link dưới đây để đặt lại mật khẩu:</p>
 <p>
-    <a href="{{ url('reset-password?token=' . $token . '&email=' . urlencode($user->email)) }}">
+    <a href="{{ url('/reset-password?token=' . $token . '&email=' . urlencode($user->email)) }}">
         Đặt lại mật khẩu
     </a>
 </p>
