@@ -158,5 +158,54 @@ class AdminManageController extends Controller
             'data' => $review
         ], 200);
     }
+
+      public function Chart(){
+        $user = User::all();
+        $userCount = $user->count();
+        $activeCount = $user->where('is_active', 'on')->count();
+        $inactiveCount = $user->where('is_active', 'off')->count();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Thống kê người dùng',
+            'data' => [
+                'total_users' => $userCount,
+                'active_users' => $activeCount,
+                'inactive_users' => $inactiveCount,
+            ],
+        ], 200);
+    }
+
+    public function OrderChart(){
+        $order = Order::all();
+        $orderCount = $order->count();
+        $orderSoldCount = $order->where('status', 1)->count();
+        $orderCancelCount = $order->where('status', 0)->count();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Thống kê đơn hàng',
+            'data' => [
+                'total_orders' => $orderCount,
+                'sold_orders' => $orderSoldCount,
+                'cancel_orders' => $orderCancelCount,
+            ],
+        ], 200);
+    }
+
+    public function ProductChart(){
+        $product = Product::all();
+        $productCount = $product->count();
+        $variantCount = Variant::all()->count();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Thống kê sản phẩm',
+            'data' => [
+                'total_products' => $productCount,
+                'total_variants' => $variantCount,
+            ],
+        ], 200);
+    }
 }
 

@@ -1,10 +1,13 @@
 <?php
-
 namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Img;
 use App\Models\Variant;
 use App\Models\Category;
+use App\Models\User;
+use App\Models\Discount;
+use App\Models\Discount_user;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -43,6 +46,55 @@ class ProductController extends Controller
             'message' => 'Danh sách danh mục',
             'data' => $category
         ],200);
+    }
+
+    public function wishList(){
+        $product = Product::with('img', 'variant', 'category')->where('wishlist', 1)->get();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách sản phẩm yêu thích',
+            'data' => $product
+        ],200);
+    }
+
+    public function discountUser(Request $request){
+       $validate = $request->validate([
+            'code' => 'required|string|max:255',
+        ]);
+
+        $user = auth()->user();
+        $discount = Discount::where('code', $request->code)
+        ->whereDate('start_day', '<=', now())
+        ->whereDate('end_day', '>=', now())
+        ->first();
+        if (!$discount) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn',
+            ], 404);
+        }
+
+        $discount_user = Discount_user::where('user_id', $user->id)
+        ->where('discount_id', $discount->id)
+        ->first();
+        if ($discount_user) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Bạn đã sử dụng mã giảm giá này',
+            ], 400);
+        }
+
+        Discount_user::create([
+            'user_id' => $user->id,
+            'discount_id' => $discount->id,
+            'used_at' => now(),
+        ]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Áp dụng mã giảm giá thành công',
+            'discount' => $discount
+        ], 200);
     }
 
     public function productById($id){
@@ -99,32 +151,32 @@ class ProductController extends Controller
 
     public function productByprice($price)
     {
-    if (!is_numeric($price)) {
+        if (!is_numeric($price)) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Giá không hợp lệ',
+            ], 400);
+        }
+
+        $product = Product::with(['img', 'variant', 'category'])
+            ->whereHas('variant', function($query) use ($price) {
+                $query->whereRaw('COALESCE(sale_price, price) <= ?', [$price]);
+            })
+            ->get();
+
+        if ($product->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ], 404);
+        }
+
         return response()->json([
-            'status' => 400,
-            'message' => 'Giá không hợp lệ',
-        ], 400);
+            'status' => 200,
+            'message' => 'Danh sách sản phẩm theo giá',
+            'data' => $product
+        ], 200);
     }
-
-    $product = Product::with(['img', 'variant', 'category'])
-        ->whereHas('variant', function($query) use ($price) {
-            $query->whereRaw('COALESCE(sale_price, price) <= ?', [$price]);
-        })
-        ->get();
-
-    if ($product->isEmpty()) {
-        return response()->json([
-            'status' => 404,
-            'message' => 'Không tìm thấy sản phẩm',
-        ], 404);
-    }
-
-    return response()->json([
-        'status' => 200,
-        'message' => 'Danh sách sản phẩm theo giá',
-        'data' => $product
-    ], 200);
-}
 
     public function SortByPrice(Request $request)
     {
@@ -157,5 +209,39 @@ class ProductController extends Controller
             'message' => 'Danh sách sản phẩm theo giá',
             'data' => $products
         ], 200);
+    }
+
+    public function addToCart(Request $request){
+        $request->validate([
+            'product_id' => 'required|integer',
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        $cart = session()->get('cart', []);
+        $productId = $request->product_id;
+        $quantity = $request->quantity;
+
+        if (isset($cart[$productId])) {
+            $cart[$productId] += $quantity;
+        } else {
+            $cart[$productId] = $quantity;
+        }
+
+        session(['cart' => $cart]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Đã thêm vào giỏ hàng',
+            'cart' => $cart
+        ]);
+    }
+
+    public function cart()
+    {
+        $cart = session()->get('cart', []);
+        return response()->json([
+            'status' => 200,
+            'cart' => $cart
+        ]);
     }
 }

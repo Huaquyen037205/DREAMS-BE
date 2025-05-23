@@ -4,6 +4,9 @@ use App\Models\Product;
 use App\Models\Img;
 use App\Models\Variant;
 use App\Models\Category;
+use App\Models\User;
+use App\Models\Wishlist;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -17,7 +20,7 @@ class AdminController extends Controller
         ],200);
     }
 
-      public function addProduct(Request $request){
+    public function addProduct(Request $request){
         $product = Product::create($request->all());
         return response()->json([
             'status' => 200,
@@ -26,7 +29,7 @@ class AdminController extends Controller
         ],200);
     }
 
-     public function updateProduct(Request $request, $id){
+    public function updateProduct(Request $request, $id){
         $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'required|integer',
@@ -57,7 +60,51 @@ class AdminController extends Controller
                 ],404);
             }
         }
+    }
 
+    public function flashSale(Request $request){
+        $product = Product::where('flash_sale', 1)->get();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách sản phẩm flash sale',
+            'data' => $product
+        ],200);
+    }
+
+    public function addFashSale(Request $request){
+        $product = Product::find($request->id);
+        if($product){
+            $product->flash_sale = 1;
+            $product->save();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Thêm sản phẩm vào flash sale thành công',
+                'data' => $product
+            ],200);
+        }else{
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ],404);
+        }
+    }
+
+    public function deleteFashSale($id){
+        $product = Product::find($id);
+        if($product){
+            $product->flash_sale = 0;
+            $product->save();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Xóa sản phẩm khỏi flash sale thành công',
+                'data' => $product
+            ],200);
+        }else{
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ],404);
+        }
     }
 
     public function deleteProduct($id){
@@ -134,7 +181,7 @@ class AdminController extends Controller
         }
     }
 
-     public function searchProductAdmin(Request $request){
+    public function searchProductAdmin(Request $request){
         $search = $request->input('search');
         $product = Product::with('img', 'variant', 'category')
             ->where('name', 'LIKE', "%{$search}%")
@@ -226,21 +273,29 @@ class AdminController extends Controller
         }
     }
 
-    public function addImg(Request $request){
-        // $request->validate([
-        //     'product_id' => 'required|exists:products,id',
-        //     'name' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        // ]);
+    public function addImg(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'name' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('name')) {
+            $file = $request->file('name');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('public/img', $filename);
+
             $img = new Img();
             $img->product_id = $request->product_id;
-            $img->name = $request->name;
+            $img->name = $filename;
 
             if ($img->save()) {
                 return response()->json([
                     'status' => 200,
                     'message' => 'Thêm hình ảnh thành công',
                     'data' => $img,
-                ], 200);
+                    'image_url' => asset('storage/img/' . $filename)
+                ]);
             } else {
                 return response()->json([
                     'status' => 500,
@@ -248,6 +303,13 @@ class AdminController extends Controller
                 ], 500);
             }
         }
+
+        return response()->json([
+            'status' => 400,
+            'message' => 'Không có file hình ảnh',
+        ], 400);
+    }
+
 
     public function editImg(Request $request, $id){
         $img = Img::find($id);
