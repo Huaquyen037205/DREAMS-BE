@@ -23,7 +23,7 @@
         Khi bạn đã đăng nhập, hãy thay đổi mật khẩu của bạn. DREAMS xin cảm ơn.
     </h2>
 
-    <a href="{{ url('admin/login') }}"
+    <a href="{{ url('/admin/login') }}"
        class="block text-center bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition duration-200">
       Quay lại đăng nhập
     </a>

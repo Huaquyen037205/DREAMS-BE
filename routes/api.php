@@ -45,6 +45,7 @@ Route::delete('/admin/deleteCategory/{id}', [AdminController::class, 'deleteCate
 Route::get('/admin/product/{id}', [AdminController::class, 'editProduct']);
 Route::patch('/admin/updateProduct/{id}', [AdminController::class, 'updateProduct']);
 Route::get('/admin/searchProduct', [AdminController::class, 'searchProductAdmin']);
+Route::patch('/admin/productActive/{id}', [AdminController::class, 'setActiveProduct']);
 Route::post('/admin/addProduct', [AdminController::class, 'addProduct']);
 Route::delete('/admin/product/{id}', [AdminController::class, 'deleteProduct']);
 
@@ -52,6 +53,7 @@ Route::delete('/admin/product/{id}', [AdminController::class, 'deleteProduct']);
 Route::get('/admin/variant', [AdminController::class, 'variantAdmin']);
 Route::post('/admin/addVariant', [AdminController::class, 'addVariant']);
 Route::patch('/admin/editVariant/{id}', [AdminController::class, 'editVariant']);
+Route::patch('/admin/variantActive/{id}', [AdminController::class, 'setVariantActive']);
 Route::delete('/admin/deleteVariant/{id}', [AdminController::class, 'deleteVariant']);
 
 //Img

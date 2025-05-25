@@ -38,4 +38,16 @@ class PageController extends Controller
     public function changePassword(){
         return view('Admin.reset_password');
     }
+
+    public function productList(){
+        return view('Admin.productList');
+    }
+
+    public function addProduct(){
+        return view('Admin.add_product');
+    }
+
+    public function editProduct($id){
+        return view('Admin.edit_product', ['id' => $id]);
+    }
 }

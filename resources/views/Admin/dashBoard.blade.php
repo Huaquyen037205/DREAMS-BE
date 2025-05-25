@@ -1,224 +1,96 @@
 @extends('template.admin')
 @section('content')
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white p-4 shadow rounded">
+          <div class="text-gray-500">Total Sells</div>
+          <div class="text-xl font-bold">$654.66k</div>
+          <div class="text-green-500 text-sm mt-2">+16.24%</div>
+        </div>
+        <div class="bg-white p-4 shadow rounded">
+          <div class="text-gray-500">Total Orders</div>
+          <div class="text-xl font-bold">$854.66k</div>
+          <div class="text-red-500 text-sm mt-2">-80.00%</div>
+        </div>
+        <div class="bg-white p-4 shadow rounded">
+          <div class="text-gray-500">Daily Visitors</div>
+          <div class="text-xl font-bold">$987.21M</div>
+          <div class="text-blue-500 text-sm mt-2">+80.00%</div>
+        </div>
+        <div class="bg-white p-4 shadow rounded">
+          <div class="text-gray-500">Daily Visitors</div>
+          <div class="text-xl font-bold">$987.21M</div>
+          <div class="text-yellow-500 text-sm mt-2">+80.00%</div>
+        </div>
+      </div>
 
-<div class="d-flex justify-content-between">
-    <h3 class="mb-4">Dashboard</h3>
-  </div>
-  <div class="row">
-    <div class="col-md-3 mb-4">
-      <div class="card border-0 rounded-0 bg-primary-subtle text-primary">
-        <div class="card-body text-end">
-          <div class="display-6 d-flex justify-content-between">
-            <i class="fal fa-file-invoice-dollar"></i>
-            122
-          </div>
-          ORDERS
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 mb-4">
-      <div class="card border-0 rounded-0 bg-warning-subtle text-warning">
-        <div class="card-body text-end">
-          <div class="display-6 d-flex justify-content-between">
-            <i class="fal fa-boxes"></i>
-            20
-          </div>
-          PRODUCTS
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 mb-4">
-      <div class="card border-0 rounded-0 bg-danger-subtle text-danger">
-        <div class="card-body text-end">
-          <div class="display-6 d-flex justify-content-between">
-            <i class="fal fa-users"></i>
-            10,003
-          </div>
-          CUSTOMERS
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 mb-4">
-      <div class="card border-0 rounded-0 bg-success-subtle text-success">
-        <div class="card-body text-end">
-          <div class="display-6 d-flex justify-content-between">
-            <i class="fal fa-chart-line"></i>
-            1.5 B
-          </div>
-          INCOMES
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-4 mb-3">
-      <div class="card rounded-0 border-0 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex border-bottom pb-2 justify-content-between">
-            <h6 class="mb-0">
-              <i class="fal fa-file-invoice-dollar fa-lg"></i>
-              Recent Orders
-            </h6>
-            <small>
-              <a href="#" class="text-decoration-none">All Orders</a>
-            </small>
-          </div>
-          <div class="d-flex text-body-secondary pt-3">
-            <div class="p-2 me-2 bg-warning text-white">
-              <i class="fal fa-receipt"></i>
+      <!-- Charts and Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 shadow rounded">
+          <div class="flex justify-between mb-4">
+            <h2 class="text-lg font-semibold">Total Sales</h2>
+            <div>
+              <button class="px-2 py-1 text-sm">7 Days</button>
+              <button class="px-2 py-1 text-sm bg-yellow-400 text-white rounded">Monthly</button>
+              <button class="px-2 py-1 text-sm">Yearly</button>
             </div>
-            <a href="#" class="py-2 mb-0 small lh-sm border-bottom w-100 text-decoration-none text-body-secondary">
-              <strong class="d-flex justify-content-between">
-                Đơn #122
-                <div>
-                  <span class="badge text-bg-warning">
-                    <i class="far fa-box"></i> 20
-                  </span>
-                  <span class="badge bg-success-subtle text-success"><i class="far fa-money-bill-wave"></i> 100,000,000</span>
-                </div>
-              </strong>
-              Đặt bởi <i>Khách vãng lai</i> lúc 18:00 04/06/2024
-            </a>
           </div>
-          <div class="d-flex text-body-secondary pt-3">
-            <div class="p-2 me-2 bg-success text-white">
-              <i class="fal fa-receipt"></i>
-            </div>
-            <a href="#" class="py-2 mb-0 small lh-sm border-bottom w-100 text-decoration-none text-body-secondary">
-              <strong class="d-flex justify-content-between">
-                Đơn #122
-                <div>
-                  <span class="badge text-bg-warning">
-                    <i class="far fa-box"></i> 5
-                  </span>
-                  <span class="badge bg-success-subtle text-success"><i class="far fa-money-bill-wave"></i> 10,000,000</span>
-                </div>
-              </strong>
-              Đặt bởi <i>Khách vãng lai</i> lúc 18:00 04/06/2024
-            </a>
-          </div>
-          <div class="d-flex text-body-secondary pt-3">
-            <div class="p-2 me-2 bg-danger text-white">
-              <i class="fal fa-receipt"></i>
-            </div>
-            <a href="#" class="py-2 mb-0 small lh-sm border-bottom w-100 text-decoration-none text-body-secondary">
-              <strong class="d-flex justify-content-between">
-                Đơn #121
-                <div>
-                  <span class="badge text-bg-warning">
-                    <i class="far fa-box"></i> 5
-                  </span>
-                  <span class="badge bg-success-subtle text-success"><i class="far fa-money-bill-wave"></i> 10,000,000</span>
-                </div>
-              </strong>
-              Đặt bởi <i>Khách vãng lai</i> lúc 18:00 04/06/2024
-            </a>
-          </div>
+          <canvas id="salesChart"></canvas>
+        </div>
+
+        <div class="bg-white p-4 shadow rounded">
+          <h2 class="text-lg font-semibold mb-4">Monthly Statistics</h2>
+          <canvas id="statsChart"></canvas>
         </div>
       </div>
-    </div>
-    <div class="col-md-4 mb-3">
-      <div class="card rounded-0 border-0 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex border-bottom pb-2 justify-content-between">
-            <h6 class="mb-0">
-              <i class="fal fa-stars fa-lg"></i>
-              Recent Ratings
-            </h6>
-            <small>
-              <a href="#" class="text-decoration-none">All Ratings</a>
-            </small>
-          </div>
-          <div class="d-flex text-body-secondary pt-3">
-            <i class="far fa-comment-alt-smile"></i>
-            <a href="#" class="py-2 mb-0 small lh-sm border-bottom w-100 text-decoration-none text-body-secondary">
-              <strong class="d-flex justify-content-between">
-                iPhone 15 Pro Max 256GB Gold Rose
-                <div class="text-warning">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                </div>
-              </strong>
-              Sản phẩm xịn, giá tốt!
-            </a>
-          </div>
-          <div class="d-flex text-body-secondary pt-3">
-            <i class="far fa-comment-alt-smile"></i>
-            <a href="#" class="py-2 mb-0 small lh-sm border-bottom w-100 text-decoration-none text-body-secondary">
-              <strong class="d-flex justify-content-between">
-                Samsung Galaxy S23 Ultra
-                <div class="text-warning">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                </div>
-              </strong>
-              Giá mắc, chất lượng tầm trung!
-            </a>
-          </div>
-          <div class="d-flex text-body-secondary pt-3">
-            <i class="far fa-comment-alt-smile"></i>
-            <a href="#" class="py-2 mb-0 small lh-sm border-bottom w-100 text-decoration-none text-body-secondary">
-              <strong class="d-flex justify-content-between">
-                Samsung Galaxy S23 Ultra
-                <div class="text-warning">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                </div>
-              </strong>
-              Giá mắc, chất lượng tầm trung!
-            </a>
-          </div>
-          <div class="d-flex text-body-secondary pt-3">
-            <i class="far fa-comment-alt-smile"></i>
-            <a href="#" class="py-2 mb-0 small lh-sm border-bottom w-100 text-decoration-none text-body-secondary">
-              <strong class="d-flex justify-content-between">
-                Samsung Galaxy S23 Ultra
-                <div class="text-warning">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                </div>
-              </strong>
-              Giá mắc, chất lượng tầm trung!
-            </a>
-          </div>
-          <div class="d-flex text-body-secondary pt-3">
-            <i class="far fa-comment-alt-smile"></i>
-            <a href="#" class="py-2 mb-0 small lh-sm border-bottom w-100 text-decoration-none text-body-secondary">
-              <strong class="d-flex justify-content-between">
-                Samsung Galaxy S23 Ultra
-                <div class="text-warning">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                </div>
-              </strong>
-              Giá mắc, chất lượng tầm trung!
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4 mb-3">
-      <div class="card rounded-0 border-0 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex border-bottom pb-2 justify-content-between">
-            <h6 class="mb-0">
-              <i class="fal fa-chart-pie fa-lg"></i>
-              Statistics</h6>
-          </div>
-
-
-          <div id="curve_chart" style="width:100%;height: 300px"></div>
-
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
+
+  <script>
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    new Chart(salesCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+          label: 'Sales',
+          data: [20, 18, 30, 45, 55, 65, 50, 60, 55, 50, 35, 40],
+          borderColor: '#6366F1',
+          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    const statsCtx = document.getElementById('statsChart').getContext('2d');
+    new Chart(statsCtx, {
+      type: 'bar',
+      data: {
+        labels: [...Array(12).keys()].map(i => `Week ${i + 1}`),
+        datasets: [
+          { label: 'Profit', backgroundColor: '#FACC15', data: [60, 70, 80, 75, 90, 95, 85, 100, 95, 85, 90, 100] },
+          { label: 'Refunds', backgroundColor: '#818CF8', data: [40, 50, 60, 55, 70, 65, 60, 80, 70, 75, 60, 70] },
+          { label: 'Expenses', backgroundColor: '#34D399', data: [50, 60, 70, 65, 85, 80, 75, 90, 85, 80, 70, 85] },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100
+          }
+        }
+      }
+    });
+  </script>
 @endsection

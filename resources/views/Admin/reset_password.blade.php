@@ -48,7 +48,7 @@
     </form>
 
     <div class="mt-6 text-center">
-      <a href="/admin/dashboar" class="text-sm text-purple-500 hover:underline">← Quay lại bảng điều khiển</a>
+      <a href="/admin/login" class="text-sm text-purple-500 hover:underline">← Quay lại bảng điều khiển</a>
     </div>
   </div>
 

@@ -12,11 +12,12 @@ use Illuminate\Http\Request;
 class AdminController extends Controller
 {
     public function productAdmin(){
-        $product = Product::with('img', 'variant', 'category')->paginate(12);
+        $products = Product::with('img', 'variant', 'category')->paginate(8);
+        return view('Admin.productList', ['products' => $products]);
         return response()->json([
             'status' => 200,
             'message' => 'Danh sách sản phẩm',
-            'data' => $product
+            'data' => $products
         ],200);
     }
 
@@ -48,6 +49,8 @@ class AdminController extends Controller
             $product->view = $request->view;
             $product->hot = $request->hot;
             if($product->save()){
+                return view('Admin.edit_product', compact('product'));
+
                 return response()->json([
                     'status' => 200,
                     'message' => 'Cập nhật sản phẩm thành công',
@@ -60,6 +63,53 @@ class AdminController extends Controller
                 ],404);
             }
         }
+    }
+
+      public function setActiveProduct(Request $request, $id)
+    {
+        $request->validate([
+        'active' => 'required|in:on,off',
+        ]);
+
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Người dùng không tồn tại',
+            ], 404);
+        }
+
+        $product->active = $request->active;
+        $product->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => $request->active === 'on' ? 'Kích hoạt sản phẩm thành công' : 'Ngừng kích sản phẩm thành công',
+        ], 200);
+    }
+
+    public function setVariantActive(Request $request, $id){
+        $request->validate([
+        'active' => 'required|in:on,off',
+        ]);
+
+        $variant = Variant::find($id);
+
+        if (!$variant) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Người dùng không tồn tại',
+            ], 404);
+        }
+
+        $variant->active = $request->active;
+        $variant->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => $request->active === 'on' ? 'Kích hoạt biến thể thành công' : 'Ngừng kích hoạt biến thể thành công',
+        ], 200);
     }
 
     public function flashSale(Request $request){
@@ -186,7 +236,8 @@ class AdminController extends Controller
         $product = Product::with('img', 'variant', 'category')
             ->where('name', 'LIKE', "%{$search}%")
             ->orWhere('description', 'LIKE', "%{$search}%")
-            ->get();
+            ->paginate(12);
+            return view('Admin.productList', ['products' => $product]);
         if($product->isEmpty()){
             return response()->json([
                 'status' => 404,

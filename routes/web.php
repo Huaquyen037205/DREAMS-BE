@@ -9,14 +9,15 @@ use App\Http\Controllers\AdminManageController;
 use App\Http\Middleware\CheckAdmin;
 
 // Web Routes
-Route::get('/', [PageController::class, 'home']);
-Route::get('/login', [PageController::class, 'login']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::get('/reset-password', [AuthController::class, 'resetPassword']);
-Route::post('/logout', [AuthController::class, 'logout']);
+// Route::get('/', [PageController::class, 'home']);
+// Route::get('/login', [PageController::class, 'login']);
+// Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/register', [AuthController::class, 'register']);
+// Route::get('/reset-password', [AuthController::class, 'resetPassword']);
+// Route::post('/logout', [AuthController::class, 'logout']);
 
 //product routes
+
 route::get('/product', [ProductController::class, 'product']);
 route::get('/hotProduct', [ProductController::class, 'hotProduct']);
 route::get('/viewProduct', [ProductController::class, 'viewProduct']);
@@ -28,9 +29,12 @@ route::get('/search', [ProductController::class, 'searchProduct']);
 
 
 // Admin Routes
+Route::get('/dashboard', [PageController::class, 'dashBoard']);
+
+
+//Auth Routes
 Route::get('/admin/login', [PageController::class, 'loginAdmin']);
 Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);;
-Route::get('/dashboard', [PageController::class, 'dashBoard']);
 
 Route::get('/admin/forgotPassword', [PageController::class, 'forgotPasswordEmail']);
 Route::post('/admin/forgotPassword', [AdminUserController::class, 'forgotPasswordAdmin']);
@@ -41,8 +45,15 @@ Route::get('/admin/reset-password', [AdminUserController::class, 'resetPasswordA
 
 Route::get('/admin/change-password', [PageController::class, 'changePassword']);
 Route::post('/admin/change-password', [AdminUserController::class, 'changePasswordAdmin']);
+//Product
+Route::get('/admin/product/list', [PageController::class, 'productList']);
+Route::get('/admin/product/list', [AdminController::class, 'productAdmin']);
+Route::get('/search/admin/product/list', [AdminController::class, 'searchProductAdmin']);
 
-
+Route::get('/admin/add', [PageController::class, 'addProduct']);
+Route::get('/admin/product/add', [AdminController::class, 'addProduct']);
+Route::get('/admin/product/edit/{id}', [PageController::class, 'editProduct']);
+Route::put('/admin/product/edit/{id}', [AdminController::class, 'updateProduct']);
 
 Route::prefix('/admin')->middleware(CheckAdmin::class)->group(function () {
     //Product
@@ -56,6 +67,4 @@ Route::prefix('/admin')->middleware(CheckAdmin::class)->group(function () {
     route::get('/user', [AdminUserController::class, 'userAdmin']);
     Route::get('/addUser', [PageController::class, 'addUserAdmin']);
     Route::get('/editUser/{id}', [PageController::class, 'editUserAdmin']);
-
 });
-

@@ -17,6 +17,7 @@ class Variant extends Model
         'stock_quantity',
         'price',
         'sale_price',
+        'active',
         'status',
         'created_at',
         'updated_at',
