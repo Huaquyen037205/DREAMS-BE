@@ -97,21 +97,26 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function productById($id){
+    public function productById($id) {
         $product = Product::with('img', 'variant', 'category')->where('id', $id)->first();
-        if($product){
+
+        if ($product) {
+            // Lọc trùng theo 'size' để tránh lặp lại size giống nhau
+            $product->variant = $product->variant->unique('size')->values();
+
             return response()->json([
                 'status' => 200,
                 'message' => 'Chi tiết sản phẩm',
                 'data' => $product
-            ],200);
-        }else{
+            ], 200);
+        } else {
             return response()->json([
                 'status' => 404,
                 'message' => 'Không tìm thấy sản phẩm',
-            ],404);
+            ], 404);
         }
     }
+
 
     public function searchProduct(Request $request){
         $search = $request->input('search');
