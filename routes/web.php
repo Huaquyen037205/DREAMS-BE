@@ -30,6 +30,8 @@ route::get('/search', [ProductController::class, 'searchProduct']);
 
 // Admin Routes
 Route::get('/dashboard', [PageController::class, 'dashBoard']);
+Route::get('/admin/user/list', [PageController::class, 'userList']);
+Route::get('/admin/user/list', [AdminUserController::class, 'userAdmin']);
 
 
 //Auth Routes
@@ -45,22 +47,34 @@ Route::get('/admin/reset-password', [AdminUserController::class, 'resetPasswordA
 
 Route::get('/admin/change-password', [PageController::class, 'changePassword']);
 Route::post('/admin/change-password', [AdminUserController::class, 'changePasswordAdmin']);
+
 //Product
 Route::get('/admin/product/list', [PageController::class, 'productList']);
+Route::get('/admin/product/{id}', [AdminController::class, 'productById'])->name('product.detail');
 Route::get('/admin/product/list', [AdminController::class, 'productAdmin']);
 Route::get('/search/admin/product/list', [AdminController::class, 'searchProductAdmin']);
 
 Route::get('/admin/add', [PageController::class, 'addProduct']);
-Route::get('/admin/product/add', [AdminController::class, 'addProduct']);
+Route::post('/admin/product/add', [AdminController::class, 'addProduct']);
 Route::get('/admin/product/edit/{id}', [PageController::class, 'editProduct']);
-Route::put('/admin/product/edit/{id}', [AdminController::class, 'updateProduct']);
+Route::put('/admin/product/edit/{id}', [AdminController::class, 'editProduct']);
+
+//variant
+Route::get('/admin/variant/list', [PageController::class, 'variantList']);
+Route::get('/admin/variant/list', [AdminController::class, 'variantAdmin']);
+Route::get('/admin/search/variant', [AdminController::class, 'searchVariantAdmin']);
+Route::get('/admin/add/variant', [PageController::class, 'addVariant']);
+Route::post('/admin/variant/add', [AdminController::class, 'addVariant']);
+Route::get('/admin/variant/edit/{id}', [PageController::class, 'editVariant']);
+Route::put('/admin/variant/edit/{id}', [AdminController::class, 'editVariant']);
+Route::get('/admin/variant/delete/{id}', [AdminController::class, 'deleteVariant']);
 
 Route::prefix('/admin')->middleware(CheckAdmin::class)->group(function () {
     //Product
     route::get('/product', [AdminController::class, 'productAdmin']);
     Route::get('/category', [AdminController::class, 'categoryAdmin']);
     route::post('/addCategory', [AdminController::class, 'addCategory']);
-    route::get('/product/{id}', [AdminController::class, 'editProduct']);
+    // route::get('/product/{id}', [AdminController::class, 'editProduct']);
 
     //User
     route::get('/searchUser', [AdminUserController::class, 'searchUser']);

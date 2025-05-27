@@ -6,6 +6,7 @@ use App\Models\Variant;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\Discount;
+use App\Models\Review;
 use App\Models\Discount_user;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
@@ -213,6 +214,43 @@ class ProductController extends Controller
             'status' => 200,
             'message' => 'Danh sách sản phẩm theo giá',
             'data' => $products
+        ], 200);
+    }
+
+
+    public function reviews(Request $request){
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'product_id' => 'required|integer|exists:products,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000'
+        ]);
+
+        $review = new Review();
+        $review->user_id = $request->user_id;
+        $review->product_id = $request->product_id;
+        $review->rating = $request->rating;
+        $review->comment = $request->comment;
+        $review->save();
+        return response()->json([
+            'status' => 201,
+            'message' => 'Đánh giá sản phẩm thành công',
+            'data' => $review
+        ], 200);
+    }
+
+    public function deleteReview(Request $request, $id){
+        $review = Review::findOrFail($id);
+        if ($review->user_id !== auth()->id()) {
+            return response()->json([
+                'status' => 403,
+                'message' => 'Bạn không có quyền xóa đánh giá này',
+            ], 403);
+        }
+        $review->delete();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Đánh giá đã được xóa thành công',
         ], 200);
     }
 

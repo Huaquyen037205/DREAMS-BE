@@ -177,6 +177,7 @@ class AdminUserController extends Controller
 
     public function userAdmin(){
         $user = User::paginate(12);
+        return view('Admin.userList', ['users' => $user]);
         return response()->json([
             'status' => 200,
             'message' => 'Danh sách người dùng',

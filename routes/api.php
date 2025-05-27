@@ -28,6 +28,12 @@ Route::post('/change-password', [AuthController::class, 'changePassword']);
 Route::post('/discount', [ProductController::class, 'discountUser']);
 // Route::middleware('auth:sanctum')->post('/discount', [ProductController::class, 'discountUser']);
 
+//Review
+Route::middleware(['auth:sancum'])->group(function () {
+    Route::post('/review', [ProductController::class, 'reviews']);
+    Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
+});
+
 //Cart
 Route::post('/cart/add', [ProductController::class, 'addToCart']);
 Route::get('/cart', [ProductController::class, 'cart']);
@@ -42,8 +48,8 @@ Route::patch('/admin/editCategory/{id}', [AdminController::class, 'editCategory'
 Route::delete('/admin/deleteCategory/{id}', [AdminController::class, 'deleteCategory']);
 
 //Product
-Route::get('/admin/product/{id}', [AdminController::class, 'editProduct']);
-Route::patch('/admin/updateProduct/{id}', [AdminController::class, 'updateProduct']);
+// Route::get('/admin/product/{id}', [AdminController::class, 'editProduct']);
+Route::patch('/admin/editProduct/{id}', [AdminController::class, 'editProduct']);
 Route::get('/admin/searchProduct', [AdminController::class, 'searchProductAdmin']);
 Route::patch('/admin/productActive/{id}', [AdminController::class, 'setActiveProduct']);
 Route::post('/admin/addProduct', [AdminController::class, 'addProduct']);
@@ -71,6 +77,7 @@ Route::middleware('auth:sanctum')->post('/admin/change-password', [AdminUserCont
 
 //Review
 Route::get('/admin/review', [AdminManageController::class, 'review']);
+
 
 //Order routes
 Route::get('/admin/order', [AdminManageController::class, 'ShowOrder']);

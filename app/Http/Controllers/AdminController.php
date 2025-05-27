@@ -21,36 +21,63 @@ class AdminController extends Controller
         ],200);
     }
 
+   public function productById(Request $request, $id) {
+    $product = Product::with(['variant.img'])->find($id);
+    if (!$product) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Không tìm thấy sản phẩm',
+        ], 404);
+    }
+    return view('Admin.productById', [
+        'product' => $product
+    ]);
+}
+
     public function addProduct(Request $request){
         $product = Product::create($request->all());
-        return response()->json([
-            'status' => 200,
-            'message' => 'Thêm sản phẩm thành công',
-            'data' => $product
-        ],200);
+        return view('Admin.add_product', ['product' => $product]);
+        if($request->wantsJson() || $request->expectsJson()){
+            return response()->json([
+                'status' => 200,
+                'message' => 'Thêm sản phẩm thành công',
+                'data' => $product
+            ],200);
+
+            return redirect()->back()->with('success', 'Thêm sản phẩm thành công');
+         } else {
+            if($request->expectsJson() || $request->wantsJson()){
+                return response()->json([
+                'status' => 404,
+                'message' => 'Thêm sản phẩm thất bại',
+                ],404);
+            }
+            return redirect()->back()->with('error', 'Thêm sản phẩm thất bại');
+        }
     }
 
-    public function updateProduct(Request $request, $id){
+    public function editProduct(Request $request, $id){
         $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'required|integer',
             'description' => 'nullable|string',
             'status' => 'required|string',
+            'active' => 'nullable|in:on,off',
             'view' => 'nullable|integer',
             'hot' => 'nullable|integer',
         ]);
 
-        $product = Product::find($id);
+        $product = Product::findOrFail($id);
         if($product){
             $product->name = $request->name;
             $product->category_id = $request->category_id;
             $product->description = $request->description;
             $product->status = $request->status;
+            $product->active = $request->active;
             $product->view = $request->view;
             $product->hot = $request->hot;
             if($product->save()){
-                return view('Admin.edit_product', compact('product'));
-
+                return redirect()->back()->with('success', 'Cập nhật sản phẩm thành công');
                 return response()->json([
                     'status' => 200,
                     'message' => 'Cập nhật sản phẩm thành công',
@@ -61,6 +88,7 @@ class AdminController extends Controller
                     'status' => 404,
                     'message' => 'Không tìm thấy sản phẩm',
                 ],404);
+                return redirect()->back()->with('error', 'Cập nhật sản phẩm thất bại');
             }
         }
     }
@@ -253,7 +281,8 @@ class AdminController extends Controller
     }
 
     public function variantAdmin(){
-        $variant = Variant::with('product', 'img')->paginate(12);
+        $variant = Variant::with('product', 'img')->paginate(8);
+        return view('Admin.variantList', ['variants' => $variant]);
         return response()->json([
             'status' => 200,
             'message' => 'Danh sách biến thể sản phẩm',
@@ -266,45 +295,84 @@ class AdminController extends Controller
             'product_id' => 'required|exists:products,id',
             'img_id' => 'required|exists:img,id',
             'size' => 'required|string|max:255',
-            'color' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',
             'price' => 'required|numeric',
             'sale_price' => 'nullable|numeric',
             'status' => 'required|string|max:255',
+            'active' => 'nullable|in:on,off',
         ]);
         $variant = Variant::create($request->all());
+        return redirect()->back()->with('success', 'Thêm biến thể sản phẩm thành công');
         // Log::info($request->all());
         return response()->json([
             'status' => 200,
             'message' => 'Thêm biển thể sản phẩm thành công',
             'data' => $variant
         ],200);
+
     }
+
+    public function searchVariantAdmin(Request $request){
+        $search = $request->input('search');
+         $variants = Variant::with('product', 'img')
+            ->where(function($query) use ($search) {
+                $query->whereHas('product', function($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%");
+                })->orWhere('size', 'LIKE', "%{$search}%");
+            })
+            ->paginate(8);
+            return view('Admin.variantList', ['variants' => $variants]);
+            if($variant->isEmpty()){
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Không tìm thấy biến thể sản phẩm',
+                ],404);
+            }else{
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Tôi đai',
+                    'data' => $variant
+                ],200);
+            }
+        }
 
     public function editVariant(Request $request, $id){
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'img_id' => 'required|exists:img,id',
             'size' => 'required|string|max:255',
-            'color' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',
             'price' => 'required|numeric',
             'sale_price' => 'nullable|numeric',
             'status' => 'required|string|max:255',
+            'active' => 'nullable|in:on,off',
         ]);
-        $variant = Variant::find($id);
-        if($variant){
-            $variant->update($request->all());
-            return response()->json([
-                'status' => 200,
-                'message' => 'Cập nhật biến thể sản phẩm thành công',
-                'data' => $variant
-            ],200);
-        }else{
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy biến thể sản phẩm',
-            ],404);
+        $variant = Variant::findOrFail($id);
+        if($variant) {
+            $variant->product_id = $request->product_id;
+            $variant->size = $request->size;
+            $variant->stock_quantity = $request->stock_quantity;
+            $variant->price = $request->price;
+            $variant->sale_price = $request->sale_price;
+            $variant->status = $request->status;
+            $variant->active = $request->active;
+            if ($variant->save()) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'Cập nhật biến thể thành công',
+                        'data' => $variant
+                    ], 200);
+                }
+                return redirect()->back()->with('success', 'Cập nhật biến thể thành công');
+            } else {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'status' => 500,
+                        'message' => 'Cập nhật biến thể thất bại',
+                    ], 500);
+                }
+                return redirect()->back()->with('error', 'Cập nhật biến thể thất bại');
+            }
         }
     }
 

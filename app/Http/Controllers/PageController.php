@@ -1,7 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Product;
+use App\Models\User;
+use App\Models\Variant;
+use App\Models\Category;
+use App\Models\Img;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -43,11 +47,38 @@ class PageController extends Controller
         return view('Admin.productList');
     }
 
+    public function productById($id){
+        $product = Product::findOrFail($id);
+        return view('Admin.productById',['id' => $id]);
+    }
+
     public function addProduct(){
-        return view('Admin.add_product');
+        $product = new Product();
+        return view('Admin.add_product', compact('product'));
     }
 
     public function editProduct($id){
-        return view('Admin.edit_product', ['id' => $id]);
+    $product = Product::findOrFail($id);
+    return view('Admin.edit_product', compact('product'));
+    }
+
+    public function userList(){
+        return view('Admin.userList');
+    }
+
+    public function variantList(){
+        return view('Admin.variantList');
+    }
+
+    public function addVariant(){
+        $variant = new Variant();
+        $products = Product::all();
+        $images = Img::all();
+        return view('Admin.add_variant', compact('variant', 'products', 'images'));
+    }
+
+    public function editVariant($id){
+        $variant = Variant::findOrFail($id);
+        return view('Admin.edit_variant', compact('variant'));
     }
 }

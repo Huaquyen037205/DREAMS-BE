@@ -15,7 +15,8 @@
   <div class="flex h-screen">
     <!-- Sidebar -->
     <aside class="w-64 bg-white shadow-lg overflow-y-auto">
-      <div class="p-6 text-2xl font-bold text-purple-600">DREAMS</div>
+   <div class="p-6 text-2xl font-bold text-purple-600">
+        <a href="/dashboard"> DREAMS  </a></div>
       <nav class="mt-8">
 
       <ul>
@@ -30,21 +31,21 @@
 
         <div class="group">
           <div onclick="toggleSubMenu('users-submenu')" class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
-            <i class="ph ph-users"></i>Người dùng<i class="ph ph-caret-down ml-auto"></i>
+            <a href="/admin/user/list"><i class="ph ph-users"></i> Người dùng </a>
           </div>
           <div id="users-submenu" class="hidden flex-col">
-            <a href="user.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách người dùng</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật người dùng</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Thêm người dùng mới</a>
+            {{-- <a href="/admin/user/list" class="block py-2 px-12 hover:text-indigo-600">Danh sách người dùng</a>
+            <a href="" class="block py-2 px-12 hover:text-indigo-600">Cập nhật người dùng</a>
+            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Thêm người dùng mới</a> --}}
           </div>
         </div>
 
         <div class="group">
-          <div onclick="toggleSubMenu('products-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
-            <i class="ph ph-package"></i>Sản Phẩm<i class="ph ph-caret-down ml-auto"></i>
+          <div onclick="toggleSubMenu('products-submenu')" class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
+               <a href="/admin/product/list"><i class="ph ph-package"></i> Sản Phẩm </a>
           </div>
           <div id="products-submenu" class="hidden flex-col">
-            <a href="/admin/product/list" class="block py-2 px-12 hover:text-indigo-600">Danh sách sản phẩm</a>
+            {{-- <a href="/admin/product/list" class="block py-2 px-12 hover:text-indigo-600">Danh sách sản phẩm</a> --}}
             {{-- <a href="/admin/product/edit/{id}" class="block py-2 px-12 hover:text-indigo-600">Cập nhật sản phẩm</a> --}}
             {{-- <a href="/admin/product/add" class="block py-2 px-12 hover:text-indigo-600">Thêm sản phẩm mới</a> --}}
           </div>
@@ -77,12 +78,12 @@
 
         <div class="group">
           <div onclick="toggleSubMenu('variants-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
-            <i class="ph ph-shapes"></i> Biến Thể Sản Phẩm <i class="ph ph-caret-down ml-auto"></i>
+            <a href="/admin/variant/list"><i class="ph ph-shapes"></i> Biến Thể Sản Phẩm</a>
           </div>
           <div id="variants-submenu" class="hidden flex-col">
-            <a href="variant.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách biến thể</a>
+            {{-- <a href="variant.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách biến thể</a>
             <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật biến thể</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Thêm biến thể</a>
+            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Thêm biến thể</a> --}}
           </div>
         </div>
 
