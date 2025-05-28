@@ -218,6 +218,21 @@ class ProductController extends Controller
     }
 
 
+    public function getReviews(Request $request)
+    {
+        $product_id = $request->query('product_id');
+        $query = Review::with('user');
+        if ($product_id) {
+            $query->where('product_id', $product_id);
+        }
+        $reviews = $query->orderByDesc('created_at')->get();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách đánh giá',
+            'data' => $reviews
+        ], 200);
+    }
+
     public function reviews(Request $request){
         $request->validate([
             'user_id' => 'required|integer|exists:users,id',
@@ -225,6 +240,11 @@ class ProductController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000'
         ]);
+
+            // $user = $request->user();
+            // if (!$user) {
+            //     return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
+            // }
 
         $review = new Review();
         $review->user_id = $request->user_id;
@@ -252,39 +272,5 @@ class ProductController extends Controller
             'status' => 200,
             'message' => 'Đánh giá đã được xóa thành công',
         ], 200);
-    }
-
-    public function addToCart(Request $request){
-        $request->validate([
-            'product_id' => 'required|integer',
-            'quantity' => 'required|integer|min:1'
-        ]);
-
-        $cart = session()->get('cart', []);
-        $productId = $request->product_id;
-        $quantity = $request->quantity;
-
-        if (isset($cart[$productId])) {
-            $cart[$productId] += $quantity;
-        } else {
-            $cart[$productId] = $quantity;
-        }
-
-        session(['cart' => $cart]);
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Đã thêm vào giỏ hàng',
-            'cart' => $cart
-        ]);
-    }
-
-    public function cart()
-    {
-        $cart = session()->get('cart', []);
-        return response()->json([
-            'status' => 200,
-            'cart' => $cart
-        ]);
     }
 }

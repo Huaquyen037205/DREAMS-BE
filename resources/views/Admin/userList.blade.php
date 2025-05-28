@@ -47,7 +47,7 @@
                              <tr class="border-t hover:bg-gray-50">
                             <td class="p-2"><input type="checkbox"></td>
                             <td class="p-2 text-indigo-600">{{$user->id}}</td>
-                            <td class="p-2">{{$user->name}}</td>
+                            <td class="p-2"><a href="/admin/profile/user">{{$user->name}}</a></td>
                             <td class="p-2">{{$user->email}}</td>
                             <td class="p-2">{{$user->phone}}</td>
                             <td class="p-2">

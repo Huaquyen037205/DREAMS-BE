@@ -66,6 +66,10 @@ class PageController extends Controller
         return view('Admin.userList');
     }
 
+    public function profileUser(){
+        return view('Admin.profile');
+    }
+
     public function variantList(){
         return view('Admin.variantList');
     }
@@ -80,5 +84,9 @@ class PageController extends Controller
     public function editVariant($id){
         $variant = Variant::findOrFail($id);
         return view('Admin.edit_variant', compact('variant'));
+    }
+
+    public function message(){
+        return view('Admin.message');
     }
 }

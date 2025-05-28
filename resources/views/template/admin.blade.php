@@ -101,7 +101,7 @@
             <i class="ph ph-gear"></i> Cài đặt
           </li>
           <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
-            <i class="ph ph-chat-circle-text"></i> Tin nhắn
+            <a href="/admin/message"><i class="ph ph-chat-circle-text"></i> Tin nhắn</a>
           </li>
           <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
             <i class="ph ph-copy"></i> Pages

@@ -48,14 +48,14 @@
         {{-- Giá --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Giá</label>
-            <input type="number" name="price" value="{{ old('price', $variant->price) }}"
+            <input type="number" name="price" value="{{ old('price', number_format($variant->price, 0, ',', '.')) }}"
                    class="w-full border border-gray-300 rounded px-3 py-2" required>
         </div>
 
         {{-- Giá giảm (nếu có) --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Giá giảm</label>
-            <input type="number" name="sale_price" value="{{ old('sale_price', $variant->sale_price) }}"
+            <input type="number" name="sale_price" value="{{ old('sale_price', number_format($variant->sale_price, 0, ',', '.')) }}"
                    class="w-full border border-gray-300 rounded px-3 py-2">
         </div>
 

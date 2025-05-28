@@ -13,7 +13,6 @@ class Variant extends Model
         'product_id',
         'img_id',
         'size',
-        'color',
         'stock_quantity',
         'price',
         'sale_price',

@@ -15,7 +15,6 @@ use App\Http\Middleware\CheckAdmin;
 // Route::post('/register', [AuthController::class, 'register']);
 // Route::get('/reset-password', [AuthController::class, 'resetPassword']);
 // Route::post('/logout', [AuthController::class, 'logout']);
-
 //product routes
 
 route::get('/product', [ProductController::class, 'product']);
@@ -25,13 +24,19 @@ route::get('/category', [ProductController::class, 'category']);
 route::get('/product/{id}', [ProductController::class, 'productById']);
 route::get('/search', [ProductController::class, 'searchProduct']);
 
+//Message
+Route::get('/admin/message', [PageController::class, 'message']);
 
+//Review
+Route::get('/review', [ProductController::class, 'reviews']);
+Route::post('/review', [ProductController::class, 'reviews']);
 
 
 // Admin Routes
 Route::get('/dashboard', [PageController::class, 'dashBoard']);
 Route::get('/admin/user/list', [PageController::class, 'userList']);
 Route::get('/admin/user/list', [AdminUserController::class, 'userAdmin']);
+Route::get('/admin/profile/user', [PageController::class, 'profileUser']);
 
 
 //Auth Routes

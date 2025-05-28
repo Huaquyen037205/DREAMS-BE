@@ -17,6 +17,7 @@ Route::get('/search', [ProductController::class, 'searchProduct']);
 Route::get('/category/{id}', [ProductController::class, 'productByCategory']);
 Route::get('/products/price/{price}', [ProductController::class, 'productByprice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
+
 //Login, Register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -24,13 +25,16 @@ route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
 route::post('/resetPassword', [AuthController::class, 'resetPassword']);
 Route::post('/change-password', [AuthController::class, 'changePassword']);
+
 //discount
 Route::post('/discount', [ProductController::class, 'discountUser']);
 // Route::middleware('auth:sanctum')->post('/discount', [ProductController::class, 'discountUser']);
 
 //Review
-Route::middleware(['auth:sancum'])->group(function () {
-    Route::post('/review', [ProductController::class, 'reviews']);
+
+Route::post('/review', [ProductController::class, 'reviews']);
+Route::middleware(['auth:sanctum'])->group(function () {
+
     Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
 });
 
@@ -72,10 +76,12 @@ Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);
 Route::post('/admin/logout', [AdminUserController::class, 'logoutAdmin']);
 Route::post('/admin/forgotPassword', [AdminUserController::class, 'forgotPasswordAdmin']);
 Route::post('/admin/resetPassword', [AdminUserController::class, 'resetPasswordAdmin']);
+
 Route::middleware('auth:sanctum')->post('/admin/change-password', [AdminUserController::class, 'changePasswordAdmin']);
 
 
 //Review
+Route::get('/review', [ProductController::class, 'getReviews']);
 Route::get('/admin/review', [AdminManageController::class, 'review']);
 
 
