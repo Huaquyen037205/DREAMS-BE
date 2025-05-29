@@ -74,6 +74,10 @@ Route::get('/admin/variant/edit/{id}', [PageController::class, 'editVariant']);
 Route::put('/admin/variant/edit/{id}', [AdminController::class, 'editVariant']);
 Route::get('/admin/variant/delete/{id}', [AdminController::class, 'deleteVariant']);
 
+Route::get('/admin/editUser/{id}', [PageController::class, 'editUserAdmin']);
+Route::put('/admin/editUser/{id}', [AdminUserController::class, 'editUser']);
+
+
 Route::prefix('/admin')->middleware(CheckAdmin::class)->group(function () {
     //Product
     route::get('/product', [AdminController::class, 'productAdmin']);
@@ -85,5 +89,5 @@ Route::prefix('/admin')->middleware(CheckAdmin::class)->group(function () {
     route::get('/searchUser', [AdminUserController::class, 'searchUser']);
     route::get('/user', [AdminUserController::class, 'userAdmin']);
     Route::get('/addUser', [PageController::class, 'addUserAdmin']);
-    Route::get('/editUser/{id}', [PageController::class, 'editUserAdmin']);
+
 });

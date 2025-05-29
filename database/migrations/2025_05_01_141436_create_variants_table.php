@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('variant', function (Blueprint $table) {
+        Schema::create('variants', function (Blueprint $table) { // Đổi 'variant' thành 'variants'
             $table->id();
             $table->foreignId('product_id')->references('id')->on('products');
             $table->foreignId('img_id')->references('id')->on('img');

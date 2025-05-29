@@ -6,6 +6,9 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminManageController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FlashSaleController;
+use App\Models\Flash_Sale_Variant;
+use App\Models\Flash_Sale;
 // use App\Http\Middleware\CheckAdmin;
 
 // Web Routes:
@@ -111,3 +114,10 @@ Route::delete('/admin/deleteUser/{id}', [AdminUserController::class, 'deleteUser
 Route::get('/admin/chart', [AdminManageController::class, 'Chart']);
 Route::get('/admin/OrderChart', [AdminManageController::class, 'OrderChart']);
 Route::get('/admin/ProductChart', [AdminManageController::class, 'ProductChart']);
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/flash-sales/active', [FlashSaleController::class, 'getActiveSales']);
+    Route::get('/flash-sales/{id}/variants', [FlashSaleController::class, 'getVariants']);
+    Route::post('/flash-sales/order', [FlashSaleController::class, 'orderVariant']);
+});

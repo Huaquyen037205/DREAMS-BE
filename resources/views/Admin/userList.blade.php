@@ -73,7 +73,7 @@
                                     <span class="bg-red-100 text-red-500 text-xs px-2 py-1 rounded">Hết hàng</span>
                                 @endif --}}
                             <td class="p-2 flex gap-2">
-                                <a href="" class="bg-green-100 text-green-500 px-2 py-1 rounded">
+                                <a href="{{url ('/admin/editUser/'. $user->id )}}"  class="bg-green-100 text-green-500 px-2 py-1 rounded">
                                     <i class="ph ph-pencil"></i>
                                 </a>
                                 <button class="bg-red-100 text-red-500 px-2 py-1 rounded"><i class="ph ph-trash"></i></button>

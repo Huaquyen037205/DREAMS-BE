@@ -23,9 +23,10 @@ class PageController extends Controller
     //     return view('Admin.addUser');
     // }
 
-    // public function editUserAdmin($id){
-    //     return view('Admin.editUser', ['id' => $id]);
-    // }
+    public function editUserAdmin($id){
+        $user = User::findOrFail($id);
+        return view('Admin.editUser', compact('user'));
+    }
 
     public function forgotPasswordEmail(){ //view của email
         return view('email.admin_reset_password');
@@ -89,4 +90,6 @@ class PageController extends Controller
     public function message(){
         return view('Admin.message');
     }
+
+
 }

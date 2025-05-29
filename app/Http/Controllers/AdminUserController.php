@@ -225,28 +225,35 @@ class AdminUserController extends Controller
         }
     }
 
+
     public function editUser(Request $request, $id)
     {
+        $request->validate([
+            'role' => 'required|in:admin,user',
+            'is_active' => 'required|in:on,off',
+        ]);
+
         $user = User::find($id);
         if ($user) {
-            $user->name = $request->name;
-            $user->phone = $request->phone;
-            $user->email = $request->email;
-            $user->password = Hash::make($request->password);
+           $user->is_active = $request->is_active;
             $user->role = $request->role;
             if ($user->save()) {
+                return redirect()->back()->with('success', 'Cập nhật người dùng thành công');
+                return view('Admin.editUser', ['user' => $user]);
                 return response()->json([
                     'status' => 200,
                     'message' => 'Cập nhật người dùng thành công',
                     'data' => $user
                 ], 200);
             } else {
+                return redirect()->back()->with('error', 'Cập nhật người dùng thất bại');
                     return response()->json([
                         'status' => 422,
                         'message' => 'Cập nhật người dùng thất bại',
                     ], 422);
                 }
             } else {
+                return redirect()->back()->with('error', 'Người dùng không tồn tại');
                 return response()->json([
                     'status' => 404,
                     'message' => 'Người dùng không tồn tại',
