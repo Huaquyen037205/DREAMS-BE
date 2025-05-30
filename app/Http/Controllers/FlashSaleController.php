@@ -119,30 +119,25 @@ public function apiProducts($id)
 
     // Lấy tất cả variant thuộc chương trình flash sale này
     $variants = DB::table('flash_sale_variants')
-    ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
-    ->join('products', 'variant.product_id', '=', 'products.id')
-    ->leftJoin('img', 'products.id', '=', 'img.product_id')
-    ->where('flash_sale_variants.flash_sale_id', $id)
-    ->select(
-        'products.id as product_id',
-        'products.name as product_name',
-        'variant.id as variant_id',
-        'variant.price as original_price',
-        'flash_sale_variants.sale_price as flash_sale_price',
-        'flash_sale_variants.flash_quantity',
-        'flash_sale_variants.flash_sold',
-        DB::raw('MIN(img.name) as image') // chỉ lấy 1 ảnh đại diện
-    )
-    ->groupBy(
-        'products.id',
-        'products.name',
-        'variant.id',
-        'variant.price',
-        'flash_sale_variants.sale_price',
-        'flash_sale_variants.flash_quantity',
-        'flash_sale_variants.flash_sold'
-    )
-    ->get();
+        ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
+        ->join('products', 'variant.product_id', '=', 'products.id')
+        ->where('flash_sale_variants.flash_sale_id', $id)
+        ->select(
+            'products.*', // Lấy tất cả cột của bảng products
+            'variant.id as variant_id',
+            'variant.price as original_price',
+            'flash_sale_variants.sale_price as flash_sale_price',
+            'flash_sale_variants.flash_quantity',
+            'flash_sale_variants.flash_sold'
+        )
+        ->get();
+
+    // Gắn tất cả ảnh cho từng variant (theo sản phẩm)
+    foreach ($variants as $variant) {
+        $variant->images = DB::table('img')
+            ->where('product_id', $variant->id) // Nếu products.id là id sản phẩm
+            ->pluck('name');
+    }
 
     return response()->json([
         'flash_sale_id' => $flashSale->id,
