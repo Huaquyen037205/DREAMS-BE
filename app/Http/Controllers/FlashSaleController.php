@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Flash_Sale;
 use App\Models\Flash_Sale_Variant;
 use App\Models\Variant;
+use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
 class FlashSaleController extends Controller
@@ -40,12 +41,16 @@ class FlashSaleController extends Controller
 
     // Hiển thị danh sách sản phẩm để thêm vào chương trình
     public function showProducts($id)
-    {
-        $flashSale = Flash_Sale::findOrFail($id);
-        $variants = Variant::with(['product', 'img'])->get();
+        {
+            $flashSale = Flash_Sale::findOrFail($id);
 
-        return view('Admin.Fl_addp', compact('flashSale', 'variants'));
-    }
+            // Lấy danh sách sản phẩm duy nhất có variant
+            $products = Product::whereIn('id',
+                Variant::pluck('product_id')->unique()
+            )->with('img')->get();
+
+            return view('Admin.Fl_addp', compact('flashSale', 'products'));
+        }
 
     // Lưu sản phẩm vào chương trình Flash Sale
     public function addProduct(Request $request, $id)
@@ -106,36 +111,47 @@ class FlashSaleController extends Controller
 
 
 
-    public function apiProducts($id)
-    {
-        $flashSale = Flash_Sale::findOrFail($id);
 
-        $products = DB::table('flash_sale_variants')
-            ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
-            ->join('products', 'variant.product_id', '=', 'products.id')
-            ->leftJoin('img', 'variant.img_id', '=', 'img.id')
-            ->where('flash_sale_variants.flash_sale_id', $id)
-            ->select(
-                'products.id as product_id',
-                'products.name as product_name',
-                'products.description',
-                'products.status as product_status',
-                'variant.id as variant_id',
-                'variant.size',
-                'variant.price as original_price',
-                'flash_sale_variants.sale_price',
-                'flash_sale_variants.flash_quantity',
-                'flash_sale_variants.flash_sold',
-                'img.name as image'
-            )
-            ->get();
 
-        return response()->json([
-            'flash_sale_id' => $flashSale->id,
-            'flash_sale_name' => $flashSale->name,
-            'start_time' => $flashSale->start_time,
-            'end_time' => $flashSale->end_time,
-            'products' => $products
-        ]);
-    }
+public function apiProducts($id)
+{
+    $flashSale = Flash_Sale::findOrFail($id);
+
+    // Lấy tất cả variant thuộc chương trình flash sale này
+    $variants = DB::table('flash_sale_variants')
+    ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
+    ->join('products', 'variant.product_id', '=', 'products.id')
+    ->leftJoin('img', 'products.id', '=', 'img.product_id')
+    ->where('flash_sale_variants.flash_sale_id', $id)
+    ->select(
+        'products.id as product_id',
+        'products.name as product_name',
+        'variant.id as variant_id',
+        'variant.size',
+        'variant.price as original_price',
+        'flash_sale_variants.sale_price as flash_sale_price',
+        'flash_sale_variants.flash_quantity',
+        'flash_sale_variants.flash_sold',
+        DB::raw('MIN(img.name) as image') // chỉ lấy 1 ảnh đại diện
+    )
+    ->groupBy(
+        'products.id',
+        'products.name',
+        'variant.id',
+        'variant.size',
+        'variant.price',
+        'flash_sale_variants.sale_price',
+        'flash_sale_variants.flash_quantity',
+        'flash_sale_variants.flash_sold'
+    )
+    ->get();
+
+    return response()->json([
+        'flash_sale_id' => $flashSale->id,
+        'flash_sale_name' => $flashSale->name,
+        'start_time' => $flashSale->start_time,
+        'end_time' => $flashSale->end_time,
+        'variants' => $variants
+    ]);
+}
 }

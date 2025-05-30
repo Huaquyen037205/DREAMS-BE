@@ -20,14 +20,14 @@
 
         <div class="mb-4">
             <label class="block text-sm font-medium mb-1">Chọn sản phẩm</label>
-            <select id="variantSelect" name="variant_id" class="w-full border px-3 py-2 rounded" required>
+            <select id="productSelect" name="product_id" class="w-full border px-3 py-2 rounded" required>
                 <option value="">-- Chọn sản phẩm --</option>
-                @foreach ($variants as $variant)
+                @foreach ($products as $product)
                     <option
-                        value="{{ $variant->id }}"
-                        data-img="{{ $variant->img ? asset('img/' . $variant->img->name) : '' }}"
+                        value="{{ $product->id }}"
+                        data-img="{{ $product->img && $product->img->first() ? asset('img/' . $product->img->first()->name) : '' }}"
                     >
-                        {{ $variant->product->name ?? 'Sản phẩm?' }} - Size: {{ $variant->size }}
+                        {{ $product->name }}
                     </option>
                 @endforeach
             </select>
@@ -38,7 +38,7 @@
 
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const select = document.getElementById('variantSelect');
+            const select = document.getElementById('productSelect');
             const img = document.getElementById('variantImg');
             select.addEventListener('change', function() {
                 const selected = select.options[select.selectedIndex];
