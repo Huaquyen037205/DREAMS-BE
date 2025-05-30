@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('product_id')->references('id')->on('products');
             $table->foreignId('img_id')->references('id')->on('img');
             $table->string('size');
-            $table->string('color');
             $table->integer('stock_quantity');
             $table->integer('price');
             $table->string('status');

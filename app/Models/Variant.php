@@ -8,7 +8,7 @@ class Variant extends Model
 {
     use HasFactory;
 
-    protected $table = 'variants';
+    protected $table = 'variant';
     protected $fillable = [
         'product_id',
         'img_id',
@@ -31,4 +31,5 @@ class Variant extends Model
     {
         return $this->belongsTo(Img::class, 'img_id', 'id');
     }
+
 }

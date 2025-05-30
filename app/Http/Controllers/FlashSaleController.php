@@ -2,81 +2,140 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use App\Models\Flash_Sale;
 use App\Models\Flash_Sale_Variant;
-use App\Models\Order;
-use App\Models\Order_item;
 use App\Models\Variant;
-use App\Models\Product;
-use App\Models\Category;
-
 use Illuminate\Support\Facades\DB;
 
 class FlashSaleController extends Controller
 {
-    public function getActiveSales()
+    // Hiển thị danh sách các chương trình Flash Sale
+    public function index()
     {
-        $now = Carbon::now();
-        $sales = Flash_Sale::where('status', true)
-            ->where('start_time', '<=', $now)
-            ->where('end_time', '>=', $now)
-            ->get();
-
-        return response()->json($sales);
+        $flashSales = Flash_Sale::orderByDesc('start_time')->paginate(10);
+        return view('Admin.Fl_list', compact('flashSales'));
     }
 
-    public function getVariants($id)
+    // Hiển thị form tạo chương trình mới
+    public function create()
+    {
+        return view('Admin.Fl_add');
+    }
+
+    // Lưu chương trình mới vào database
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+        ]);
+
+        Flash_Sale::create($request->only(['name', 'start_time', 'end_time']));
+
+        return redirect('/admin/flash-sale')->with('success', 'Tạo chương trình thành công');
+    }
+
+    // Hiển thị danh sách sản phẩm để thêm vào chương trình
+    public function showProducts($id)
+    {
+        $flashSale = Flash_Sale::findOrFail($id);
+        $variants = Variant::with(['product', 'img'])->get();
+
+        return view('Admin.Fl_addp', compact('flashSale', 'variants'));
+    }
+
+    // Lưu sản phẩm vào chương trình Flash Sale
+    public function addProduct(Request $request, $id)
+    {
+        $request->validate([
+            'variant_id' => 'required|exists:variant,id',
+            'sale_price' => 'required|numeric|min:0',
+            'flash_quantity' => 'required|integer|min:1',
+        ]);
+
+        Flash_Sale_Variant::updateOrCreate(
+            [
+                'flash_sale_id' => $id,
+                'variant_id' => $request->variant_id,
+            ],
+            [
+                'sale_price' => $request->sale_price,
+                'flash_quantity' => $request->flash_quantity,
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Đã thêm sản phẩm vào chương trình');
+    }
+
+    // Hiển thị form chỉnh sửa chương trình
+    public function edit($id)
     {
         $sale = Flash_Sale::findOrFail($id);
-        $variants = $sale->variants()->with('variant.product')->get();
-
-        return response()->json($variants);
+        return view('Admin.Fl_edit', compact('sale'));
     }
 
-    public function orderVariant(Request $request)
+    // Xoá chương trình Flash Sale
+    public function destroy($id)
     {
-        $variantId = $request->variant_id;
-        $userId = auth()->id();
+        Flash_Sale::destroy($id);
+        return redirect('/admin/flash-sale')->with('success', 'Đã xoá chương trình');
+    }
 
-        DB::beginTransaction();
-        try {
-            $item = Flash_Sale_Variant::lockForUpdate()
-                ->where('variant_id', $variantId)
-                ->first();
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+        ]);
 
-            if (!$item || $item->flash_sold >= $item->flash_quantity) {
-                return response()->json(['message' => 'Hết hàng'], 400);
-            }
+        $flashSale = Flash_Sale::findOrFail($id);
+        $flashSale->update($request->only(['name', 'start_time', 'end_time']));
 
-            // Tạo đơn hàng (giả sử các field cơ bản và tạm payment_id, address_id...)
-            $order = Order::create([
-                'user_id' => $userId,
-                'shipping_id' => 1,
-                'discount_id' => null,
-                'payment_id' => 1,
-                'coupon_id' => null,
-                'address_id' => 1,
-                'status' => 'chờ xử lý',
-                'total_price' => $item->sale_price,
-                'order_date' => Carbon::now(),
-            ]);
+        return redirect('/admin/flash-sale')->with('success', 'Cập nhật chương trình thành công');
+    }
 
-            Order_item::create([
-                'order_id' => $order->id,
-                'variant_id' => $variantId,
-                'quantity' => 1,
-                'price' => $item->sale_price,
-            ]);
+    public function show($id)
+    {
+        $flashSale = Flash_Sale::with(['variants.variant.product'])->findOrFail($id);
+        return view('Admin.Fl_show', compact('flashSale'));
+    }
 
-            $item->increment('flash_sold');
-            DB::commit();
 
-            return response()->json(['message' => 'Đặt hàng thành công']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Lỗi hệ thống'], 500);
-        }
+
+    public function apiProducts($id)
+    {
+        $flashSale = Flash_Sale::findOrFail($id);
+
+        $products = DB::table('flash_sale_variants')
+            ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
+            ->join('products', 'variant.product_id', '=', 'products.id')
+            ->leftJoin('img', 'variant.img_id', '=', 'img.id')
+            ->where('flash_sale_variants.flash_sale_id', $id)
+            ->select(
+                'products.id as product_id',
+                'products.name as product_name',
+                'products.description',
+                'products.status as product_status',
+                'variant.id as variant_id',
+                'variant.size',
+                'variant.price as original_price',
+                'flash_sale_variants.sale_price',
+                'flash_sale_variants.flash_quantity',
+                'flash_sale_variants.flash_sold',
+                'img.name as image'
+            )
+            ->get();
+
+        return response()->json([
+            'flash_sale_id' => $flashSale->id,
+            'flash_sale_name' => $flashSale->name,
+            'start_time' => $flashSale->start_time,
+            'end_time' => $flashSale->end_time,
+            'products' => $products
+        ]);
     }
 }
