@@ -117,4 +117,5 @@ Route::get('/admin/OrderChart', [AdminManageController::class, 'OrderChart']);
 Route::get('/admin/ProductChart', [AdminManageController::class, 'ProductChart']);
 
 //flash sale routes
-Route::get('/flash-sale/{id}/products', [FlashSaleController::class, 'apiProducts']);
+
+Route::get('/flash-sales', [FlashSaleController::class, 'apiActiveFlashSales']);

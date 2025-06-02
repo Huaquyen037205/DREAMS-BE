@@ -1,4 +1,3 @@
-{{-- filepath: resources/views/Admin/Fl_show.blade.php --}}
 @extends('template.admin')
 @section('content')
 <main class="flex-1 p-6 overflow-y-auto">
@@ -16,7 +15,6 @@
             <thead>
                 <tr>
                     <th class="p-2">Tên sản phẩm</th>
-                    <th class="p-2">Size</th>
                     <th class="p-2">Giá Flash Sale</th>
                     <th class="p-2">Số lượng</th>
                     <th class="p-2">Đã bán</th>
@@ -26,7 +24,6 @@
                 @foreach ($flashSale->variants as $item)
                     <tr>
                         <td class="p-2">{{ $item->variant->product->name ?? '' }}</td>
-                        <td class="p-2">{{ $item->variant->size ?? '' }}</td>
                         <td class="p-2">{{ number_format($item->sale_price) }}</td>
                         <td class="p-2">{{ $item->flash_quantity }}</td>
                         <td class="p-2">{{ $item->flash_sold ?? 0 }}</td>

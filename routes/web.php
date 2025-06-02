@@ -12,6 +12,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminManageController;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\FlashSaleController;
+use App\Http\Controllers\CateList;
 
 // Web Routes
 // Route::get('/', [PageController::class, 'home']);
@@ -99,8 +100,6 @@ Route::prefix('/admin')->middleware(CheckAdmin::class)->group(function () {
 
 
 // Flash Sale Routes
-
-
 Route::prefix('admin/flash-sale')->group(function () {
     Route::get('/', [FlashSaleController::class, 'index'])->name('flashsale.list');
     Route::get('/create', [FlashSaleController::class, 'create'])->name('flashsale.create');
@@ -112,3 +111,14 @@ Route::prefix('admin/flash-sale')->group(function () {
     Route::delete('/{id}', [FlashSaleController::class, 'destroy'])->name('flashsale.destroy');
     Route::get('/{id}', [FlashSaleController::class, 'show'])->name('flashsale.show');
 });
+
+// Category Routes
+// Danh sách danh mục
+Route::get('/admin/categories', [CateList::class, 'index'])->name('categories.index');
+// Thêm danh mục (xử lý form POST)
+Route::post('/admin/categories', [CateList::class, 'store'])->name('categories.store');
+// Chi tiết danh mục
+Route::get('/admin/categories/{id}', [CateList::class, 'show'])->name('categories.show');
+// Hiển thị form chỉnh sửa danh mục
+Route::put('/admin/categories/{id}', [CateList::class, 'update']);
+
