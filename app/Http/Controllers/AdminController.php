@@ -59,6 +59,7 @@ class AdminController extends Controller
     public function editProduct(Request $request, $id){
         $request->validate([
             'name' => 'required|string|max:255',
+            'image'=> 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'category_id' => 'required|integer',
             'description' => 'nullable|string',
             'status' => 'required|string',
@@ -76,6 +77,24 @@ class AdminController extends Controller
             $product->active = $request->active;
             $product->view = $request->view;
             $product->hot = $request->hot;
+
+            if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = $file->getClientOriginalName();
+            $file->move(public_path('img'), $filename);
+
+                  if ($product->img && $product->img->first()) {
+                $img = $product->img->first();
+                $img->name = $filename;
+                $img->save();
+            } else {
+                Img::create([
+                'product_id' => $product->id,
+                'name' => $filename
+            ]);
+        }
+        }
+
             if($product->save()){
                 return redirect()->back()->with('success', 'Cập nhật sản phẩm thành công');
                 return response()->json([
@@ -93,7 +112,7 @@ class AdminController extends Controller
         }
     }
 
-      public function setActiveProduct(Request $request, $id)
+    public function setActiveProduct(Request $request, $id)
     {
         $request->validate([
         'active' => 'required|in:on,off',
@@ -339,6 +358,7 @@ class AdminController extends Controller
     public function editVariant(Request $request, $id){
         $request->validate([
             'product_id' => 'required|exists:products,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'size' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',
             'price' => 'required|numeric',
@@ -355,6 +375,24 @@ class AdminController extends Controller
             $variant->sale_price = $request->sale_price;
             $variant->status = $request->status;
             $variant->active = $request->active;
+
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $filename = $file->getClientOriginalName();
+                $file->move(public_path('img'), $filename);
+
+                if ($variant->img && $variant->img->first()) {
+                    $img = $variant->img->first();
+                    $img->name = $filename;
+                    $img->save();
+                } else {
+                    Img::create([
+                        'product_id' => $variant->product_id,
+                        'name' => $filename
+                    ]);
+                }
+            }
+
             if ($variant->save()) {
                 if ($request->wantsJson() || $request->ajax()) {
                     return response()->json([
@@ -396,12 +434,12 @@ class AdminController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'name' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         if ($request->hasFile('name')) {
             $file = $request->file('name');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = $file->getClientOriginalName();
             $path = $file->storeAs('public/img', $filename);
 
             $img = new Img();
@@ -409,11 +447,13 @@ class AdminController extends Controller
             $img->name = $filename;
 
             if ($img->save()) {
+                 return redirect()->route('product.detail', ['id' => $request->product_id])
+                ->with('success', 'Thêm hình ảnh thành công!');
                 return response()->json([
                     'status' => 200,
                     'message' => 'Thêm hình ảnh thành công',
                     'data' => $img,
-                    'image_url' => asset('storage/img/' . $filename)
+                    'image_url' => asset('public/img/' . $filename)
                 ]);
             } else {
                 return response()->json([

@@ -15,6 +15,7 @@ class ProductController extends Controller
 {
     public function product(){
         $product = Product::with('img', 'variant', 'category')->paginate(12);
+        return view('producTest', ['products' => $product]);
         return response()->json([
             'status' => 200,
             'message' => 'Danh sách sản phẩm',
@@ -241,10 +242,10 @@ class ProductController extends Controller
             'comment' => 'nullable|string|max:1000'
         ]);
 
-            // $user = $request->user();
-            // if (!$user) {
-            //     return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
-            // }
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
+        }
 
         $review = new Review();
         $review->user_id = $request->user_id;

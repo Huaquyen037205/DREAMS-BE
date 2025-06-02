@@ -52,14 +52,18 @@ class AuthController extends Controller
                     'message' => 'Tài khoản đã bị khóa',
                 ], 403);
             }
-
+            $token = $user->createToken('API Token')->plainTextToken;
             return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
                 'status' => 200,
                 'message' => 'Đăng nhập thành công',
                 'data' => $user
             ], 200);
         } else {
             return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
                 'status' => 401,
                 'message' => 'Email hoặc mật khẩu không đúng',
             ], 401);

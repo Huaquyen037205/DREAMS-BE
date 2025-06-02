@@ -16,11 +16,11 @@
     <!-- Sidebar -->
     <aside class="w-64 bg-white shadow-lg overflow-y-auto">
    <div class="p-6 text-2xl font-bold text-purple-600">
-        <a href="/dashboard"> DREAMS  </a></div>
+        <a href="/admin/dashboard"> DREAMS  </a></div>
       <nav class="mt-8">
 
       <ul>
-        <a href="/dashboard" >
+        <a href="/admin/dashboard" >
             <li class="px-6 py-3 bg-purple-100 text-purple-700 flex items-center gap-2">
             <i class="ph ph-gauge"></i> Dashboard
             </li>
@@ -119,6 +119,15 @@
           <span class="bg-purple-200 text-purple-800 rounded-full px-3 py-1 text-sm">Admin DREAMS</span>
         </div>
       </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <form id="logout-form" action="{{ url('/admin/logout') }}" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
+                    Đăng xuất
+                </button>
+            </form>
+        </div>
 
       <!-- Stats Cards -->
       @yield('content')

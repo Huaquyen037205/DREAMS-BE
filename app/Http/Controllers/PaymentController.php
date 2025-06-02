@@ -1,13 +1,29 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
      public function createVnpayPayment(Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $order = Order::create([
+        'user_id' => $user->id,
+        'shipping_id' => $request->input('shipping_id', null),
+        'payment_id' => $request->input('payment_id', null),
+        'coupon_id' => $request->input('coupon_id', null),
+        'address_id' => $request->input('address_id', null),
+        'total_price' => $request->input('amount'),
+        'status' => 'pending',
+
+    ]);
+
         // Lấy thông tin đơn hàng từ request
         $vnp_TxnRef = uniqid(); // Mã giao dịch
         $vnp_OrderInfo = $request->input('order_desc', 'Thanh toan don hang');
@@ -68,5 +84,21 @@ class PaymentController extends Controller
             'message' => 'Kết quả thanh toán',
             'data' => $request->all()
         ]);
+    }
+
+    public function getOrdersByUser(Request $request)
+    {
+        $user = $request->user();
+
+        $orders = Order::with(['order_items', 'order_items.variant', 'order_items.product'])
+            ->where('user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách đơn hàng của bạn',
+            'data' => $orders
+        ], 200);
     }
 }

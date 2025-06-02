@@ -26,6 +26,8 @@ class AdminUserController extends Controller
                 Auth::logout();
                 if($request->expectsJson() || $request->wantsJson()){
                     return response()->json([
+                        'access_token' => $token,
+                        'token_type' => 'Bearer',
                         'status' => 403,
                         'message' => 'Tài khoản đã bị khóa',
                     ], 403);
@@ -45,7 +47,7 @@ class AdminUserController extends Controller
                     ], 200);
                 }
 
-                return redirect('/dashboard');
+                return redirect('/admin/dashboard');
 
             } else {
                 Auth::logout();
@@ -169,6 +171,7 @@ class AdminUserController extends Controller
 
     public function logoutAdmin(Request $request){
         auth()->logout();
+        return redirect('/admin/login');
         return response()->json([
             'status' => 200,
             'message' => 'Đã đăng xuất',

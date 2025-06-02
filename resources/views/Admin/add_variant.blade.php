@@ -35,7 +35,6 @@
                 </select>
             </div>
 
-
             <div>
                 <label class="block text-sm font-medium text-gray-700">Chọn Ảnh</label>
                 <select name="img_id" class="mt-1 w-full border px-3 py-2 rounded">
@@ -103,5 +102,6 @@
             </div>
         </form>
     </div>
+
 </main>
 @endsection

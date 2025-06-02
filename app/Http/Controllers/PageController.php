@@ -16,7 +16,7 @@ class PageController extends Controller
     }
 
     public function loginAdmin(){
-        return view('Admin.login');
+        return view('Admin.Login');
     }
 
     // public function addUserAdmin(){
@@ -49,7 +49,7 @@ class PageController extends Controller
 
     public function productById($id){
         $product = Product::findOrFail($id);
-        return view('Admin.productById',['id' => $id]);
+        return view('Admin.productById',['id' => $id], compact('product'));
     }
 
     public function addProduct(){
@@ -88,5 +88,12 @@ class PageController extends Controller
 
     public function message(){
         return view('Admin.message');
+    }
+
+    //Route Test
+
+    public function product()  {
+        $products = Product::all();
+        return view('producTest', compact('products'));
     }
 }
