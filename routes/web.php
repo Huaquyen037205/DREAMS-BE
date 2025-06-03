@@ -110,6 +110,9 @@ Route::prefix('admin/flash-sale')->group(function () {
     Route::put('/{id}', [FlashSaleController::class, 'update'])->name('flashsale.update');
     Route::delete('/{id}', [FlashSaleController::class, 'destroy'])->name('flashsale.destroy');
     Route::get('/{id}', [FlashSaleController::class, 'show'])->name('flashsale.show');
+     // Route xử lý cập nhật sản phẩm Flash Sale
+    Route::put('{flashsale}/variant/{variant}', [FlashSaleController::class, 'updateVariant'])->name('flashsale.variant.update');
+    Route::delete('{flashsale}/variant/{variant}', [FlashSaleController::class, 'destroyVariant'])->name('flashsale.variant.destroy');
 });
 
 // Category Routes

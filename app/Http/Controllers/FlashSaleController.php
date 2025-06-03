@@ -174,4 +174,33 @@ public function apiActiveFlashSales()
 
     return response()->json($result);
 }
+
+public function updateVariant(Request $request, $flashsaleId, $variantId)
+{
+    $validated = $request->validate([
+        'sale_price' => 'required|numeric|min:0',
+        'flash_quantity' => 'required|integer|min:0',
+    ]);
+
+    $variant = Flash_Sale_Variant::where('flash_sale_id', $flashsaleId)
+        ->where('id', $variantId)
+        ->firstOrFail();
+
+    $variant->update([
+        'sale_price' => $validated['sale_price'],
+        'flash_quantity' => $validated['flash_quantity'],
+    ]);
+
+    return redirect()->back()->with('success', 'Cập nhật thành công.');
+}
+
+// Xóa variant khỏi flash sale
+public function destroyVariant($flashSaleId, $variantId)
+{
+    $variant = Flash_Sale_Variant::where('flash_sale_id', $flashSaleId)
+        ->where('id', $variantId)
+        ->firstOrFail();
+    $variant->delete();
+    return redirect()->route('flashsale.show', $flashSaleId)->with('success', 'Đã xóa sản phẩm khỏi chương trình!');
+}
 }

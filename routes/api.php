@@ -21,6 +21,7 @@ Route::get('/search', [ProductController::class, 'searchProduct']);
 Route::get('/category/{id}', [ProductController::class, 'productByCategory']);
 Route::get('/products/price/{price}', [ProductController::class, 'productByprice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
+Route::get('/products/filter-size', [ProductController::class, 'filterBySize']);
 
 //Login, Register
 Route::post('/register', [AuthController::class, 'register']);
@@ -117,5 +118,4 @@ Route::get('/admin/OrderChart', [AdminManageController::class, 'OrderChart']);
 Route::get('/admin/ProductChart', [AdminManageController::class, 'ProductChart']);
 
 //flash sale routes
-
 Route::get('/flash-sales', [FlashSaleController::class, 'apiActiveFlashSales']);

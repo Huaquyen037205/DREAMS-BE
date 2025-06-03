@@ -243,6 +243,42 @@ class ProductController extends Controller
     }
 
 
+
+    public function filterBySize(Request $request)
+    {
+        $size = strtoupper($request->input('size'));
+
+        // Chỉ cho phép S, M, L
+        if (!in_array($size, ['S', 'M', 'L'])) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Size không hợp lệ. Chỉ chấp nhận S, M, L.',
+            ], 400);
+        }
+
+        $products = Product::with(['img', 'variant' => function($query) use ($size) {
+                $query->where('size', $size);
+            }, 'category'])
+            ->whereHas('variant', function($query) use ($size) {
+                $query->where('size', $size);
+            })
+            ->get();
+
+        if ($products->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm với size này',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách sản phẩm theo size',
+            'data' => $products
+        ], 200);
+    }
+
+
     public function getReviews(Request $request)
     {
         $product_id = $request->query('product_id');
