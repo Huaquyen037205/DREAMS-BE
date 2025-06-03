@@ -18,7 +18,7 @@ class Order extends Model
         'address_id',
         'status',
         'total_price',
-        'order_date',
+        'vnp_TxnRef',
     ];
 
     public function user()

@@ -19,7 +19,7 @@
                         </select>
                     </div>
 
-                    <form action="/search/admin/product/list" method="GET" class="flex items-center">
+                    <form action="/search/product/list" method="GET" class="flex items-center">
                         <div>
                             <input type="text" name="search" class="border px-2 py-1 rounded" placeholder="Tìm kiếm sản phẩm..." >
                             <button class="ml-2 bg-indigo-500 text-white px-3 py-1 rounded">Tìm kiếm</button>
@@ -33,6 +33,7 @@
                         <tr class="bg-gray-100 text-gray-600 text-sm uppercase">
                             <th class="p-2"><input type="checkbox"></th>
                             <th class="p-2">ID Sản Phẩm</th>
+                            <th class="p-2">Ảnh Sản Phẩm</th>
                             <th class="p-2">Tên Sản Phẩm</th>
                             <th class="p-2">Danh Mục</th>
                             <th class="p-2">Mô Tả</th>
@@ -48,6 +49,12 @@
                                 <tr class="border-t hover:bg-gray-50">
                                     <td class="p-2"><input type="checkbox"></td>
                                     <td class="p-2 text-indigo-600">{{$product->id}}</td>
+                                    <td class="p-2">
+                                     @if ($product->img && $product->img->first())
+                                        <img src="{{ asset('img/' . $product->img->first()->name) }}" alt="Product Image" class="w-16 h-16 object-cover rounded">
+                                    @else
+                                        <img src="{{ asset('images/no-image.png') }}" alt="No Image" class="w-16 h-16 object-cover rounded">
+                                    @endif
                                     <td class="p-2"><a href="{{ url('/admin/product/'. $product->id) }}">{{$product->name}}</a></td>
                                     <td class="p-2">{{ $product->category->name ?? $product->category_id}}</td>
                                     <td class="p-2 max-w-xs truncate" style="max-width: 200px;">{{$product->description}}</td>

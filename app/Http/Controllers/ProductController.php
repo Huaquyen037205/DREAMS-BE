@@ -302,10 +302,10 @@ class ProductController extends Controller
             'comment' => 'nullable|string|max:1000'
         ]);
 
-            // $user = $request->user();
-            // if (!$user) {
-            //     return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
-            // }
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
+        }
 
         $review = new Review();
         $review->user_id = $request->user_id;

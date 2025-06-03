@@ -33,6 +33,7 @@
                         <tr class="bg-gray-100 text-gray-700 text-sm font-semibold uppercase tracking-wider">
                             <th class="p-3"><input type="checkbox"></th>
                             <th class="p-3">ID</th>
+                            <th class="p-3">Ảnh sản phẩm</th>
                             <th class="p-3">Tên Sản Phẩm</th>
                             <th class="p-3">Size</th>
                             <th class="p-3">Số Lượng</th>
@@ -51,6 +52,12 @@
                             <tr class="border-t hover:bg-gray-50 text-sm text-gray-700 leading-relaxed">
                                 <td class="p-3"><input type="checkbox"></td>
                                 <td class="p-3 font-medium text-indigo-600">{{ $variant->id }}</td>
+                                <td class="p-3">
+                                    @if ($variant->image)
+                                        <img src="{{ asset('img/' . $variant->image) }}" alt="Product Image" class="w-16 h-16 object-cover rounded">
+                                    @else
+                                        <img src="{{ asset('images/no-image.png') }}" alt="No Image" class="w-16 h-16 object-cover rounded">
+                                    @endif
                                 <td class="p-3">{{ $variant->product->name ?? 'N/A' }}</td>
                                 <td class="p-3">{{ $variant->size }}</td>
                                 <td class="p-3">{{ $variant->stock_quantity }}</td>

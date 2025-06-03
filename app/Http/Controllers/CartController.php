@@ -16,31 +16,64 @@ class CartController extends Controller
 {
     public function addToCart(Request $request)
     {
-        $user = auth()->user();
-        $productId = $request->input('product_id');
-
-        $quantity = $request->input('quantity', 1);
-
-        $product = Product::find($productId);
-        if (!$product) {
-            return response()->json(['message' => 'Không có sản phẩm trong giỏ hàng'], 404);
+        $cart = Session::get('cart', []);
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $cartItem = Order_item::updateOrCreate(
-            [
-                'user_id' => $user->id,
-                'product_id' => $productId,
-            ],
-            ['quantity' => $quantity]
-        );
+        if(empty($cart)) {
+            return response()->json(['message' => 'Giỏ hàng trống'], 404);
+        }
 
-        return response()->json(['message' => 'Thêm sản phẩm trong giỏ hàng', 'cart_item' => $cartItem], 200);
+        $productId = $request->input('product_id');
+        $variantId = $request->input('variant_id');
+        $quantity = $request->input('quantity', 1);
+        $price = $request->input('price', 0);
+
+        $total = 0;
+        foreach ($cart as $item) {
+            if ($item['product_id'] == $productId && $item['variant_id'] == $variantId) {
+                $item['quantity'] += $quantity;
+                $total = $item['price'] * $item['quantity'];
+                break;
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'shipping_id' => $request->shipping_id,
+                'payment_id' => $request->payment_id,
+                'coupon_id' => $request->coupon_id,
+                'address_id' => $request->address_id,
+                'status' => 'pending',
+                'total_price' => $total,
+            ]);
+
+            foreach ($cart as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'variant_id' => $item['variant_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price']
+                ]);
+            }
+
+            session()->forget('cart');
+
+            DB::commit();
+            return redirect()->route('orders.success')->with('success', 'Đặt hàng thành công!');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Đặt hàng thất bại: ' . $e->getMessage());
+        }
     }
 
     public function viewCart()
     {
         $user = auth()->user();
-        $cartItems = Order_item::with('product')->where('user_id', $user->id)->get();
+        $cartItems = Order_item::with('product', 'variant', 'order')->where('user_id', $user->id)->get();
 
         return response()->json(['cart_items' => $cartItems], 200);
     }
