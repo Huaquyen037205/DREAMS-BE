@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
 use App\Models\Flash_Sale;
+use App\Http\Controllers\AddressController;
 
 // use App\Http\Middleware\CheckAdmin;
 
@@ -114,5 +115,14 @@ Route::middleware(['auth:sanctum'])->group(function (){
 Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
 Route::middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])->group(function () {
 Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
-
 });
+
+//flash sale routes
+Route::get('/flash-sales', [FlashSaleController::class, 'apiActiveFlashSales']);
+
+//address routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/addresses', [AddressController::class, 'store']);
+    Route::patch('/addresses/{id}/set-default', [AddressController::class, 'setDefault']);
+});
+
