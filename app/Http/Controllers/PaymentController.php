@@ -13,7 +13,6 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-
         // Lấy thông tin đơn hàng từ request
         $vnp_TxnRef = uniqid(); // Mã giao dịch
         $vnp_OrderInfo = $request->input('order_desc', 'Thanh toan don hang');
