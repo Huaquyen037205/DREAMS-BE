@@ -59,6 +59,7 @@ class AdminController extends Controller
     public function editProduct(Request $request, $id){
         $request->validate([
             'name' => 'required|string|max:255',
+            'image'=> 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'category_id' => 'required|integer',
             'description' => 'nullable|string',
             'status' => 'required|string',
@@ -76,6 +77,24 @@ class AdminController extends Controller
             $product->active = $request->active;
             $product->view = $request->view;
             $product->hot = $request->hot;
+
+            if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = $file->getClientOriginalName();
+            $file->move(public_path('img'), $filename);
+
+                  if ($product->img && $product->img->first()) {
+                $img = $product->img->first();
+                $img->name = $filename;
+                $img->save();
+            } else {
+                Img::create([
+                'product_id' => $product->id,
+                'name' => $filename
+            ]);
+        }
+        }
+
             if($product->save()){
                 return redirect()->back()->with('success', 'Cập nhật sản phẩm thành công');
                 return response()->json([
@@ -93,7 +112,7 @@ class AdminController extends Controller
         }
     }
 
-      public function setActiveProduct(Request $request, $id)
+    public function setActiveProduct(Request $request, $id)
     {
         $request->validate([
         'active' => 'required|in:on,off',
@@ -339,6 +358,7 @@ class AdminController extends Controller
     public function editVariant(Request $request, $id){
         $request->validate([
             'product_id' => 'required|exists:products,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'size' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',
             'price' => 'required|numeric',
@@ -355,6 +375,24 @@ class AdminController extends Controller
             $variant->sale_price = $request->sale_price;
             $variant->status = $request->status;
             $variant->active = $request->active;
+
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $filename = $file->getClientOriginalName();
+                $file->move(public_path('img'), $filename);
+
+                if ($variant->img && $variant->img->first()) {
+                    $img = $variant->img->first();
+                    $img->name = $filename;
+                    $img->save();
+                } else {
+                    Img::create([
+                        'product_id' => $variant->product_id,
+                        'name' => $filename
+                    ]);
+                }
+            }
+
             if ($variant->save()) {
                 if ($request->wantsJson() || $request->ajax()) {
                     return response()->json([
@@ -396,12 +434,17 @@ class AdminController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'name' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
+
+        $currentImageCount = Img::where('product_id', $request->product_id)->count();
+            if ($currentImageCount >= 5) {
+                return redirect()->back()->withErrors(['name' => 'Sản phẩm này đã có đủ 5 ảnh.']);
+        }
 
         if ($request->hasFile('name')) {
             $file = $request->file('name');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = $file->getClientOriginalName();
             $path = $file->storeAs('public/img', $filename);
 
             $img = new Img();
@@ -409,11 +452,13 @@ class AdminController extends Controller
             $img->name = $filename;
 
             if ($img->save()) {
+                 return redirect()->route('product.detail', ['id' => $request->product_id])
+                ->with('success', 'Thêm hình ảnh thành công!');
                 return response()->json([
                     'status' => 200,
                     'message' => 'Thêm hình ảnh thành công',
                     'data' => $img,
-                    'image_url' => asset('storage/img/' . $filename)
+                    'image_url' => asset('public/img/' . $filename)
                 ]);
             } else {
                 return response()->json([
@@ -429,29 +474,34 @@ class AdminController extends Controller
         ], 400);
     }
 
-
     public function editImg(Request $request, $id){
-        $img = Img::find($id);
-        if($img){
-            $img->update($request->all());
-            return response()->json([
-                'status' => 200,
-                'message' => 'Cập nhật hình ảnh thành công',
-                'data' => $img
-            ],200);
-        }
-            else{
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Không tìm thấy hình ảnh',
-                ],404);
+       $img = Img::find($id);
+        if ($img) {
+            $request->validate([
+                'name' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+            if ($request->hasFile('name')) {
+                $file = $request->file('name');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('img'), $filename);
+                $img->name = $filename;
+                $img->save();
+                return redirect()->back()->with('success', 'Cập nhật hình ảnh thành công');
             }
+            return redirect()->back()->withErrors(['name' => 'Vui lòng chọn file ảnh']);
+        }
+        return redirect()->back()->withErrors(['name' => 'Không tìm thấy hình ảnh']);
     }
 
     public function deleteImg($id){
         $img = Img::find($id);
         if($img){
+            $filePath = public_path('img/' . $img->name);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
             $img->delete();
+            return redirect()->back()->with('success', 'Xóa hình ảnh thành công');
             return response()->json([
                 'status' => 200,
                 'message' => 'Xóa hình ảnh thành công',

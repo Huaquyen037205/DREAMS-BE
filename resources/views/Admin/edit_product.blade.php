@@ -63,23 +63,24 @@
                     <option value="on" {{ $product->active == 'on' ? 'selected' : '' }}>Đang hoạt động</option>
                     <option value="off" {{ $product->active == 'off' ? 'selected' : '' }}>Ngưng kích hoạt</option>
                 </select>
-              <div class="mb-4">
+            <div class="mb-4">
                 <label class="block text-gray-700 mb-1">Trạng Thái</label>
                 <select name="status" class="w-full border px-3 py-2 rounded">
                     <option value="còn hàng" {{ $product->status == 'còn hàng' ? 'selected' : '' }}>Còn hàng</option>
                     <option value="hết hàng" {{ $product->status == 'hết hàng' ? 'selected' : '' }}>Hết hàng</option>
                 </select>
             </div>
+
             <!-- Image Upload -->
-            {{-- <div class="mb-4">
+           <div class="mb-4">
                 <label class="block text-gray-700 mb-1">Thay Đổi Ảnh</label>
                 <input type="file" name="image" class="w-full border px-3 py-2 rounded">
-                @if ($product->image)
+                @if ($product->img && $product->img->first())
                     <div class="mt-2">
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="Product image" class="w-32 rounded border">
+                        <img src="{{ asset('img/' . $product->img->first()->name) }}" alt="Product image" class="w-32 rounded border">
                     </div>
                 @endif
-            </div> --}}
+            </div>
 
             <!-- Submit -->
             <div class="mt-6">

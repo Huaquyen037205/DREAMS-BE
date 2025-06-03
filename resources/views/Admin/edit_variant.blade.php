@@ -19,7 +19,7 @@
             <strong>Thành công:</strong> {{ session('success') }}
         </div>
     @endif
-    <form action="{{ url('/admin/variant/edit/' . $variant->id) }}" method="POST">
+    <form action="{{ url('/admin/variant/edit/' . $variant->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -31,32 +31,43 @@
             <input type="hidden" name="product_id" value="{{ $variant->product_id }}">
         </div>
 
+        {{-- Ảnh sản phẩm --}}
+        {{-- <div class="mb-4">
+            <label class="block font-medium mb-1">Ảnh sản phẩm</label>
+            <input type="file" name="image" accept="image/*"
+                class="w-full border border-gray-300 rounded px-3 py-2">
+            @if ($variant->image)
+                <img src="{{ asset('img/' . $variant->image) }}" alt="Product Image"
+                    class="mt-2 w-32 h-32 object-cover rounded">
+            @endif
+        </div> --}}
+
         {{-- Size --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Size</label>
             <input type="text" name="size" value="{{ old('size', $variant->size) }}"
-                   class="w-full border border-gray-300 rounded px-3 py-2" required>
+                class="w-full border border-gray-300 rounded px-3 py-2" required>
         </div>
 
         {{-- Số lượng --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Số lượng</label>
             <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $variant->stock_quantity) }}"
-                   class="w-full border border-gray-300 rounded px-3 py-2" required>
+                class="w-full border border-gray-300 rounded px-3 py-2" required>
         </div>
 
         {{-- Giá --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Giá</label>
             <input type="number" name="price" value="{{ old('price', number_format($variant->price, 0, ',', '.')) }}"
-                   class="w-full border border-gray-300 rounded px-3 py-2" required>
+                class="w-full border border-gray-300 rounded px-3 py-2" required>
         </div>
 
         {{-- Giá giảm (nếu có) --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Giá giảm</label>
             <input type="number" name="sale_price" value="{{ old('sale_price', number_format($variant->sale_price, 0, ',', '.')) }}"
-                   class="w-full border border-gray-300 rounded px-3 py-2">
+                class="w-full border border-gray-300 rounded px-3 py-2">
         </div>
 
         {{-- Tình trạng --}}
@@ -78,7 +89,7 @@
         </div>
 
         <div class="flex justify-end gap-4">
-            <a href="{{ url('/admin/variant/list') }}"
+            <a href="{{ url('/admin/product/'. $variant->product->id) }}"
                class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Quay lại</a>
             <button type="submit"
                     class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">

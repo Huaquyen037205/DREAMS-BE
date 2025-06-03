@@ -8,7 +8,7 @@ class Shipping extends Model
 {
     use HasFactory;
 
-    protected $table = 'shipping';
+    protected $table = 'shippings';
     protected $fillable = [
         'name',
         'shipping_status',

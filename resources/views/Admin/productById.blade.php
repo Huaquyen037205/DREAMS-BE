@@ -1,5 +1,4 @@
 @extends('template.admin')
-
 @section('content')
 <main class="p-6">
     <div class="flex justify-between items-center mb-6">
@@ -17,22 +16,17 @@
                 <p class="mb-2"><strong class="text-gray-700">Mô tả:</strong> {{ $product->description }}</p>
                 <p class="mb-2"><strong class="text-gray-700">Ngày tạo:</strong> {{ optional($product->created_at)->format('d-m-Y H:i') }}</p>
             </div>
-            <div>
-                @if(isset($product->images) && count($product->images))
-                    <div class="grid grid-cols-3 gap-2">
-                        @foreach($product->images as $img)
-                            <img src="{{ asset('storage/'.$img->url) }}" class="rounded-md border shadow-sm h-24 w-full object-cover" />
-                        @endforeach
-                    </div>
-                @else
-                    <p class="text-gray-500 italic">Không có ảnh đại diện</p>
-                @endif
-            </div>
         </div>
     </div>
 
     <!-- Variants Table -->
-    <h2 class="text-xl font-semibold mb-3 text-gray-800">Danh sách biến thể</h2>
+    <div class="flex justify-between items-center mb-6">
+        <div class="text-2xl font-semibold">Danh Sách Biến Thể</div>
+            <a href="{{ url('/admin/add/variant') }}" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
+            + Thêm biến thể
+        </a>
+    </div>
+
     <div class="overflow-x-auto">
         <table class="w-full table-auto border border-gray-200 rounded-md">
             <thead>
@@ -43,6 +37,8 @@
                     <th class="p-3 border">Giá giảm</th>
                     <th class="p-3 border">Trạng thái hàng</th>
                     <th class="p-3 border">Trạng thái</th>
+                    <th class="p-3 border">Ngày cập nhật</th>
+                    <th class="p-3 border">Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,13 +58,20 @@
                             @endif
                         </td>
 
-                        </td>
                         <td class="p-3 border text-center">
                             @if($variant->active === 'on')
                                 <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-sm">Hoạt động</span>
                             @else
                                 <span class="bg-yellow-100 text-red-700 px-2 py-1 rounded-full text-sm">Đang cập nhật</span>
                             @endif
+                        </td>
+
+                        <td class="p-3 border text-center">{{ optional($variant->updated_at)->format('d-m-Y H:i') }}</td>
+
+                        <td class="p-3 border text-center">
+                            <a href="{{ url('/admin/variant/edit/' . $variant->id) }}" class="bg-green-100 text-green-600 px-2 py-1 rounded text-xs">
+                                <i class="ph ph-pencil"></i>
+                            </a>
                         </td>
                     </tr>
                     </tr>
@@ -77,6 +80,44 @@
         </table>
     </div>
 </main>
+
+<div class="bg-gray-50 p-4 rounded shadow mb-8 mt-4">
+    <h3 class="font-semibold mb-2">Thêm ảnh sản phẩm</h3>
+    <form action="{{ url('/admin/product/add-img') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <input type="hidden" name="product_id" value="{{ $product->id }}">
+        <input type="file" name="name" accept="image/*" required class="border px-2 py-1 rounded mb-2">
+        <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Thêm ảnh</button>
+    </form>
+    @if(session('success'))
+        <div class="mt-2 text-green-600">{{ session('success') }}</div>
+    @endif
+    @if($errors->has('name'))
+        <div class="mt-2 text-red-600">{{ $errors->first('name') }}</div>
+    @endif
+</div>
+
+
+<div class="grid grid-cols-3 gap-4 mb-4">
+    @foreach($product->img as $img)
+        <div class="flex flex-col items-center justify-center text-center">
+            <img src="{{ asset('img/' . $img->name) }}"
+                 class="rounded-md border shadow-sm aspect-square object-cover w-full max-w-[350px] mb-2" />
+
+            <!-- Form sửa ảnh -->
+            <form action="{{ url('/admin/product/edit-img/' . $img->id) }}" method="POST" enctype="multipart/form-data" class="flex flex-col items-center gap-2 w-full">
+                @csrf
+                @method('POST')
+                <input type="file" name="name" accept="image/*" required class="border px-2 py-1 rounded w-full max-w-[200px]">
+                <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">
+                    Sửa ảnh
+                </button>
+            </form>
+        </div>
+    @endforeach
+</div>
+
+
 
 <!-- Hiển thị đánh giá và bình luận -->
 <h2 class="text-xl font-semibold mt-8 mb-3 text-gray-800">Đánh giá & Bình luận của khách hàng</h2>
@@ -122,4 +163,5 @@
         <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Gửi đánh giá</button>
     </form>
 </div> --}}
+
 @endsection

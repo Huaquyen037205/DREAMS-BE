@@ -66,14 +66,14 @@ class AuthController extends Controller
     //     }
     // }
 
-    // public function logout(Request $request)
-    // {
-    //     Auth::logout();
-    //     return response()->json([
-    //         'status' => 200,
-    //         'message' => 'Đăng xuất thành công'
-    //     ], 200);
-    // }
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Đăng xuất thành công'
+        ], 200);
+    }
 
 
 
@@ -112,10 +112,6 @@ class AuthController extends Controller
                 ], 401);
             }
         }
-
-
-
-
 
     public function forgotPassword(Request $request)
     {
