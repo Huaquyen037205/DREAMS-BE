@@ -437,6 +437,11 @@ class AdminController extends Controller
             'name' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
+        $currentImageCount = Img::where('product_id', $request->product_id)->count();
+            if ($currentImageCount >= 5) {
+                return redirect()->back()->withErrors(['name' => 'Sản phẩm này đã có đủ 5 ảnh.']);
+        }
+
         if ($request->hasFile('name')) {
             $file = $request->file('name');
             $filename = $file->getClientOriginalName();
@@ -469,29 +474,34 @@ class AdminController extends Controller
         ], 400);
     }
 
-
     public function editImg(Request $request, $id){
-        $img = Img::find($id);
-        if($img){
-            $img->update($request->all());
-            return response()->json([
-                'status' => 200,
-                'message' => 'Cập nhật hình ảnh thành công',
-                'data' => $img
-            ],200);
-        }
-            else{
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Không tìm thấy hình ảnh',
-                ],404);
+       $img = Img::find($id);
+        if ($img) {
+            $request->validate([
+                'name' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+            if ($request->hasFile('name')) {
+                $file = $request->file('name');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('img'), $filename);
+                $img->name = $filename;
+                $img->save();
+                return redirect()->back()->with('success', 'Cập nhật hình ảnh thành công');
             }
+            return redirect()->back()->withErrors(['name' => 'Vui lòng chọn file ảnh']);
+        }
+        return redirect()->back()->withErrors(['name' => 'Không tìm thấy hình ảnh']);
     }
 
     public function deleteImg($id){
         $img = Img::find($id);
         if($img){
+            $filePath = public_path('img/' . $img->name);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
             $img->delete();
+            return redirect()->back()->with('success', 'Xóa hình ảnh thành công');
             return response()->json([
                 'status' => 200,
                 'message' => 'Xóa hình ảnh thành công',

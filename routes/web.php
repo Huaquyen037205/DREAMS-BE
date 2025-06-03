@@ -39,6 +39,8 @@ Route::get('/change-password', [PageController::class, 'changePassword']);
 Route::post('/change-password', [AdminUserController::class, 'changePasswordAdmin']);
 
 Route::post('/admin/product/add-img', [AdminController::class, 'addImg']);
+Route::post('/admin/product/edit-img/{id}', [AdminController::class, 'editImg']);
+Route::delete('/admin/product/delete-img/{id}', [AdminController::class, 'deleteImg']);
 //Review
 Route::get('/review', [ProductController::class, 'reviews']);
 Route::post('/review', [ProductController::class, 'reviews']);
@@ -53,7 +55,6 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::post('/product/add', [AdminController::class, 'addProduct']);
     Route::get('/product/edit/{id}', [PageController::class, 'editProduct']);
     Route::put('/product/edit/{id}', [AdminController::class, 'editProduct']);
-
 
     // Admin Routes
     Route::get('/dashboard', [PageController::class, 'dashBoard']);

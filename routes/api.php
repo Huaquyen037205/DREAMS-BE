@@ -36,10 +36,10 @@ Route::post('/review', [ProductController::class, 'reviews']);
 Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
 
 
-    //Img
-    Route::post('/admin/addImg', [AdminController::class, 'addImg']);
-    Route::patch('/admin/editImg/{id}', [AdminController::class, 'editImg']);
-    Route::delete('/admin/deleteImg/{id}', [AdminController::class, 'deleteImg']);
+//Img
+Route::post('/admin/addImg', [AdminController::class, 'addImg']);
+Route::patch('/admin/editImg/{id}', [AdminController::class, 'editImg']);
+Route::delete('/admin/deleteImg/{id}', [AdminController::class, 'deleteImg']);
 
 
 // Admin Routes
@@ -70,15 +70,13 @@ Route::middleware(['auth:sanctum'])->group(function (){
     Route::patch('/admin/variantActive/{id}', [AdminController::class, 'setVariantActive']);
     Route::delete('/admin/deleteVariant/{id}', [AdminController::class, 'deleteVariant']);
 
-
-
     //Login routes
     Route::post('/admin/logout', [AdminUserController::class, 'logoutAdmin']);
 
     //Payment
-    Route::get('/orders', [PaymentController::class, 'getOrdersByUser']);
-    Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
-    Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
+    // Route::get('/orders', [PaymentController::class, 'getOrdersByUser']);
+    // Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
+    // Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
 
     //Order routes
     Route::get('/admin/order', [AdminManageController::class, 'ShowOrder']);
@@ -108,11 +106,8 @@ Route::middleware(['auth:sanctum'])->group(function (){
     Route::get('/admin/ProductChart', [AdminManageController::class, 'ProductChart']);
 });
 
-// Route::middleware('auth:sanctum')->post('/admin/change-password', [AdminUserController::class, 'changePasswordAdmin']);
+Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
+Route::middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])->group(function () {
+    Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
 
-
-
-
-
-
-
+});

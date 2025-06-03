@@ -1,5 +1,4 @@
 @extends('template.admin')
-
 @section('content')
 <main class="p-6">
     <div class="flex justify-between items-center mb-6">
@@ -98,13 +97,27 @@
     @endif
 </div>
 
-<div class="grid grid-cols-3 gap-2 mb-4">
+
+<div class="grid grid-cols-3 gap-4 mb-4">
     @foreach($product->img as $img)
-        <div>
-            <img src="{{ asset('img/' . $img->name) }}" class="rounded-md border shadow-sm aspect-square object-cover w-80"/>
+        <div class="flex flex-col items-center justify-center text-center">
+            <img src="{{ asset('img/' . $img->name) }}"
+                 class="rounded-md border shadow-sm aspect-square object-cover w-full max-w-[350px] mb-2" />
+
+            <!-- Form sửa ảnh -->
+            <form action="{{ url('/admin/product/edit-img/' . $img->id) }}" method="POST" enctype="multipart/form-data" class="flex flex-col items-center gap-2 w-full">
+                @csrf
+                @method('POST')
+                <input type="file" name="name" accept="image/*" required class="border px-2 py-1 rounded w-full max-w-[200px]">
+                <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">
+                    Sửa ảnh
+                </button>
+            </form>
         </div>
     @endforeach
 </div>
+
+
 
 <!-- Hiển thị đánh giá và bình luận -->
 <h2 class="text-xl font-semibold mt-8 mb-3 text-gray-800">Đánh giá & Bình luận của khách hàng</h2>

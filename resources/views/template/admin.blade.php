@@ -121,7 +121,7 @@
       </div>
 
         <div class="flex justify-between items-center mb-6">
-            <form id="logout-form" action="{{ url('/admin/logout') }}" method="POST" style="display: inline;">
+            <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: inline;">
                 @csrf
                 <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
                     Đăng xuất

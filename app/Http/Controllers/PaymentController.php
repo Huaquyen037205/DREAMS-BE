@@ -13,16 +13,6 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $order = Order::create([
-        'user_id' => $user->id,
-        'shipping_id' => $request->input('shipping_id', null),
-        'payment_id' => $request->input('payment_id', null),
-        'coupon_id' => $request->input('coupon_id', null),
-        'address_id' => $request->input('address_id', null),
-        'total_price' => $request->input('amount'),
-        'status' => 'pending',
-
-    ]);
 
         // Lấy thông tin đơn hàng từ request
         $vnp_TxnRef = uniqid(); // Mã giao dịch
@@ -56,6 +46,17 @@ class PaymentController extends Controller
             $inputData['vnp_BankCode'] = $vnp_BankCode;
         }
 
+         $order = Order::create([
+                'user_id' => $user->id,
+                'shipping_id' => $request->input('shipping_id', null),
+                'payment_id' => $request->input('payment_id', null),
+                'coupon_id' => $request->input('coupon_id', null),
+                'address_id' => $request->input('address_id', null),
+                'total_price' => $request->input('amount', 0),
+                'status' => 'pending',
+                'vnp_TxnRef' => $vnp_TxnRef,
+            ]);
+
         // Sắp xếp dữ liệu theo key
         ksort($inputData);
         $query = [];
@@ -76,14 +77,34 @@ class PaymentController extends Controller
 
     public function vnpayReturn(Request $request)
     {
-        // Xử lý kết quả trả về từ VNPAY tại đây
-        // $request->all() chứa các tham số trả về
-        // Kiểm tra vnp_ResponseCode, vnp_TxnRef, vnp_Amount, vnp_SecureHash, ...
+       if ($request->input('vnp_ResponseCode') == '00') {
+        $vnp_TxnRef = $request->input('vnp_TxnRef');
+        // Tìm đơn hàng theo mã giao dịch đã lưu khi tạo đơn hàng
+        $order = Order::where('vnp_TxnRef', $vnp_TxnRef)->first();
+
+        if (!$order) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Không tìm thấy đơn hàng với mã giao dịch này',
+            ]);
+        }
+
+        // Cập nhật trạng thái đơn hàng
+        $order->status = 'paid';
+        $order->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Thanh toán thành công, đã cập nhật đơn hàng!',
+            'order' => $order
+        ]);
+    } else {
         return response()->json([
             'status' => 200,
             'message' => 'Kết quả thanh toán',
             'data' => $request->all()
         ]);
+    }
     }
 
     public function getOrdersByUser(Request $request)
