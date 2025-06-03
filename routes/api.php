@@ -9,6 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
 use App\Models\Flash_Sale;
+use App\Http\Controllers\AddressController;
 
 // use App\Http\Middleware\CheckAdmin;
 
@@ -119,3 +120,9 @@ Route::get('/admin/ProductChart', [AdminManageController::class, 'ProductChart']
 
 //flash sale routes
 Route::get('/flash-sales', [FlashSaleController::class, 'apiActiveFlashSales']);
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/addresses', [AddressController::class, 'store']);
+    Route::patch('/addresses/{id}/set-default', [AddressController::class, 'setDefault']);
+});
