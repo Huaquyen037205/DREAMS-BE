@@ -10,18 +10,42 @@ use App\Models\Review;
 use App\Models\Discount_user;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    public function product(){
-        $product = Product::with('img', 'variant', 'category')->paginate(12);
-        return view('producTest', ['products' => $product]);
-        return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách sản phẩm',
-            'data' => $product
-        ],200);
-    }
+    // public function product(){
+    //     $product = Product::with('img', 'variant', 'category')->paginate(12);
+    //     return response()->json([
+    //         'status' => 200,
+    //         'message' => 'Danh sách sản phẩm',
+    //         'data' => $product
+    //     ],200);
+    // }
+
+    public function product() {
+    $now = now();
+
+    // Lấy danh sách product_id đang thuộc flash sale đang hoạt động
+    $flashSaleProductIds = DB::table('flash_sale_variants')
+        ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
+        ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
+        ->where('flash_sales.start_time', '<=', $now)
+        ->where('flash_sales.end_time', '>=', $now)
+        ->pluck('variant.product_id')
+        ->unique();
+
+    // Lấy sản phẩm KHÔNG nằm trong chương trình flash sale đang hoạt động
+    $product = Product::with('img', 'variant', 'category')
+        ->whereNotIn('id', $flashSaleProductIds)
+        ->paginate(12);
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm',
+        'data' => $product
+    ], 200);
+}
 
     public function hotProduct(){
         $product = Product::with('img', 'variant', 'category')->where('hot', 1)->get();
@@ -214,6 +238,42 @@ class ProductController extends Controller
             return response()->json([
             'status' => 200,
             'message' => 'Danh sách sản phẩm theo giá',
+            'data' => $products
+        ], 200);
+    }
+
+
+
+    public function filterBySize(Request $request)
+    {
+        $size = strtoupper($request->input('size'));
+
+        // Chỉ cho phép S, M, L
+        if (!in_array($size, ['S', 'M', 'L'])) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Size không hợp lệ. Chỉ chấp nhận S, M, L.',
+            ], 400);
+        }
+
+        $products = Product::with(['img', 'variant' => function($query) use ($size) {
+                $query->where('size', $size);
+            }, 'category'])
+            ->whereHas('variant', function($query) use ($size) {
+                $query->where('size', $size);
+            })
+            ->get();
+
+        if ($products->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm với size này',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách sản phẩm theo size',
             'data' => $products
         ], 200);
     }

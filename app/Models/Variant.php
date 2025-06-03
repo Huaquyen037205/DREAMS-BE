@@ -31,4 +31,5 @@ class Variant extends Model
     {
         return $this->belongsTo(Img::class, 'img_id', 'id');
     }
+
 }

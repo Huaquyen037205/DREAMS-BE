@@ -77,6 +77,18 @@
         </div>
 
         <div class="group">
+            <div onclick="toggleSubMenu('flashsale-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+                <i class="ph ph-lightning"></i> Flash-Sale <i class="ph ph-caret-down ml-auto"></i>
+            </div>
+            <div id="flashsale-submenu" class="hidden flex-col">
+                <a href="/admin/flash-sale" class="block py-2 px-12 hover:text-indigo-600">Danh sách FlSale</a>
+                <a href="/admin/flash-sale/create" class="block py-2 px-12 hover:text-indigo-600">Thêm chương trình FlSale</a>
+                {{-- <a href="/admin/flash-sale/{{ $flashSale->id }}/products">Thêm sản phẩm</a> --}}
+            </div>
+        </div>
+
+
+        <div class="group">
           <div onclick="toggleSubMenu('variants-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
             <a href="/admin/variant/list"><i class="ph ph-shapes"></i> Biến Thể Sản Phẩm</a>
           </div>
@@ -87,15 +99,9 @@
           </div>
         </div>
 
-        <div class="group">
-          <div onclick="toggleSubMenu('categories-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
-            <i class="ph ph-grid-four"></i> Danh Mục Sản Phẩm <i class="ph ph-caret-down ml-auto"></i>
-          </div>
-          <div id="categories-submenu" class="hidden flex-col">
-            <a href="variant.html" class="block py-2 px-12 hover:text-indigo-600">Tất cả danh mục</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật danh mục</a>
-          </div>
-        </div>
+        <a href="{{ url('/admin/categories') }}" class="px-6 py-3 hover:bg-purple-50 flex items-center gap-2 text-gray-700 font-semibold">
+            <i class="ph ph-grid-four"></i> Danh Mục Sản Phẩm
+        </a>
 
           <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
             <i class="ph ph-gear"></i> Cài đặt
@@ -131,6 +137,9 @@
 
       <!-- Stats Cards -->
       @yield('content')
+
+
+
 </body>
 <script>
 
@@ -138,5 +147,7 @@
         const submenu = document.getElementById(id);
         submenu.classList.toggle('hidden');
     }
+
+
 </script>
 </html>

@@ -1,5 +1,8 @@
 <?php
+
 date_default_timezone_set('Asia/Ho_Chi_Minh');
+
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AdminController;
@@ -8,6 +11,8 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminManageController;
 use App\Http\Middleware\CheckAdmin;
+use App\Http\Controllers\FlashSaleController;
+use App\Http\Controllers\CateList;
 
 // Web Routes
 Route::get('/test/product', [PageController::class, 'product']);
@@ -75,3 +80,31 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::put('/variant/edit/{id}', [AdminController::class, 'editVariant']);
     Route::get('/variant/delete/{id}', [AdminController::class, 'deleteVariant']);
 });
+
+
+// Flash Sale Routes
+Route::prefix('admin/flash-sale')->group(function () {
+    Route::get('/', [FlashSaleController::class, 'index'])->name('flashsale.list');
+    Route::get('/create', [FlashSaleController::class, 'create'])->name('flashsale.create');
+    Route::post('/', [FlashSaleController::class, 'store'])->name('flashsale.store');
+    Route::get('/{id}/products', [FlashSaleController::class, 'showProducts'])->name('flashsale.products');
+    Route::post('/{id}/add-product', [FlashSaleController::class, 'addProduct'])->name('flashsale.addProduct');
+    Route::get('/{id}/edit', [FlashSaleController::class, 'edit'])->name('flashsale.edit');
+    Route::put('/{id}', [FlashSaleController::class, 'update'])->name('flashsale.update');
+    Route::delete('/{id}', [FlashSaleController::class, 'destroy'])->name('flashsale.destroy');
+    Route::get('/{id}', [FlashSaleController::class, 'show'])->name('flashsale.show');
+     // Route xử lý cập nhật sản phẩm Flash Sale
+    Route::put('{flashsale}/variant/{variant}', [FlashSaleController::class, 'updateVariant'])->name('flashsale.variant.update');
+    Route::delete('{flashsale}/variant/{variant}', [FlashSaleController::class, 'destroyVariant'])->name('flashsale.variant.destroy');
+});
+
+// Category Routes
+// Danh sách danh mục
+Route::get('/admin/categories', [CateList::class, 'index'])->name('categories.index');
+// Thêm danh mục (xử lý form POST)
+Route::post('/admin/categories', [CateList::class, 'store'])->name('categories.store');
+// Chi tiết danh mục
+Route::get('/admin/categories/{id}', [CateList::class, 'show'])->name('categories.show');
+// Hiển thị form chỉnh sửa danh mục
+Route::put('/admin/categories/{id}', [CateList::class, 'update']);
+

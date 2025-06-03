@@ -7,6 +7,10 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminManageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FlashSaleController;
+use App\Models\Flash_Sale_Variant;
+use App\Models\Flash_Sale;
+
 // use App\Http\Middleware\CheckAdmin;
 
 // Web Routes:
@@ -18,6 +22,7 @@ Route::get('/search', [ProductController::class, 'searchProduct']);
 Route::get('/category/{id}', [ProductController::class, 'productByCategory']);
 Route::get('/products/price/{price}', [ProductController::class, 'productByprice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
+Route::get('/products/filter-size', [ProductController::class, 'filterBySize']);
 
 //Login, Register
 Route::post('/register', [AuthController::class, 'register']);
@@ -108,6 +113,6 @@ Route::middleware(['auth:sanctum'])->group(function (){
 
 Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
 Route::middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])->group(function () {
-    Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
+Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
 
 });
