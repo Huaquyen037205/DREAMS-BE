@@ -99,15 +99,9 @@
           </div>
         </div>
 
-        <div class="group">
-          <div onclick="toggleSubMenu('categories-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
-            <i class="ph ph-grid-four"></i> Danh Mục Sản Phẩm <i class="ph ph-caret-down ml-auto"></i>
-          </div>
-          <div id="categories-submenu" class="hidden flex-col">
-            <a href="variant.html" class="block py-2 px-12 hover:text-indigo-600">Tất cả danh mục</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật danh mục</a>
-          </div>
-        </div>
+        <a href="{{ url('/admin/categories') }}" class="px-6 py-3 hover:bg-purple-50 flex items-center gap-2 text-gray-700 font-semibold">
+            <i class="ph ph-grid-four"></i> Danh Mục Sản Phẩm
+        </a>
 
           <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
             <i class="ph ph-gear"></i> Cài đặt

@@ -32,6 +32,11 @@ class FlashSaleController extends Controller
             'name' => 'required|string|max:255',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
+        ], [
+            'name.required' => 'Vui lòng nhập tên chương trình.',
+            'start_time.required' => 'Vui lòng chọn thời gian bắt đầu.',
+            'end_time.required' => 'Vui lòng chọn thời gian kết thúc.',
+            'end_time.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
         ]);
 
         Flash_Sale::create($request->only(['name', 'start_time', 'end_time']));
@@ -54,26 +59,34 @@ class FlashSaleController extends Controller
 
     // Lưu sản phẩm vào chương trình Flash Sale
     public function addProduct(Request $request, $id)
-    {
-        $request->validate([
-            'variant_id' => 'required|exists:variant,id',
-            'sale_price' => 'required|numeric|min:0',
-            'flash_quantity' => 'required|integer|min:1',
-        ]);
+{
+    $request->validate([
+        'product_id' => 'required|exists:products,id',
+        'sale_price' => 'required|numeric|min:0',
+        'flash_quantity' => 'required|integer|min:1',
+    ]);
 
-        Flash_Sale_Variant::updateOrCreate(
-            [
-                'flash_sale_id' => $id,
-                'variant_id' => $request->variant_id,
-            ],
-            [
-                'sale_price' => $request->sale_price,
-                'flash_quantity' => $request->flash_quantity,
-            ]
-        );
-
-        return redirect()->back()->with('success', 'Đã thêm sản phẩm vào chương trình');
+    // Lấy variant đầu tiên của sản phẩm
+    $variant = Variant::where('product_id', $request->product_id)->first();
+    if (!$variant) {
+        return back()->withErrors(['Sản phẩm này chưa có biến thể (size)!']);
     }
+
+    // Lưu vào bảng flash_sale_variants
+    DB::table('flash_sale_variants')->updateOrInsert(
+        [
+            'flash_sale_id' => $id,
+            'variant_id' => $variant->id,
+        ],
+        [
+            'sale_price' => $request->sale_price,
+            'flash_quantity' => $request->flash_quantity,
+            'flash_sold' => 0,
+        ]
+    );
+
+    return redirect()->back()->with('success', 'Đã thêm sản phẩm vào chương trình');
+}
 
     // Hiển thị form chỉnh sửa chương trình
     public function edit($id)
@@ -95,6 +108,11 @@ class FlashSaleController extends Controller
             'name' => 'required|string|max:255',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
+        ], [
+            'name.required' => 'Vui lòng nhập tên chương trình.',
+            'start_time.required' => 'Vui lòng chọn thời gian bắt đầu.',
+            'end_time.required' => 'Vui lòng chọn thời gian kết thúc.',
+            'end_time.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
         ]);
 
         $flashSale = Flash_Sale::findOrFail($id);
@@ -113,38 +131,76 @@ class FlashSaleController extends Controller
 
 
 
-public function apiProducts($id)
+public function apiActiveFlashSales()
 {
-    $flashSale = Flash_Sale::findOrFail($id);
+    $now = now();
 
-    // Lấy tất cả variant thuộc chương trình flash sale này
-    $variants = DB::table('flash_sale_variants')
-        ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
-        ->join('products', 'variant.product_id', '=', 'products.id')
-        ->where('flash_sale_variants.flash_sale_id', $id)
-        ->select(
-            'products.*', // Lấy tất cả cột của bảng products
-            'variant.id as variant_id',
-            'variant.price as original_price',
-            'flash_sale_variants.sale_price as flash_sale_price',
-            'flash_sale_variants.flash_quantity',
-            'flash_sale_variants.flash_sold'
-        )
+    $flashSales = Flash_Sale::where('start_time', '<=', $now)
+        ->where('end_time', '>=', $now)
+        ->orderByDesc('start_time')
         ->get();
 
-    // Gắn tất cả ảnh cho từng variant (theo sản phẩm)
-    foreach ($variants as $variant) {
-        $variant->images = DB::table('img')
-            ->where('product_id', $variant->id) // Nếu products.id là id sản phẩm
-            ->pluck('name');
+    $result = [];
+    foreach ($flashSales as $flashSale) {
+        $variants = DB::table('flash_sale_variants')
+            ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
+            ->join('products', 'variant.product_id', '=', 'products.id')
+            ->where('flash_sale_variants.flash_sale_id', $flashSale->id)
+            ->select(
+                'products.id as product_id',
+                'products.*',
+                'variant.id as variant_id',
+                'variant.price as original_price',
+                'flash_sale_variants.sale_price as flash_sale_price',
+                'flash_sale_variants.flash_quantity',
+                'flash_sale_variants.flash_sold'
+            )
+            ->get();
+
+        foreach ($variants as $variant) {
+            $variant->images = DB::table('img')
+                ->where('product_id', $variant->product_id)
+                ->pluck('name');
+        }
+
+        $result[] = [
+            'flash_sale_id' => $flashSale->id,
+            'flash_sale_name' => $flashSale->name,
+            'start_time' => $flashSale->start_time,
+            'end_time' => $flashSale->end_time,
+            'variants' => $variants
+        ];
     }
 
-    return response()->json([
-        'flash_sale_id' => $flashSale->id,
-        'flash_sale_name' => $flashSale->name,
-        'start_time' => $flashSale->start_time,
-        'end_time' => $flashSale->end_time,
-        'variants' => $variants
+    return response()->json($result);
+}
+
+public function updateVariant(Request $request, $flashsaleId, $variantId)
+{
+    $validated = $request->validate([
+        'sale_price' => 'required|numeric|min:0',
+        'flash_quantity' => 'required|integer|min:0',
     ]);
+
+    $variant = Flash_Sale_Variant::where('flash_sale_id', $flashsaleId)
+        ->where('id', $variantId)
+        ->firstOrFail();
+
+    $variant->update([
+        'sale_price' => $validated['sale_price'],
+        'flash_quantity' => $validated['flash_quantity'],
+    ]);
+
+    return redirect()->back()->with('success', 'Cập nhật thành công.');
+}
+
+// Xóa variant khỏi flash sale
+public function destroyVariant($flashSaleId, $variantId)
+{
+    $variant = Flash_Sale_Variant::where('flash_sale_id', $flashSaleId)
+        ->where('id', $variantId)
+        ->firstOrFail();
+    $variant->delete();
+    return redirect()->route('flashsale.show', $flashSaleId)->with('success', 'Đã xóa sản phẩm khỏi chương trình!');
 }
 }
