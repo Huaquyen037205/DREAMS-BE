@@ -126,3 +126,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/addresses/{id}/set-default', [AddressController::class, 'setDefault']);
 });
 
+// edit user profile
+Route::middleware('auth:sanctum')->patch('/user/profile', [\App\Http\Controllers\AuthController::class, 'updateProfile']);
+

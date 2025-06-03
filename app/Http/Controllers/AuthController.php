@@ -194,4 +194,25 @@ class AuthController extends Controller
             ], 401);
         }
     }
+
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $user->update($validated);
+        $user->refresh(); // Lấy lại dữ liệu mới nhất từ database
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Cập nhật thông tin thành công',
+            'data' => $user
+        ]);
+    }
 }
