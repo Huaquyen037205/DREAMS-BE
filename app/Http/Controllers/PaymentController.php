@@ -78,7 +78,6 @@ class PaymentController extends Controller
     {
        if ($request->input('vnp_ResponseCode') == '00') {
         $vnp_TxnRef = $request->input('vnp_TxnRef');
-        // Tìm đơn hàng theo mã giao dịch đã lưu khi tạo đơn hàng
         $order = Order::where('vnp_TxnRef', $vnp_TxnRef)->first();
 
         if (!$order) {
@@ -87,9 +86,7 @@ class PaymentController extends Controller
                 'message' => 'Không tìm thấy đơn hàng với mã giao dịch này',
             ]);
         }
-
-        // Cập nhật trạng thái đơn hàng
-        $order->status = 'paid';
+        $order->status = 'pending';
         $order->save();
 
         return response()->json([
