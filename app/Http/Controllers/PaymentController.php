@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 use App\Models\Order;
+use App\Models\Order_item;
+use App\Models\Address;
+use App\Models\Coupon;
+use App\Models\Shipping;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 class PaymentController extends Controller
 {
      public function createVnpayPayment(Request $request)
@@ -13,10 +17,37 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // Lấy thông tin đơn hàng từ request
+        $cart = $request->input('cart', []);
+        $total = 0;
+        foreach ($cart as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
         $vnp_TxnRef = uniqid(); // Mã giao dịch
+        $order = Order::create([
+            'user_id' => $user->id,
+            'shipping_id' => $request->input('shipping_id', null),
+            'payment_id' => $request->input('payment_id', null),
+            'coupon_id' => $request->input('coupon_id', null),
+            'address_id' => $request->input('address_id', null),
+            'total_price' => $total,
+            'status' => 'pending',
+            'vnp_TxnRef' => $vnp_TxnRef,
+        ]);
+
+        $cart = $request->input('cart', []);
+            foreach ($cart as $item) {
+                $order->order_items()->create([
+                'variant_id' => $item['variant_id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Lấy thông tin đơn hàng từ request
         $vnp_OrderInfo = $request->input('order_desc', 'Thanh toan don hang');
-        $vnp_Amount = $request->input('amount') * 100; // VNPAY yêu cầu đơn vị là VND * 100
+        $vnp_Amount = $total * 100; // VNPAY yêu cầu đơn vị là VND * 100
         $vnp_Locale = 'vn';
         $vnp_BankCode = $request->input('bank_code', '');
         $vnp_IpAddr = $request->ip();
@@ -45,17 +76,6 @@ class PaymentController extends Controller
             $inputData['vnp_BankCode'] = $vnp_BankCode;
         }
 
-         $order = Order::create([
-                'user_id' => $user->id,
-                'shipping_id' => $request->input('shipping_id', null),
-                'payment_id' => $request->input('payment_id', null),
-                'coupon_id' => $request->input('coupon_id', null),
-                'address_id' => $request->input('address_id', null),
-                'total_price' => $request->input('amount', 0),
-                'status' => 'pending',
-                'vnp_TxnRef' => $vnp_TxnRef,
-            ]);
-
         // Sắp xếp dữ liệu theo key
         ksort($inputData);
         $query = [];
@@ -67,10 +87,11 @@ class PaymentController extends Controller
         $vnp_Url .= "?" . implode('&', $query);
         $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
         $vnp_Url .= '&vnp_SecureHash=' . $vnpSecureHash;
-
+        $order = Order::with('order_items')->find($order->id);
         return response()->json([
             'status' => 200,
-            'payment_url' => $vnp_Url
+            'payment_url' => $vnp_Url,
+            'order' => $order,
         ]);
     }
 
