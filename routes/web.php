@@ -1,8 +1,6 @@
 <?php
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AdminController;
@@ -66,6 +64,9 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::get('/user/list', [PageController::class, 'userList']);
     Route::get('/user/list', [AdminUserController::class, 'userAdmin']);
     Route::get('/profile/user', [PageController::class, 'profileUser']);
+    Route::get('/search/user', [AdminUserController::class, 'searchUserAdmin']);
+    Route::get('/editUser/{id}', [PageController::class, 'editUserAdmin']);
+    Route::put('/editUser/{id}', [AdminUserController::class, 'editUser']);
 
     //Message
     Route::get('/message', [PageController::class, 'message']);

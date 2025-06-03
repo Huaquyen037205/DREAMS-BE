@@ -139,4 +139,37 @@ class PaymentController extends Controller
             'data' => $orders
         ], 200);
     }
+
+
+    public function getOrderDetails($id)
+    {
+        $order = Order::with(['order_items', 'order_items.variant', 'order_items.product'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Chi tiết đơn hàng',
+            'data' => $order
+        ], 200);
+    }
+
+    public function cancelOrder($id)
+    {
+        $order = Order::findOrFail($id);
+        if ($order->status !== 'pending') {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Không thể hủy đơn hàng đã được xử lý',
+            ], 400);
+        }
+
+        $order->status = 'canceled';
+        $order->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Đơn hàng đã được hủy thành công',
+            'data' => $order
+        ], 200);
+    }
 }
