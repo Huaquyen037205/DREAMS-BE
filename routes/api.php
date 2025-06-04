@@ -131,7 +131,11 @@ Route::get('/flash-sales', [FlashSaleController::class, 'apiActiveFlashSales']);
 
 //address routes
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/addresses', [AddressController::class, 'show']);
     Route::post('/addresses', [AddressController::class, 'store']);
     Route::patch('/addresses/{id}/set-default', [AddressController::class, 'setDefault']);
 });
+
+// edit user profile
+Route::middleware('auth:sanctum')->patch('/user/profile', [\App\Http\Controllers\AuthController::class, 'updateProfile']);
 
