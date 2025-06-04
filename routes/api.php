@@ -33,9 +33,14 @@ Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
 route::post('/resetPassword', [AuthController::class, 'resetPassword']);
 Route::post('/change-password', [AuthController::class, 'changePassword']);
 
-//discount
-Route::post('/discount', [ProductController::class, 'discountUser']);
-// Route::middleware('auth:sanctum')->post('/discount', [ProductController::class, 'discountUser']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    //discount
+    Route::post('/discount', [ProductController::class, 'discountUser']);
+   //oder
+   Route::get('/order', [PaymentController::class, 'getOrdersByUser']);
+});
+
 
 //Review
 Route::post('/review', [ProductController::class, 'reviews']);
@@ -110,6 +115,9 @@ Route::middleware(['auth:sanctum'])->group(function (){
     Route::get('/admin/chart', [AdminManageController::class, 'Chart']);
     Route::get('/admin/OrderChart', [AdminManageController::class, 'OrderChart']);
     Route::get('/admin/ProductChart', [AdminManageController::class, 'ProductChart']);
+
+    //Order routes
+    Route::get('/admin/order/{id}', [PaymentController::class, 'getOrderDetails']);
 });
 
 Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);

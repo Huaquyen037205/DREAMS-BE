@@ -12,7 +12,9 @@ use Illuminate\Http\Request;
 class AdminController extends Controller
 {
     public function productAdmin(){
-        $products = Product::with('img', 'variant', 'category')->paginate(8);
+        $products = Product::with('img', 'variant', 'category')
+        ->orderBy('created_at')
+        ->paginate(8);
         return view('Admin.productList', ['products' => $products]);
         return response()->json([
             'status' => 200,
@@ -96,7 +98,7 @@ class AdminController extends Controller
         }
 
             if($product->save()){
-                return redirect()->back()->with('success', 'Cập nhật sản phẩm thành công');
+                return redirect()->route('product.list')->with('success', 'Cập nhật sản phẩm thành công');
                 return response()->json([
                     'status' => 200,
                     'message' => 'Cập nhật sản phẩm thành công',
@@ -300,7 +302,9 @@ class AdminController extends Controller
     }
 
     public function variantAdmin(){
-        $variant = Variant::with('product', 'img')->paginate(8);
+        $variant = Variant::with('product', 'img')
+        ->orderBy('created_at')
+        ->paginate(8);
         return view('Admin.variantList', ['variants' => $variant]);
         return response()->json([
             'status' => 200,
@@ -394,6 +398,7 @@ class AdminController extends Controller
             }
 
             if ($variant->save()) {
+                return redirect()->route('product.detail', ['id' => $variant->id])->with('success', 'Cập nhật biến thể thành công');
                 if ($request->wantsJson() || $request->ajax()) {
                     return response()->json([
                         'status' => 200,
@@ -452,7 +457,7 @@ class AdminController extends Controller
             $img->name = $filename;
 
             if ($img->save()) {
-                 return redirect()->route('product.detail', ['id' => $request->product_id])
+                return redirect()->route('product.detail', ['id' => $request->product_id])
                 ->with('success', 'Thêm hình ảnh thành công!');
                 return response()->json([
                     'status' => 200,

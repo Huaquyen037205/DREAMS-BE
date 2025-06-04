@@ -23,4 +23,9 @@ class Order_item extends Model
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
+
+    public function product()
+    {
+        return $this->hasOneThrough(Product::class, Variant::class, 'id', 'id', 'variant_id', 'product_id');
+    }
 }

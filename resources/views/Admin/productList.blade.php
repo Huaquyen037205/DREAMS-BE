@@ -19,7 +19,7 @@
                         </select>
                     </div>
 
-                    <form action="/search/product/list" method="GET" class="flex items-center">
+                    <form action="/admin/search/product/list" method="GET" class="flex items-center">
                         <div>
                             <input type="text" name="search" class="border px-2 py-1 rounded" placeholder="Tìm kiếm sản phẩm..." >
                             <button class="ml-2 bg-indigo-500 text-white px-3 py-1 rounded">Tìm kiếm</button>
@@ -32,7 +32,7 @@
                     <thead>
                         <tr class="bg-gray-100 text-gray-600 text-sm uppercase">
                             <th class="p-2"><input type="checkbox"></th>
-                            <th class="p-2">ID Sản Phẩm</th>
+                            <th class="p-2">STT</th>
                             <th class="p-2">Ảnh Sản Phẩm</th>
                             <th class="p-2">Tên Sản Phẩm</th>
                             <th class="p-2">Danh Mục</th>

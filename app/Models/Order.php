@@ -21,6 +21,10 @@ class Order extends Model
         'vnp_TxnRef',
     ];
 
+    public function order_items() {
+        return $this->hasMany(Order_item::class, 'order_id', 'id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
