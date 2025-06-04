@@ -6,6 +6,7 @@ use App\Models\Order_item;
 use App\Models\Address;
 use App\Models\Coupon;
 use App\Models\Shipping;
+use App\Models\Discount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 class PaymentController extends Controller
@@ -22,14 +23,26 @@ class PaymentController extends Controller
         foreach ($cart as $item) {
             $total += $item['price'] * $item['quantity'];
         }
+
+        $coupon_id = $request->input('coupon_id');
+        $discountAmount = 0;
+            if ($coupon_id) {
+                $coupon = Coupon::find($coupon_id);
+                if ($coupon && now()->lt($coupon->expiry_date)) {
+                    $discountAmount = (int)$coupon->discount_value;
+                }
+            }
+
+        $totalAfterDiscount = max($total - $discountAmount, 0);
+
         $vnp_TxnRef = uniqid(); // Mã giao dịch
         $order = Order::create([
             'user_id' => $user->id,
             'shipping_id' => $request->input('shipping_id', null),
             'payment_id' => $request->input('payment_id', null),
-            'coupon_id' => $request->input('coupon_id', null),
+            'coupon_id' => $coupon_id,
             'address_id' => $request->input('address_id', null),
-            'total_price' => $total,
+            'total_price' => $totalAfterDiscount,
             'status' => 'pending',
             'vnp_TxnRef' => $vnp_TxnRef,
         ]);
