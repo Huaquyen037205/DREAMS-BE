@@ -93,7 +93,6 @@ class PageController extends Controller
     }
 
     public function orderList(){
-         $order = Order::with('user', 'discount' ,'shipping', 'payment', 'coupon', 'address')->paginate(12);
        return view('Admin.orderList', compact('orders'));
     }
 

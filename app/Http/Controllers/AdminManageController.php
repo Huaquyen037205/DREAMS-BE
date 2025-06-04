@@ -15,15 +15,16 @@ use Illuminate\Http\Request;
 
 class AdminManageController extends Controller
 {
-    public function ShowOrder(Request $request)
-    {
-       $order = Order::with('user', 'discount' ,'shipping', 'payment', 'coupon', 'address')->paginate(12);
+    public function orderAdmin(){
+        $orders = Order::with('user', 'discount', 'shipping', 'payment', 'coupon', 'address')
+        ->orderByDesc('created_at')
+        ->paginate(12);
         return view('Admin.orderList', compact('orders'));
         return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách đơn hàng',
-            'data' => $order
-        ], 200);
+        'status' => 200,
+        'message' => 'Danh sách đơn hàng',
+        'data' => $orders
+    ], 200);
     }
 
     public function OrderSold(Request $request)

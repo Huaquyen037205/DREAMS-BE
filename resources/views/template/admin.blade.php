@@ -70,9 +70,8 @@
             <i class="ph ph-percent"></i> Mã Giảm giá <i class="ph ph-caret-down ml-auto"></i>
           </div>
           <div id="discounts-submenu" class="hidden flex-col">
-            <a href="variant.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách mã giảm giá</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật mã giảm giá</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Thêm mã giảm giá</a>
+            <a href="{{ url('/admin/coupons') }}" class="block py-2 px-12 hover:text-indigo-600">Danh sách mã giảm giá</a>
+            <a href="{{ url('/admin/coupons/create') }}" class="block py-2 px-12 hover:text-indigo-600">Thêm mã giảm giá</a>
           </div>
         </div>
 

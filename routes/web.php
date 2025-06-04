@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminManageController;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\FlashSaleController;
 use App\Http\Controllers\CateList;
+use App\Http\Controllers\DiscountController;
 
 // Web Routes
 Route::get('/test/product', [PageController::class, 'product']);
@@ -75,7 +76,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     //Message
     Route::get('/message', [PageController::class, 'message']);
     //Order
-    Route::get('/order', [PageController::class, 'orderList'])->name('orders.index');
+    Route::get('/order', [PageController::class, 'orderList']);
     //variant
     Route::get('/variant/list', [PageController::class, 'variantList']);
     Route::get('/variant/list', [AdminController::class, 'variantAdmin']);
@@ -85,9 +86,16 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::get('/variant/edit/{id}', [PageController::class, 'editVariant']);
     Route::put('/variant/edit/{id}', [AdminController::class, 'editVariant']);
     Route::get('/variant/delete/{id}', [AdminController::class, 'deleteVariant']);
+
+
+    //Coupons
+    Route::get('/coupons', [DiscountController::class, 'index'])->name('coupons.index');
+    Route::get('/coupons/create', [DiscountController::class, 'create'])->name('coupons.create');
+    Route::post('/coupons', [DiscountController::class, 'store'])->name('coupons.store');
+    Route::get('/coupons/{id}/edit', [DiscountController::class, 'edit'])->name('coupons.edit');
+    Route::put('/coupons/{id}', [DiscountController::class, 'update'])->name('coupons.update');
+    Route::delete('/coupons/{id}', [DiscountController::class, 'destroy'])->name('coupons.destroy');
 });
-
-
 // Flash Sale Routes
 Route::prefix('admin/flash-sale')->group(function () {
     Route::get('/', [FlashSaleController::class, 'index'])->name('flashsale.list');
@@ -113,4 +121,6 @@ Route::post('/admin/categories', [CateList::class, 'store'])->name('categories.s
 Route::get('/admin/categories/{id}', [CateList::class, 'show'])->name('categories.show');
 // Hiển thị form chỉnh sửa danh mục
 Route::put('/admin/categories/{id}', [CateList::class, 'update']);
+
+
 
