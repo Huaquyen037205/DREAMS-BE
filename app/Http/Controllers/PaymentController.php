@@ -128,7 +128,7 @@ class PaymentController extends Controller
     {
         $user = $request->user();
 
-        $orders = Order::with(['order_items', 'order_items.variant', 'order_items.product'])
+        $orders = Order::with(['order_items', 'order_items.variant', 'order_items.product', 'order_items.product.img'])
             ->where('user_id', $user->id)
             ->orderByDesc('created_at')
             ->get();

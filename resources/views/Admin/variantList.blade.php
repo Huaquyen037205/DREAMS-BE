@@ -32,7 +32,7 @@
                     <thead>
                         <tr class="bg-gray-100 text-gray-700 text-sm font-semibold uppercase tracking-wider">
                             <th class="p-3"><input type="checkbox"></th>
-                            <th class="p-3">ID</th>
+                            <th class="p-3">STT</th>
                             <th class="p-3">Ảnh sản phẩm</th>
                             <th class="p-3">Tên Sản Phẩm</th>
                             <th class="p-3">Size</th>
