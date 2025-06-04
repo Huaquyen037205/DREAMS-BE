@@ -122,6 +122,7 @@ Route::get('/flash-sales', [FlashSaleController::class, 'apiActiveFlashSales']);
 
 //address routes
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/addresses', [AddressController::class, 'show']);
     Route::post('/addresses', [AddressController::class, 'store']);
     Route::patch('/addresses/{id}/set-default', [AddressController::class, 'setDefault']);
 });

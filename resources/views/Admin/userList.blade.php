@@ -19,12 +19,12 @@
                         </select>
                     </div>
 
-                    <form action="/search/admin/product/list" method="GET" class="flex items-center">
-                        <div>
-                            <input type="text" name="search" class="border px-2 py-1 rounded" placeholder="Tìm kiếm sản phẩm..." >
-                            <button class="ml-2 bg-indigo-500 text-white px-3 py-1 rounded">Tìm kiếm</button>
-                        </div>
-                    </form>
+                <form action="{{ url('/admin/searchUser') }}" method="GET" class="flex items-center">
+                    <div>
+                        <input type="text" name="search" class="border px-2 py-1 rounded" placeholder="Tìm kiếm người dùng..." >
+                        <button class="ml-2 bg-indigo-500 text-white px-3 py-1 rounded">Tìm kiếm</button>
+                    </div>
+                </form>
 
                 </div>
 

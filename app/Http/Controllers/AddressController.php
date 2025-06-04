@@ -46,4 +46,17 @@ class AddressController extends Controller
 
         return response()->json(['message' => 'Đã cập nhật địa chỉ mặc định']);
     }
+
+
+    public function show()
+    {
+        $user = Auth::user();
+
+        $addresses = Address::where('user_id', $user->id)->get();
+
+        return response()->json([
+            'message' => 'Lấy danh sách địa chỉ thành công',
+            'data' => $addresses
+        ]);
+    }
 }

@@ -66,6 +66,10 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::get('/user/list', [PageController::class, 'userList']);
     Route::get('/user/list', [AdminUserController::class, 'userAdmin']);
     Route::get('/profile/user', [PageController::class, 'profileUser']);
+    Route::get('/editUser/{id}', [PageController::class, 'editUserAdmin']);
+    Route::put('/editUser/{id}', [AdminUserController::class, 'editUser']);
+    Route::get('/searchUser', [AdminUserController::class, 'searchUser']);
+
 
     //Message
     Route::get('/message', [PageController::class, 'message']);
@@ -78,8 +82,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::post('/variant/add', [AdminController::class, 'addVariant']);
     Route::get('/variant/edit/{id}', [PageController::class, 'editVariant']);
     Route::put('/variant/edit/{id}', [AdminController::class, 'editVariant']);
-    Route::get('/variant/delete/{id}', [AdminController::class, 'deleteVariant']);
-});
+    Route::get('/variant/delete/{id}', [AdminController::class, 'deleteVariant']);});
 
 
 // Flash Sale Routes
