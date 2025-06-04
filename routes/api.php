@@ -116,7 +116,8 @@ Route::middleware(['auth:sanctum'])->group(function (){
     Route::get('/admin/OrderChart', [AdminManageController::class, 'OrderChart']);
     Route::get('/admin/ProductChart', [AdminManageController::class, 'ProductChart']);
 
-
+    //Order routes
+    Route::get('/admin/order/{id}', [PaymentController::class, 'getOrderDetails']);
 });
 
 Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);

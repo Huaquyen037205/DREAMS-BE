@@ -19,6 +19,24 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="flex items-center bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <svg class="w-5 h-5 mr-2 text-green-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if($errors->has('name'))
+        <div class="flex items-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <svg class="w-5 h-5 mr-2 text-red-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+            </svg>
+            <span class="block sm:inline">{{ $errors->first('name') }}</span>
+        </div>
+    @endif
+
     <!-- Variants Table -->
     <div class="flex justify-between items-center mb-6">
         <div class="text-2xl font-semibold">Danh Sách Biến Thể</div>
@@ -89,12 +107,6 @@
         <input type="file" name="name" accept="image/*" required class="border px-2 py-1 rounded mb-2">
         <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Thêm ảnh</button>
     </form>
-    @if(session('success'))
-        <div class="mt-2 text-green-600">{{ session('success') }}</div>
-    @endif
-    @if($errors->has('name'))
-        <div class="mt-2 text-red-600">{{ $errors->first('name') }}</div>
-    @endif
 </div>
 
 

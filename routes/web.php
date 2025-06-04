@@ -52,7 +52,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     //Product
     Route::get('/product/list', [PageController::class, 'productList']);
     Route::get('/product/{id}', [AdminController::class, 'productById'])->name('product.detail');
-    Route::get('/product/list', [AdminController::class, 'productAdmin']);
+    Route::get('/product/list', [AdminController::class, 'productAdmin'])->name('product.list');
     Route::get('/search/product/list', [AdminController::class, 'searchProductAdmin']);
     Route::get('/add', [PageController::class, 'addProduct']);
     Route::post('/product/add', [AdminController::class, 'addProduct']);
