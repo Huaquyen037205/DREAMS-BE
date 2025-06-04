@@ -96,4 +96,21 @@ class PageController extends Controller
         $products = Product::all();
         return view('producTest', compact('products'));
     }
+
+    public function couponList()
+    {
+        $coupons = \App\Models\Coupon::all();
+        return view('admin.coupon_index', compact('coupons'));
+    }
+
+    public function couponCreate()
+    {
+        return view('admin.coupon_create');
+    }
+
+    public function couponEdit($id)
+    {
+        $coupon = \App\Models\Coupon::findOrFail($id);
+        return view('admin.coupon_edit', compact('coupon'));
+    }
 }
