@@ -87,18 +87,6 @@
             </div>
         </div>
 
-
-        {{-- <div class="group">
-          <div onclick="toggleSubMenu('variants-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
-            <a href="/admin/variant/list"><i class="ph ph-shapes"></i> Biến Thể Sản Phẩm</a>
-          </div>
-          <div id="variants-submenu" class="hidden flex-col">
-            <a href="variant.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách biến thể</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật biến thể</a>
-            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Thêm biến thể</a>
-          </div>
-        </div> --}}
-
         <a href="{{ url('/admin/categories') }}" class="px-6 py-3 hover:bg-purple-50 flex items-center gap-2 text-gray-700 font-semibold">
             <i class="ph ph-grid-four"></i> Danh Mục Sản Phẩm
         </a>

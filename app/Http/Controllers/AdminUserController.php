@@ -189,16 +189,14 @@ class AdminUserController extends Controller
         ],200);
     }
 
-    public function searchUser(Request $request){
+    public function searchUser(Request $request)
+    {
         $search = $request->input('search');
-        $user = User::where('name', 'LIKE', "%{$search}%")
+        $users = User::where('name', 'LIKE', "%{$search}%")
                     ->orWhere('email', 'LIKE', "%{$search}%")
                     ->paginate(12);
-        return response()->json([
-            'status' => 200,
-            'message' => 'Tìm thấy người dùng',
-            'data' => $user
-        ],200);
+
+        return view('Admin.userList', ['users' => $users]);
     }
 
     public function addUser(Request $request)
@@ -264,6 +262,7 @@ class AdminUserController extends Controller
                 ], 404);
             }
     }
+
 
     public function setActiveUser(Request $request, $id)
     {

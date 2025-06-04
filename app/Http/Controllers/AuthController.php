@@ -35,36 +35,6 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // public function login(Request $request)
-    // {
-    //     $isLogin = Auth::attempt([
-    //         'email' => $request->email,
-    //         'password' => $request->password
-    //     ]);
-
-    //     if ($isLogin) {
-    //         $user = Auth::user();
-
-    //         if ($user->is_active === 'off') {
-    //             Auth::logout();
-    //             return response()->json([
-    //                 'status' => 403,
-    //                 'message' => 'Tài khoản đã bị khóa',
-    //             ], 403);
-    //         }
-
-    //         return response()->json([
-    //             'status' => 200,
-    //             'message' => 'Đăng nhập thành công',
-    //             'data' => $user
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'status' => 401,
-    //             'message' => 'Email hoặc mật khẩu không đúng',
-    //         ], 401);
-    //     }
-    // }
 
     public function logout(Request $request)
     {
@@ -207,7 +177,7 @@ class AuthController extends Controller
         ]);
 
         $user->update($validated);
-        $user->refresh(); // Lấy lại dữ liệu mới nhất từ database
+        $user->refresh();
 
         return response()->json([
             'status' => 200,
