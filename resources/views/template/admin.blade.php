@@ -57,7 +57,7 @@
 
         <div class="group">
           <div onclick="toggleSubMenu('orders-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
-            <i class="ph ph-truck"></i> Đơn Hàng
+            <a href="/admin/order"><i class="ph ph-truck"></i> Đơn Hàng</a>
           </div>
           {{-- <div id="orders-submenu" class="hidden flex-col">
             <a href="orderList.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách đơn hàng</a>

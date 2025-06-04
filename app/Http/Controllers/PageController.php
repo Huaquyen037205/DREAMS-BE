@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Order;
 use App\Models\Variant;
 use App\Models\Category;
 use App\Models\Img;
@@ -91,6 +92,14 @@ class PageController extends Controller
         return view('Admin.message');
     }
 
+    public function orderList(){
+         $order = Order::with('user', 'discount' ,'shipping', 'payment', 'coupon', 'address')->paginate(12);
+       return view('Admin.orderList', compact('orders'));
+    }
+
+    public function discountList(){
+        return view('Admin.discountList');
+    }
 
     public function product()  {
         $products = Product::all();

@@ -29,7 +29,9 @@ route::get('/category', [ProductController::class, 'category']);
 route::get('/product/{id}', [ProductController::class, 'productById']);
 route::get('/search', [ProductController::class, 'searchProduct']);
 
- //Auth Routes
+
+// Admin Routes
+//Auth Routes
 Route::get('/admin/login', [PageController::class, 'loginAdmin'])->name('Admin.Login');
 Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);
 Route::post('/logout', [AdminUserController::class, 'logoutAdmin']);
@@ -59,7 +61,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::get('/product/edit/{id}', [PageController::class, 'editProduct']);
     Route::put('/product/edit/{id}', [AdminController::class, 'editProduct']);
 
-    // Admin Routes
+    //User
     Route::get('/dashboard', [PageController::class, 'dashBoard']);
     Route::get('/user/list', [PageController::class, 'userList']);
     Route::get('/user/list', [AdminUserController::class, 'userAdmin']);
@@ -68,10 +70,12 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::put('/editUser/{id}', [AdminUserController::class, 'editUser']);
     Route::get('/searchUser', [AdminUserController::class, 'searchUser']);
 
-
+    //Discount
+    Route::get('/discount', [PageController::class, 'discountList']);
     //Message
     Route::get('/message', [PageController::class, 'message']);
-
+    //Order
+    Route::get('/order', [PageController::class, 'orderList'])->name('orders.index');
     //variant
     Route::get('/variant/list', [PageController::class, 'variantList']);
     Route::get('/variant/list', [AdminController::class, 'variantAdmin']);
@@ -80,7 +84,8 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::post('/variant/add', [AdminController::class, 'addVariant']);
     Route::get('/variant/edit/{id}', [PageController::class, 'editVariant']);
     Route::put('/variant/edit/{id}', [AdminController::class, 'editVariant']);
-    Route::get('/variant/delete/{id}', [AdminController::class, 'deleteVariant']);});
+    Route::get('/variant/delete/{id}', [AdminController::class, 'deleteVariant']);
+});
 
 
 // Flash Sale Routes

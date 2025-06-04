@@ -18,6 +18,7 @@ class AdminManageController extends Controller
     public function ShowOrder(Request $request)
     {
        $order = Order::with('user', 'discount' ,'shipping', 'payment', 'coupon', 'address')->paginate(12);
+        return view('Admin.orderList', compact('orders'));
         return response()->json([
             'status' => 200,
             'message' => 'Danh sách đơn hàng',
