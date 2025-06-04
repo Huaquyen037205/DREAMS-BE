@@ -30,7 +30,7 @@
         </li>
 
         <div class="group">
-          <div onclick="toggleSubMenu('users-submenu')" class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('users-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
             <a href="/admin/user/list"><i class="ph ph-users"></i> Người dùng </a>
           </div>
           <div id="users-submenu" class="hidden flex-col">
@@ -41,7 +41,7 @@
         </div>
 
         <div class="group">
-          <div onclick="toggleSubMenu('products-submenu')" class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('products-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
                <a href="/admin/product/list"><i class="ph ph-package"></i> Sản Phẩm </a>
           </div>
           <div id="products-submenu" class="hidden flex-col">
@@ -57,12 +57,12 @@
 
         <div class="group">
           <div onclick="toggleSubMenu('orders-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
-            <i class="ph ph-truck"></i> Đơn Hàng <i class="ph ph-caret-down ml-auto"></i>
+            <i class="ph ph-truck"></i> Đơn Hàng
           </div>
-          <div id="orders-submenu" class="hidden flex-col">
+          {{-- <div id="orders-submenu" class="hidden flex-col">
             <a href="orderList.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách đơn hàng</a>
             <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật đơn hàng</a>
-          </div>
+          </div> --}}
         </div>
 
         <div class="group">

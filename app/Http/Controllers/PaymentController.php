@@ -156,7 +156,7 @@ class PaymentController extends Controller
 
     public function getOrderDetails($id)
     {
-        $order = Order::with(['order_items', 'order_items.variant', 'order_items.product'])
+        $order = Order::with(['order_items', 'order_items.variant', 'order_items.product', 'order_items.product.img'])
             ->findOrFail($id);
 
         return response()->json([
