@@ -41,17 +41,6 @@ class DiscountController extends Controller
         ]);
     }
 
-    public function index()
-    {
-        $coupons = Coupon::all();
-        return view('admin.coupon_index', compact('coupons'));
-    }
-
-    public function create()
-    {
-        return view('admin.coupon_create');
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -61,12 +50,6 @@ class DiscountController extends Controller
         ]);
         Coupon::create($request->all());
         return redirect()->route('coupons.index')->with('success', 'Tạo mã giảm giá thành công!');
-    }
-
-    public function edit($id)
-    {
-        $coupon = \App\Models\Coupon::findOrFail($id);
-        return view('admin.coupon_edit', compact('coupon'));
     }
 
     public function update(Request $request, $id)
@@ -82,3 +65,4 @@ class DiscountController extends Controller
         return redirect()->route('coupons.index')->with('success', 'Xóa mã giảm giá thành công!');
     }
 }
+

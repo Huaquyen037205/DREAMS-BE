@@ -89,10 +89,10 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
 
 
     //Coupons
-    Route::get('/coupons', [DiscountController::class, 'index'])->name('coupons.index');
-    Route::get('/coupons/create', [DiscountController::class, 'create'])->name('coupons.create');
+    Route::get('/coupons', [PageController::class, 'couponList'])->name('coupons.index');
+    Route::get('/coupons/create', [PageController::class, 'couponCreate'])->name('coupons.create');
+    Route::get('/coupons/{id}/edit', [PageController::class, 'couponEdit'])->name('coupons.edit');
     Route::post('/coupons', [DiscountController::class, 'store'])->name('coupons.store');
-    Route::get('/coupons/{id}/edit', [DiscountController::class, 'edit'])->name('coupons.edit');
     Route::put('/coupons/{id}', [DiscountController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{id}', [DiscountController::class, 'destroy'])->name('coupons.destroy');
 });
