@@ -88,14 +88,12 @@ class AdminManageController extends Controller
     public function addDiscount(Request $request)
     {
         $request->validate([
-            'code' => 'required|string|unique:discounts,code',
             'percentage' => 'required|integer|min:1|max:100',
             'start_day' => 'required|date',
             'end_day' => 'required|date|after_or_equal:start_day',
         ]);
 
         $discount = new Discount();
-        $discount->code = $request->code;
         $discount->percentage = $request->percentage;
         $discount->start_day = $request->start_day;
         $discount->end_day = $request->end_day;
@@ -117,8 +115,6 @@ class AdminManageController extends Controller
                 'message' => 'Không tìm thấy mã giảm giá'
             ], 404);
         }
-
-        $discount->code = $request->code;
         $discount->percentage = $request->percentage;
         $discount->start_date = $request->start_date;
         $discount->end_date = $request->end_date;
