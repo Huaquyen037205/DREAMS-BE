@@ -120,3 +120,4 @@ Route::put('/admin/categories/{id}', [CateList::class, 'update']);
 
 
 
+
