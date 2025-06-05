@@ -14,14 +14,6 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    // public function product(){
-    //     $product = Product::with('img', 'variant', 'category')->paginate(12);
-    //     return response()->json([
-    //         'status' => 200,
-    //         'message' => 'Danh sách sản phẩm',
-    //         'data' => $product
-    //     ],200);
-    // }
 
     public function product() {
     $now = now();
@@ -46,18 +38,6 @@ class ProductController extends Controller
         'data' => $product
     ], 200);
 }
-
-    // public function hotProduct(){
-    //     $product = Product::with('img', 'variant', 'category')->where('hot', 1)->get();
-    //     return response()->json([
-    //         'status' => 200,
-    //         'message' => 'Hot sản phẩm',
-    //         'data' => $product
-    //     ],200);
-    // }
-
-
-
 
     public function hotProduct() {
     $now = now();
@@ -116,7 +96,7 @@ class ProductController extends Controller
             'code' => 'required|string|max:255',
         ]);
 
-        $user = auth()->user();
+        $user = auth()->user;
         $discount = Discount::where('code', $request->code)
         ->whereDate('start_day', '<=', now())
         ->whereDate('end_day', '>=', now())
@@ -152,90 +132,55 @@ class ProductController extends Controller
     }
 
     public function productById($id) {
-        $product = Product::with('img', 'variant', 'category')->where('id', $id)->first();
+    $product = Product::with('img', 'variant', 'category')->where('id', $id)->first();
 
-        if ($product) {
-            // Lọc trùng theo 'size' để tránh lặp lại size giống nhau
-            $product->variant = $product->variant->unique('size')->values();
-
-            return response()->json([
-                'status' => 200,
-                'message' => 'Chi tiết sản phẩm',
-                'data' => $product
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy sản phẩm',
-            ], 404);
-        }
-    }
-
-
-    public function searchProduct(Request $request){
-        $search = $request->input('search');
-        $product = Product::with('img', 'variant', 'category')
-            ->where('name', 'LIKE', "%{$search}%")
-            ->orWhere('description', 'LIKE', "%{$search}%")
-            ->get();
-        if($product->isEmpty()){
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy sản phẩm',
-            ],404);
-        }else{
-            return response()->json([
-                'status' => 200,
-                'message' => 'Tôi dei',
-                'data' => $product
-            ],200);
-        }
-    }
-
-    public function productByCategory($id){
-        $product = Product::with('img', 'variant', 'category')->where('category_id', $id)->get();
-        if($product->isEmpty()){
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy sản phẩm',
-            ],404);
-        }else{
-            return response()->json([
-                'status' => 200,
-                'message' => 'Danh sách sản phẩm theo danh mục',
-                'data' => $product
-            ],200);
-        }
-    }
-
-    public function productByprice($price)
-    {
-        if (!is_numeric($price)) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Giá không hợp lệ',
-            ], 400);
-        }
-
-        $product = Product::with(['img', 'variant', 'category'])
-            ->whereHas('variant', function($query) use ($price) {
-                $query->whereRaw('COALESCE(sale_price, price) <= ?', [$price]);
-            })
-            ->get();
-
-        if ($product->isEmpty()) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy sản phẩm',
-            ], 404);
-        }
-
+    if (!$product) {
         return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách sản phẩm theo giá',
-            'data' => $product
-        ], 200);
+            'status' => 404,
+            'message' => 'Không tìm thấy sản phẩm',
+        ], 404);
     }
+
+    $now = now();
+    $variantIds = $product->variant->pluck('id')->toArray();
+
+    // Lấy tất cả flash sale variant của sản phẩm này
+    $flashSaleVariants = DB::table('flash_sale_variants')
+        ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
+        ->whereIn('flash_sale_variants.variant_id', $variantIds)
+        ->where('flash_sales.start_time', '<=', $now)
+        ->where('flash_sales.end_time', '>=', $now)
+        ->select('flash_sale_variants.sale_price')
+        ->get();
+
+    if ($flashSaleVariants->count() > 0) {
+        // Lấy giá flash sale đầu tiên (áp dụng cho tất cả size)
+        $flashSalePrice = $flashSaleVariants->first()->sale_price;
+        foreach ($product->variant as $variant) {
+            $variant->final_price = $flashSalePrice;
+            $variant->price_type = 'flash_sale';
+        }
+    } else {
+        foreach ($product->variant as $variant) {
+            if (!empty($variant->sale_price)) {
+                $variant->final_price = $variant->sale_price;
+                $variant->price_type = 'sale_price';
+            } else {
+                $variant->final_price = $variant->price;
+                $variant->price_type = 'origin';
+            }
+        }
+    }
+
+    // Lọc trùng theo 'size' để tránh lặp lại size giống nhau
+    $product->variant = $product->variant->unique('size')->values();
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Chi tiết sản phẩm',
+        'data' => $product
+    ], 200);
+}
 
     public function SortByPrice(Request $request)
     {
