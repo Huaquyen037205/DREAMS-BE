@@ -35,6 +35,17 @@ class AdminManageController extends Controller
             'status' => 'required|in:pending,processing,paid,cancelled',
         ]);
 
+        if ($order->status !== 'paid' && $request->status === 'paid') {
+        $orderItems = Order_item::where('order_id', $order->id)->get();
+        foreach ($orderItems as $item) {
+            $product = $item->variant->product ?? null;
+            if ($product) {
+                $product->hot = ($product->hot ?? 0) + $item->quantity;
+                $product->save();
+            }
+        }
+    }
+
         $order->status = $request->status;
         $order->save();
 
@@ -66,6 +77,27 @@ class AdminManageController extends Controller
         ], 200);
     }
 
+    public function searchOrder(Request $request){
+        $query = Order::with('user')->orderByDesc('created_at')->paginate(10);
+
+        if ($request->filled('vnp_TxnRef')) {
+            $query->where('vnp_TxnRef', $request->vnp_TxnRef);
+        }
+
+        if ($request->filled('email')) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('email', $request->email);
+            });
+        }
+        $orders = $query;
+        return view('Admin.orderList' , compact('orders'));
+        return response()->json([
+            'status' => 200,
+            'message' => 'Kết quả tìm kiếm đơn hàng',
+            'data' => $orders
+        ], 200);
+    }
+
     public function topSoldProduct(Request $request)
     {
         $topSoldProducts = Order_item::with('variant.product')
@@ -84,28 +116,31 @@ class AdminManageController extends Controller
 
     public function discount(Request $request)
     {
-        $discount = Discount::paginate(12);
+        $discounts = Discount::orderBy('created_at', 'desc')->paginate(12);
+        return view ('Admin.discountList', compact('discounts'));
         return response()->json([
             'status' => 200,
             'message' => 'Discount List',
-            'data' => $discount
+            'data' => $discounts
         ], 200);
     }
 
     public function addDiscount(Request $request)
     {
         $request->validate([
+            'name' => 'required',
             'percentage' => 'required|integer|min:1|max:100',
             'start_day' => 'required|date',
             'end_day' => 'required|date|after_or_equal:start_day',
         ]);
 
         $discount = new Discount();
+        $discount->name = $request->name;
         $discount->percentage = $request->percentage;
         $discount->start_day = $request->start_day;
         $discount->end_day = $request->end_day;
         $discount->save();
-
+        return view ('Admin.addDiscount');
         return response()->json([
             'status' => 200,
             'message' => 'Thêm mã giảm giá thành công',
@@ -113,7 +148,7 @@ class AdminManageController extends Controller
         ], 200);
     }
 
-    public function updateDiscount(Request $request, $id)
+    public function editDiscount(Request $request, $id)
     {
         $discount = Discount::find($id);
         if (!$discount) {
@@ -122,11 +157,12 @@ class AdminManageController extends Controller
                 'message' => 'Không tìm thấy mã giảm giá'
             ], 404);
         }
+        $discount->name = $request->name;
         $discount->percentage = $request->percentage;
-        $discount->start_date = $request->start_date;
-        $discount->end_date = $request->end_date;
+        $discount->start_day = $request->start_day;
+        $discount->end_day = $request->end_day;
         $discount->save();
-
+         return redirect('/admin/discount')->with('success', 'Thêm mã giảm giá thành công!');
         return response()->json([
             'status' => 200,
             'message' => 'Cập nhật mã giảm giá thành công',

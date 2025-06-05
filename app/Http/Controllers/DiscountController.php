@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 use App\Models\Coupon;
 use Illuminate\Http\Request;
@@ -13,7 +12,7 @@ class DiscountController extends Controller
         $coupons = Coupon::all();
         return response()->json($coupons);
     }
-    
+
     public function applyDiscount(Request $request)
     {
         $request->validate([

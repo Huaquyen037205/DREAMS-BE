@@ -78,7 +78,9 @@
                                         <a href="{{ url('/admin/product/edit/'. $product->id) }}" class="bg-green-100 text-green-500 px-2 py-1 rounded">
                                             <i class="ph ph-pencil"></i>
                                         </a>
-                                        <button class="bg-red-100 text-red-500 px-2 py-1 rounded"><i class="ph ph-trash"></i></button>
+                                        <a href="{{ url('/admin/product/'. $product->id) }}" class="bg-green-100 text-green-500 px-2 py-1 rounded">
+                                            <i class="ph ph-eye"></i>
+                                        </a>
                                     </td>
                                 </tr>
                         @endforeach

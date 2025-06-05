@@ -101,7 +101,7 @@ Route::middleware(['auth:sanctum'])->group(function (){
     //Discount routes
     Route::get('/admin/discount', [AdminManageController::class, 'discount']);
     Route::post('/admin/add/discount', [AdminManageController::class, 'addDiscount']);
-    Route::patch('/admin/update/discount/{id}', [AdminManageController::class, 'updateDiscount']);
+    Route::patch('/admin/edit/discount/{id}', [AdminManageController::class, 'editDiscount']);
     Route::delete('/admin/delete/discount/{id}', [AdminManageController::class, 'deleteDiscount']);
 
     //User routes
