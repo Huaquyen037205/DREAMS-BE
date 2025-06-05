@@ -93,7 +93,27 @@ class PageController extends Controller
     }
 
     public function orderList(){
+        $orders = Order::with('user', 'discount', 'shipping', 'payment', 'coupon', 'address')
+        ->orderByDesc('created_at')
+        ->paginate(12);
        return view('Admin.orderList', compact('orders'));
+    }
+
+    public function orderDetail($id){
+         $order = Order::with([
+        'user',
+        'order_items.variant.product.img',
+        'discount',
+        'shipping',
+        'payment',
+        'coupon',
+        'address'
+    ])->findOrFail($id);
+
+      return view('Admin.orderDetail', [
+        'order' => $order,
+        'order_items' => $order->order_items
+    ]);
     }
 
     public function discountList(){
