@@ -75,6 +75,16 @@
           </div>
         </div>
 
+         <div class="group">
+          <div onclick="toggleSubMenu('disscounts-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+            <a href="/admin/discount"><i class="ph ph-tag"></i> Chương trình giảm giá</a>
+          </div>
+          {{-- <div id="orders-submenu" class="hidden flex-col">
+            <a href="orderList.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách đơn hàng</a>
+            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật đơn hàng</a>
+          </div> --}}
+        </div>
+
         <div class="group">
             <div onclick="toggleSubMenu('flashsale-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
                 <i class="ph ph-lightning"></i> Flash-Sale <i class="ph ph-caret-down ml-auto"></i>

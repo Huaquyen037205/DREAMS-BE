@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Variant;
 use App\Models\Category;
 use App\Models\Img;
+use App\Models\Discount;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -118,6 +119,16 @@ class PageController extends Controller
 
     public function discountList(){
         return view('Admin.discountList');
+    }
+
+    public function addDiscount(){
+        $discount = new Discount();
+        return view('Admin.addDiscount', compact('discount'));
+    }
+
+    public function editDiscount($id){
+        $discount = Discount::findOrFail($id);
+        return view('Admin.editDiscount', compact('discount'));
     }
 
     public function product()  {
