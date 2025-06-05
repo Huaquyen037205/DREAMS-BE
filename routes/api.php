@@ -12,6 +12,7 @@ use App\Models\Flash_Sale_Variant;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
+
 // use App\Http\Middleware\CheckAdmin;
 
 // Web Routes:
@@ -140,3 +141,5 @@ Route::middleware('auth:sanctum')->group(function () {
 // edit user profile
 Route::middleware('auth:sanctum')->patch('/user/profile', [\App\Http\Controllers\AuthController::class, 'updateProfile']);
 
+//coupons
+Route::get('/coupons', [DiscountController::class, 'index']);

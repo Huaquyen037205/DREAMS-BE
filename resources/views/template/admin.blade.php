@@ -106,12 +106,14 @@
     <!-- Main Content -->
     <main class="flex-1 p-6 overflow-auto">
       <!-- Top Bar -->
-      <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6">
         <input type="text" placeholder="Search" class="px-4 py-2 border rounded-md w-1/3" />
         <div class="flex items-center space-x-4">
-          <span class="bg-purple-200 text-purple-800 rounded-full px-3 py-1 text-sm">Admin DREAMS</span>
+        <span class="bg-purple-200 text-purple-800 rounded-full px-3 py-1 text-sm">
+            {{ (Auth::user()->name ?? 'Admin DREAMS')  . ' ADMIN'}}
+        </span>
         </div>
-      </div>
+    </div>
 
         <div class="flex justify-between items-center mb-6">
             <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: inline;">

@@ -11,6 +11,7 @@ use App\Models\Discount;
 use App\Models\Coupon;
 use App\Models\Address;
 use App\Models\Review;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class AdminManageController extends Controller
