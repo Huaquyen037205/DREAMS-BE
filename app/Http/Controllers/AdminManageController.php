@@ -11,28 +11,34 @@ use App\Models\Discount;
 use App\Models\Coupon;
 use App\Models\Address;
 use App\Models\Review;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class AdminManageController extends Controller
 {
-    public function ShowOrder(Request $request)
-    {
-       $order = Order::with('user', 'discount' ,'shipping', 'payment', 'coupon', 'address')->paginate(12);
+    public function orderAdmin(){
+        $orders = Order::with('user', 'discount', 'shipping', 'payment', 'coupon', 'address')
+        ->orderByDesc('created_at')
+        ->paginate(12);
+        return view('Admin.orderList', compact('orders'));
         return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách đơn hàng',
-            'data' => $order
-        ], 200);
+        'status' => 200,
+        'message' => 'Danh sách đơn hàng',
+        'data' => $orders
+    ], 200);
     }
 
-    public function OrderSold(Request $request)
+    public function updateStatus(Request $request, $id)
     {
-        $order = Order::with('user', 'discount' ,'shipping', 'payment', 'coupon', 'address')->where('status', 1)->paginate(12);
-        return response()->json([
-            'status' => 200,
-            'message' => 'Đơn hàng đã giao',
-            'data' => $order
-        ], 200);
+        $order = Order::findOrFail($id);
+        $request->validate([
+            'status' => 'required|in:pending,processing,paid,cancelled',
+        ]);
+
+        $order->status = $request->status;
+        $order->save();
+
+        return redirect()->back()->with('success', 'Trạng thái đơn hàng đã được cập nhật.');
     }
 
     public function OrderCancel(Request $request)
@@ -47,14 +53,15 @@ class AdminManageController extends Controller
 
     public function OrderDetail(Request $request, $id)
     {
-       $order = Order_item::with('variant.product')->where('order_id', $id)->get();
-        $orderInfo = Order::with('user', 'discount' ,'shipping', 'payment', 'coupon', 'address')->where('id', $id)->first();
+        $order = Order_item::with('variant.product', 'variant.product.img', 'variant')->where('order_id', $id)->get();
+        $orderInfo = Order::with('user', 'discount' ,'shipping', 'payment', 'coupon', 'address','order_items.variant.product.img')->where('id', $id)->first();
+        return view('Admin.orderDetail', compact('order', 'orderInfo'));
         return response()->json([
             'status' => 200,
             'message' => 'Order List',
             'data' => [
                 'orderInfo' => $orderInfo,
-                'orderItem' => $order
+                'order_item' => $order
             ]
         ], 200);
     }
@@ -62,7 +69,7 @@ class AdminManageController extends Controller
     public function topSoldProduct(Request $request)
     {
         $topSoldProducts = Order_item::with('variant.product')
-            ->select('variant_id', \DB::raw('SUM(quantity) as total_quantity'))
+            ->select('variant_id', DB::raw('SUM(quantity) as total_quantity'))
             ->groupBy('variant_id')
             ->orderBy('total_quantity', 'desc')
             ->take(5)

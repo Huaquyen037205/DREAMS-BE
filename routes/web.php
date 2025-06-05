@@ -30,7 +30,9 @@ route::get('/category', [ProductController::class, 'category']);
 route::get('/product/{id}', [ProductController::class, 'productById']);
 route::get('/search', [ProductController::class, 'searchProduct']);
 
- //Auth Routes
+
+// Admin Routes
+//Auth Routes
 Route::get('/admin/login', [PageController::class, 'loginAdmin'])->name('Admin.Login');
 Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);
 Route::post('/logout', [AdminUserController::class, 'logoutAdmin']);
@@ -60,7 +62,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::get('/product/edit/{id}', [PageController::class, 'editProduct']);
     Route::put('/product/edit/{id}', [AdminController::class, 'editProduct']);
 
-    // Admin Routes
+    //User
     Route::get('/dashboard', [PageController::class, 'dashBoard']);
     Route::get('/user/list', [PageController::class, 'userList']);
     Route::get('/user/list', [AdminUserController::class, 'userAdmin']);
@@ -69,10 +71,14 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::put('/editUser/{id}', [AdminUserController::class, 'editUser']);
     Route::get('/searchUser', [AdminUserController::class, 'searchUser']);
 
-
+    //Discount
+    Route::get('/discount', [PageController::class, 'discountList']);
     //Message
     Route::get('/message', [PageController::class, 'message']);
-
+    //Order
+    Route::get('/order', [PageController::class, 'orderList']);
+    Route::get('/order/{id}', [AdminManageController::class, 'OrderDetail']);
+    Route::put('/order/update-status/{id}', [AdminManageController::class, 'updateStatus']);
     //variant
     Route::get('/variant/list', [PageController::class, 'variantList']);
     Route::get('/variant/list', [AdminController::class, 'variantAdmin']);
