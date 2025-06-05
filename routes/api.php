@@ -11,7 +11,7 @@ use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
-
+use App\Http\Controllers\DiscountController;
 // use App\Http\Middleware\CheckAdmin;
 
 // Web Routes:
@@ -37,6 +37,7 @@ Route::post('/change-password', [AuthController::class, 'changePassword']);
 Route::middleware('auth:sanctum')->group(function () {
     //discount
     Route::post('/discount', [ProductController::class, 'discountUser']);
+    Route::post('/discount/apply', [DiscountController::class, 'applyDiscount']);
    //oder
    Route::get('/order', [PaymentController::class, 'getOrdersByUser']);
 });
@@ -118,6 +119,7 @@ Route::middleware(['auth:sanctum'])->group(function (){
 
     //Order routes
     Route::get('/admin/order/{id}', [PaymentController::class, 'getOrderDetails']);
+    Route::get('/admin/orderDetail/{id}', [AdminManageController::class, 'OrderDetail']);
 });
 
 Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
