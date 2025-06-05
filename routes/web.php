@@ -77,6 +77,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::get('/message', [PageController::class, 'message']);
     //Order
     Route::get('/order', [PageController::class, 'orderList']);
+    Route::get('/search/order', [AdminManageController::class, 'searchOrder']);
     Route::get('/order/{id}', [AdminManageController::class, 'OrderDetail']);
     Route::put('/order/update-status/{id}', [AdminManageController::class, 'updateStatus']);
     //variant

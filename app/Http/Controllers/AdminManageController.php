@@ -66,6 +66,27 @@ class AdminManageController extends Controller
         ], 200);
     }
 
+    public function searchOrder(Request $request){
+        $query = Order::with('user')->orderByDesc('created_at')->paginate(10);
+
+        if ($request->filled('vnp_TxnRef')) {
+            $query->where('vnp_TxnRef', $request->vnp_TxnRef);
+        }
+
+        if ($request->filled('email')) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('email', $request->email);
+            });
+        }
+        $orders = $query;
+        return view('Admin.orderList' , compact('orders'));
+        return response()->json([
+            'status' => 200,
+            'message' => 'Kết quả tìm kiếm đơn hàng',
+            'data' => $orders
+        ], 200);
+    }
+
     public function topSoldProduct(Request $request)
     {
         $topSoldProducts = Order_item::with('variant.product')

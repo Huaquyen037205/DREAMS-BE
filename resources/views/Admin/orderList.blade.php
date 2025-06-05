@@ -6,7 +6,7 @@
         <h2 class="text-2xl font-bold">Danh Sách Đơn Hàng</h2>
     </div>
 
-    <form method="GET" action="/admin/order" class="mb-4 flex items-center gap-2">
+    <form method="GET" action="/admin/search/order" class="mb-4 flex items-center gap-2">
         <input type="text" name="keyword" placeholder="Tìm theo mã đơn hàng hoặc email..." class="border px-3 py-2 rounded w-1/3">
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Tìm kiếm</button>
     </form>
