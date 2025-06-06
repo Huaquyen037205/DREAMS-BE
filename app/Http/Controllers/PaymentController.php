@@ -190,4 +190,62 @@ class PaymentController extends Controller
             'data' => $order
         ], 200);
     }
+
+
+    public function createCodPayment(Request $request)
+{
+    $user = $request->user();
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    $cart = $request->input('cart', []);
+    $total = 0;
+    foreach ($cart as $item) {
+        $variant = Variant::find($item['variant_id']);
+        $price = $variant && $variant->sale_price !== null ? $variant->sale_price : ($variant ? $variant->price : 0);
+        $total += $price * $item['quantity'];
+    }
+
+    $coupon_id = $request->input('coupon_id');
+    $discountAmount = 0;
+    if ($coupon_id) {
+        $coupon = Coupon::find($coupon_id);
+        if ($coupon && now()->lt($coupon->expiry_date)) {
+            $discountAmount = (int)$coupon->discount_value;
+        }
+    }
+
+    $totalAfterDiscount = max($total - $discountAmount, 0);
+
+    $order = Order::create([
+        'user_id' => $user->id,
+        'shipping_id' => $request->input('shipping_id', null),
+        'payment_id' => $request->input('payment_id', null),
+        'coupon_id' => $coupon_id,
+        'address_id' => $request->input('address_id', null),
+        'total_price' => $totalAfterDiscount,
+        'status' => 'pending', // hoặc 'cod'
+        'vnp_TxnRef' => null,
+    ]);
+
+    foreach ($cart as $item) {
+        $variant = Variant::find($item['variant_id']);
+        $price = $variant && $variant->sale_price !== null ? $variant->sale_price : ($variant ? $variant->price : 0);
+
+        $order->order_items()->create([
+            'variant_id' => $item['variant_id'],
+            'quantity' => $item['quantity'],
+            'price' => $price,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Đặt hàng thành công. Vui lòng thanh toán khi nhận hàng!',
+        'order' => $order,
+    ]);
+}
 }
