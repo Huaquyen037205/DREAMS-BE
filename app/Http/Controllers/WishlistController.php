@@ -16,7 +16,11 @@ class WishlistController extends Controller
     public function store($productId)
     {
         $user = auth()->user();
-        $user->wishlist()->syncWithoutDetaching([$productId]);
+        // Kiểm tra sản phẩm đã có trong wishlist chưa
+        if ($user->wishlist()->where('product_id', $productId)->exists()) {
+            return response()->json(['message' => 'Sản phẩm đã có trong danh sách yêu thích'], 409);
+        }
+        $user->wishlist()->attach($productId);
         return response()->json(['message' => 'Đã thêm vào yêu thích']);
     }
 
