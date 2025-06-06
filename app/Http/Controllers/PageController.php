@@ -128,7 +128,8 @@ class PageController extends Controller
 
     public function editDiscount($id){
         $discount = Discount::findOrFail($id);
-        return view('Admin.editDiscount', compact('discount'));
+        $allProducts = Product::all();
+        return view('Admin.editDiscount', compact('discount', 'allProducts'));
     }
 
     public function product()  {

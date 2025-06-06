@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Order_item;
+use App\Models\Variant;
 use App\Models\Address;
 use App\Models\Coupon;
 use App\Models\Shipping;
@@ -21,9 +22,10 @@ class PaymentController extends Controller
         $cart = $request->input('cart', []);
         $total = 0;
         foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
+            $variant = Variant::find($item['variant_id']);
+            $price = $variant && $variant->sale_price !== null ? $variant->sale_price : ($variant ? $variant->price : 0);
+            $total += $price * $item['quantity'];
         }
-
         $coupon_id = $request->input('coupon_id');
         $discountAmount = 0;
             if ($coupon_id) {
@@ -49,10 +51,13 @@ class PaymentController extends Controller
 
         $cart = $request->input('cart', []);
             foreach ($cart as $item) {
+                $variant = Variant::find($item['variant_id']);
+                $price = $variant && $variant->sale_price !== null ? $variant->sale_price : ($variant ? $variant->price : 0);
+
                 $order->order_items()->create([
                 'variant_id' => $item['variant_id'],
                 'quantity' => $item['quantity'],
-                'price' => $item['price'],
+                'price' => $price,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

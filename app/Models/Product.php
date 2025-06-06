@@ -36,6 +36,23 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function discount()
+    {
+        return $this->belongsTo(Discount::class, 'discount_id');
+    }
+
+    public function getDiscountedPriceAttribute()
+    {
+        $variant = $this->variant->first();
+        if (!$variant) {
+            return 0;
+        }
+        if ($this->discount && $this->discount->percentage > 0) {
+            return round($this->variant->first()->price * (1 - $this->discount->percentage / 100));
+        }
+        return $this->variant->first()->price;
+    }
+
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class);
