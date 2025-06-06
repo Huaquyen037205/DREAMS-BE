@@ -127,6 +127,7 @@ Route::middleware(['auth:sanctum'])->group(function (){
 Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
 Route::middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])->group(function () {
 Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
+Route::post('/payment/cod', [PaymentController::class, 'createCodPayment']);
 });
 
 //flash sale routes
