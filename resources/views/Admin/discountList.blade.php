@@ -46,7 +46,7 @@
                         <a href={{url('/admin/editDiscount/' . $discount->id) }} class="bg-green-100 text-green-500 px-2 py-1 rounded">
                             <i class="ph ph-pencil"></i>
                         </a>
-                        <a href="" class="bg-green-100 text-green-500 px-2 py-1 rounded">
+                        <a href="{{url('/admin/discount/detail/' . $discount->id)}}" class="bg-green-100 text-green-500 px-2 py-1 rounded">
                             <i class="ph ph-eye"></i>
                         </a>
                     </td>

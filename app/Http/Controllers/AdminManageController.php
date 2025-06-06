@@ -125,6 +125,14 @@ class AdminManageController extends Controller
         ], 200);
     }
 
+    public function discountDetail($id){
+        $discount = Discount::with('products')->find($id);
+        if (!$discount) {
+            return redirect('/admin/discount')->with('error', 'Không tìm thấy chương trình giảm giá');
+        }
+        return view('Admin.discountDetail', compact('discount'));
+    }
+
     public function addDiscount(Request $request)
     {
         $request->validate([
@@ -150,24 +158,53 @@ class AdminManageController extends Controller
 
     public function editDiscount(Request $request, $id)
     {
-        $discount = Discount::find($id);
-        if (!$discount) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy mã giảm giá'
-            ], 404);
-        }
+        $discount = Discount::findOrFail($id);
         $discount->name = $request->name;
         $discount->percentage = $request->percentage;
         $discount->start_day = $request->start_day;
         $discount->end_day = $request->end_day;
         $discount->save();
-         return redirect('/admin/discount')->with('success', 'Thêm mã giảm giá thành công!');
-        return response()->json([
-            'status' => 200,
-            'message' => 'Cập nhật mã giảm giá thành công',
-            'data' => $discount
-        ], 200);
+
+        $selectedProducts = $request->products ?? [];
+
+        if (!empty($selectedProducts)) {
+            foreach ($selectedProducts as $productId) {
+                $product = Product::with('variant')->find($productId);
+                if ($product) {
+                    $product->discount_id = $discount->id;
+                    $product->save();
+                    foreach ($product->variant as $variant) {
+                        $variant->sale_price = round($variant->price * (1 - $discount->percentage / 100));
+                        $variant->save();
+                    }
+                }
+            }
+
+            $productsToRemove = Product::where('discount_id', $discount->id)
+                ->whereNotIn('id', $selectedProducts)
+                ->get();
+            foreach ($productsToRemove as $product) {
+                $product->discount_id = null;
+                $product->save();
+                foreach ($product->variant as $variant) {
+                    $variant->sale_price = null;
+                    $variant->save();
+                }
+            }
+        } else {
+
+            $productsToRemove = Product::where('discount_id', $discount->id)->get();
+            foreach ($productsToRemove as $product) {
+                $product->discount_id = null;
+                $product->save();
+                foreach ($product->variant as $variant) {
+                    $variant->sale_price = null;
+                    $variant->save();
+                }
+            }
+        }
+
+        return redirect('/admin/discount')->with('success', 'Cập nhật mã giảm giá thành công!');
     }
 
     public function deleteDiscount(Request $request, $id)
