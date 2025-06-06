@@ -39,7 +39,8 @@ class ProductController extends Controller
     ], 200);
 }
 
-    public function hotProduct() {
+
+public function hotProduct() {
     $now = now();
 
     // Lấy danh sách product_id đang thuộc flash sale đang hoạt động
@@ -51,16 +52,17 @@ class ProductController extends Controller
         ->pluck('variant.product_id')
         ->unique();
 
-    // Lấy sản phẩm hot KHÔNG nằm trong chương trình flash sale đang hoạt động
-    $product = Product::with('img', 'variant', 'category')
-        ->where('hot', 1)
+    // Lấy nhiều sản phẩm có lượt hot >= 10, KHÔNG nằm trong chương trình flash sale, sắp xếp theo hot giảm dần
+    $products = Product::with('img', 'variant', 'category')
+        ->where('hot', '>=', 10)
         ->whereNotIn('id', $flashSaleProductIds)
+        ->orderByDesc('hot')
         ->get();
 
     return response()->json([
         'status' => 200,
         'message' => 'Hot sản phẩm',
-        'data' => $product
+        'data' => $products
     ], 200);
 }
 
@@ -79,15 +81,6 @@ class ProductController extends Controller
             'status' => 200,
             'message' => 'Danh sách danh mục',
             'data' => $category
-        ],200);
-    }
-
-    public function wishList(){
-        $product = Product::with('img', 'variant', 'category')->where('wishlist', 1)->get();
-        return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách sản phẩm yêu thích',
-            'data' => $product
         ],200);
     }
 
