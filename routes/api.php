@@ -12,6 +12,7 @@ use App\Models\Flash_Sale_Variant;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\WishlistController;
 
 // use App\Http\Middleware\CheckAdmin;
 
@@ -143,3 +144,10 @@ Route::middleware('auth:sanctum')->patch('/user/profile', [\App\Http\Controllers
 
 //coupons
 Route::get('/coupons', [DiscountController::class, 'index']);
+
+// Wishlist routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index']);
+    Route::post('/wishlist/{productId}', [WishlistController::class, 'store']);
+    Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy']);
+});
