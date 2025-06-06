@@ -316,7 +316,6 @@ class AdminController extends Controller
     public function addVariant(Request $request){
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'img_id' => 'required|exists:img,id',
             'size' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',
             'price' => 'required|numeric',

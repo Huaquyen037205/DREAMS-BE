@@ -5,7 +5,7 @@
     <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold">Thêm Biến Thể</h2>
-            <a href="{{ url('/admin/variant/list') }}" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">
+            <a href="{{ url('/admin/product/list') }}" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">
                 Danh sách biến thể
             </a>
         </div>
@@ -98,7 +98,7 @@
             {{-- Nút hành động --}}
             <div class="pt-4">
                 <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded text-sm">Thêm Biến Thể</button>
-                <a href="{{ url('/admin/variant/list') }}" class="ml-3 text-gray-600 hover:text-indigo-500 text-sm">Hủy</a>
+                <a href="{{ url('/admin/product/list') }}" class="ml-3 text-gray-600 hover:text-indigo-500 text-sm">Hủy</a>
             </div>
         </form>
     </div>
