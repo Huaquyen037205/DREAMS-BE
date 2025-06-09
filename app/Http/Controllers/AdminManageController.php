@@ -35,6 +35,20 @@ class AdminManageController extends Controller
             'status' => 'required|in:pending,processing,paid,cancelled',
         ]);
 
+        $statusOrder = [
+        'pending' => 1,
+        'processing' => 2,
+        'paid' => 3,
+        'cancelled' => 4,
+    ];
+
+    $current = $statusOrder[$order->status];
+    $next = $statusOrder[$request->status];
+
+    if ($next <= $current) {
+        return redirect()->back()->with('error', 'Không thể chuyển về trạng thái trước hoặc trạng thái hiện tại!');
+    }
+
         if ($order->status !== 'paid' && $request->status === 'paid') {
         $orderItems = Order_item::where('order_id', $order->id)->get();
         foreach ($orderItems as $item) {
