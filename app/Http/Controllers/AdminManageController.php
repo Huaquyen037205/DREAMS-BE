@@ -78,24 +78,21 @@ class AdminManageController extends Controller
     }
 
     public function searchOrder(Request $request){
-        $query = Order::with('user')->orderByDesc('created_at')->paginate(10);
+       $search = $request->input('search');
+        $query = Order::with('user')->orderByDesc('created_at');
 
-        if ($request->filled('vnp_TxnRef')) {
-            $query->where('vnp_TxnRef', $request->vnp_TxnRef);
-        }
-
-        if ($request->filled('email')) {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('email', $request->email);
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('vnp_TxnRef', 'like', "%$search%")
+                ->orWhereHas('user', function($q2) use ($search) {
+                    $q2->where('email', 'like', "%$search%");
+                });
             });
         }
-        $orders = $query;
+
+        $orders = $query->paginate(10);
+
         return view('Admin.orderList' , compact('orders'));
-        return response()->json([
-            'status' => 200,
-            'message' => 'Kết quả tìm kiếm đơn hàng',
-            'data' => $orders
-        ], 200);
     }
 
     public function topSoldProduct(Request $request)
@@ -121,6 +118,23 @@ class AdminManageController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'Discount List',
+            'data' => $discounts
+        ], 200);
+    }
+
+    public function searchDiscount(Request $request){
+        $name = $request->input('search');
+        $query = Discount::query();
+
+        if ($name) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+
+        $discounts = $query->orderBy('created_at', 'desc')->paginate(12);
+        return view ('Admin.discountList', ['discounts' => $discounts]);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Kết quả tìm kiếm chương trình giảm giá',
             'data' => $discounts
         ], 200);
     }
