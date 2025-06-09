@@ -74,6 +74,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     //Discount
     Route::get('/discount', [AdminManageController::class, 'discount']);
     Route::get('/addDiscount',[PageController::class, 'addDiscount']);
+    Route::get('/searchDiscount', [AdminManageController::class, 'searchDiscount']);
     Route::post('/add/discount', [AdminManageController::class, 'addDiscount']);
     Route::get('/editDiscount/{id}', [PageController::class, 'editDiscount']);
     Route::put('/edit/discount/{id}', [AdminManageController::class, 'editDiscount']);
