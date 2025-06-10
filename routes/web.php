@@ -64,7 +64,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
 
     //User
     Route::get('/dashboard', [PageController::class, 'dashBoard']);
-    Route::get('/dashboard', [AdminManageController::class, 'OrderChart']); //Admin Dashboard
+    Route::get('/dashboard', [AdminManageController::class, 'OrderChart']);
     Route::get('/user/list', [PageController::class, 'userList']);
     Route::get('/user/list', [AdminUserController::class, 'userAdmin']);
     Route::get('/profile/user', [PageController::class, 'profileUser']);
@@ -87,6 +87,8 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::get('/search/order', [AdminManageController::class, 'searchOrder']);
     Route::get('/order/{id}', [AdminManageController::class, 'OrderDetail']);
     Route::put('/order/update-status/{id}', [AdminManageController::class, 'updateStatus']);
+    Route::get('/admin/order/invoice/{id}', [AdminManageController::class, 'printInvoice'])->name('admin.order.invoice');
+    Route::get('/admin/order/send-invoice/{id}', [AdminManageController::class, 'sendInvoiceMail'])->name('admin.order.sendInvoice');
     //variant
     Route::get('/variant/list', [AdminController::class, 'variantAdmin']);
     Route::get('/search/variant', [AdminController::class, 'searchVariantAdmin']);
