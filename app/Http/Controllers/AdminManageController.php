@@ -11,6 +11,7 @@ use App\Models\Discount;
 use App\Models\Coupon;
 use App\Models\Address;
 use App\Models\Review;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -281,20 +282,51 @@ class AdminManageController extends Controller
     }
 
     public function OrderChart(){
-        $order = Order::all();
-        $orderCount = $order->count();
-        $orderSoldCount = $order->where('status', 1)->count();
-        $orderCancelCount = $order->where('status', 0)->count();
+        $totalSells = Order::where('status', 'paid')->sum('total_price');
+        $totalOrders = Order::count();
+        $dailyVisitors = User::count();
+        $salesByMonth = Order::where('status', 'paid')
+            ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Thống kê đơn hàng',
-            'data' => [
-                'total_orders' => $orderCount,
-                'sold_orders' => $orderSoldCount,
-                'cancel_orders' => $orderCancelCount,
-            ],
-        ], 200);
+        $salesByDay = Order::where('status', 'paid')
+        ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+        ->selectRaw('DATE(created_at) as day, SUM(total_price) as total')
+        ->groupBy('day')
+        ->orderBy('day')
+        ->pluck('total', 'day')
+        ->toArray();
+
+        $profit = Order::where('status', 'paid')
+            ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        $refunds = Order::where('status', 'cancelled')
+            ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        $expenses = [];
+
+        $monthlyStats = [
+            'profit' => [],
+            'refunds' => [],
+            'expenses' => [],
+        ];
+        for ($i = 1; $i <= 12; $i++) {
+            $monthlyStats['profit'][] = isset($profit[$i]) ? $profit[$i] : 0;
+            $monthlyStats['refunds'][] = isset($refunds[$i]) ? $refunds[$i] : 0;
+            $monthlyStats['expenses'][] = isset($expenses[$i]) ? $expenses[$i] : 0;
+        }
+        return view('Admin.dashBoard', compact('totalSells', 'totalOrders', 'dailyVisitors', 'salesByMonth', 'salesByDay', 'monthlyStats'));
     }
 
     public function ProductChart(){
