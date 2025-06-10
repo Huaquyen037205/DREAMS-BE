@@ -64,6 +64,7 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
 
     //User
     Route::get('/dashboard', [PageController::class, 'dashBoard']);
+    Route::get('/dashboard', [AdminManageController::class, 'OrderChart']); //Admin Dashboard
     Route::get('/user/list', [PageController::class, 'userList']);
     Route::get('/user/list', [AdminUserController::class, 'userAdmin']);
     Route::get('/profile/user', [PageController::class, 'profileUser']);
