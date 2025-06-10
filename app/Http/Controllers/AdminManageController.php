@@ -12,6 +12,8 @@ use App\Models\Coupon;
 use App\Models\Address;
 use App\Models\Review;
 use Carbon\Carbon;
+use App\Mail\OrderInvoiceMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -343,5 +345,17 @@ class AdminManageController extends Controller
             ],
         ], 200);
     }
-}
 
+    public function printInvoice($id)
+    {
+        $order = Order::with('user', 'order_items.variant.product', 'shipping', 'payment', 'address')->findOrFail($id);
+        return view('Admin.invoice', compact('order'));
+    }
+
+    public function sendInvoiceMail($id)
+    {
+        $order = Order::with('user', 'order_items.variant.product')->findOrFail($id);
+        Mail::to($order->user->email)->send(new OrderInvoiceMail($order));
+        return back()->with('success', 'Đã gửi hóa đơn tới email khách hàng!');
+    }
+}

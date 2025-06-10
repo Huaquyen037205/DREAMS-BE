@@ -3,8 +3,6 @@
 @section('content')
 <div class="container mx-auto p-6">
     <h2 class="text-3xl font-bold text-gray-800 mb-6">🧾 Chi Tiết Đơn Hàng: {{ $orderInfo->vnp_TxnRef }}</h2>
-
-    {{-- Thông tin khách hàng + đơn hàng --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="bg-white p-6 rounded-2xl shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-4">👤 Thông Tin Khách Hàng</h3>
@@ -50,7 +48,6 @@
         </form>
     </div>
 
-    {{-- Danh sách sản phẩm --}}
     <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
         <h3 class="text-xl font-semibold text-gray-700 mb-6">🛒 Sản Phẩm</h3>
         <div class="overflow-x-auto">
@@ -87,11 +84,16 @@
         </div>
     </div>
 
-    {{-- Nút quay lại --}}
     <div class="text-left">
         <a href="{{ url('/admin/order') }}" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-md shadow">
             ← Quay lại danh sách
         </a>
     </div>
+
+    <div class="text-right">
+        <a href="{{ route('admin.order.invoice', $orderInfo->id) }}" target="_blank" class="btn btn-primary">In hóa đơn</a>
+    </div>
+
+    <a href="{{ route('admin.order.sendInvoice', $orderInfo->id) }}" class="btn btn-success">Gửi hóa đơn qua email</a>
 </div>
 @endsection
