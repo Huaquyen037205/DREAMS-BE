@@ -175,38 +175,41 @@ public function hotProduct() {
     ], 200);
 }
 
-    public function SortByPrice(Request $request)
+        public function productByPrice(Request $request)
     {
-        $price = $request->input('price');
-        $sort = $request->input('sort', 'asc');
+        $min = $request->input('min', 0);
+        $max = $request->input('max', null);
 
-        if (!$price || !is_numeric($price)) {
+        if (!is_numeric($min) || ($max !== null && !is_numeric($max))) {
             return response()->json([
                 'status' => 400,
                 'message' => 'Giá không hợp lệ',
             ], 400);
         }
 
-        if (!in_array(strtolower($sort), ['asc', 'desc'])) {
+        $products = Product::with(['img', 'variant', 'category'])
+            ->whereHas('variant', function($query) use ($min, $max) {
+                $query->whereRaw('COALESCE(sale_price, price) >= ?', [$min]);
+                if ($max !== null) {
+                    $query->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
+                }
+            })
+            ->get();
+
+        if ($products->isEmpty()) {
             return response()->json([
-                'status' => 400,
-                'message' => 'Sort không hợp lệ',
-            ], 400);
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ], 404);
         }
 
-        $products = Product::select('products.*')
-            ->join('variant', 'products.id', '=', 'variant.product_id')
-            ->with(['img', 'variant', 'category'])
-            ->whereRaw('COALESCE(variant.sale_price, variant.price) <= ?', [$price])
-            ->orderByRaw('COALESCE(variant.sale_price, variant.price) ' . $sort)
-            ->distinct()
-            ->get();
-            return response()->json([
+        return response()->json([
             'status' => 200,
-            'message' => 'Danh sách sản phẩm theo giá',
+            'message' => 'Danh sách sản phẩm theo khoảng giá',
             'data' => $products
         ], 200);
     }
+
 
 
     public function filterBySize(Request $request)
