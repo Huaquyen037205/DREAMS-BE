@@ -23,7 +23,7 @@ Route::get('/viewProduct', [ProductController::class, 'viewProduct']);
 Route::get('/product/{id}', [ProductController::class, 'productById']);
 Route::get('/search', [ProductController::class, 'searchProduct']);
 Route::get('/category/{id}', [ProductController::class, 'productByCategory']);
-Route::get('/products/price/{price}', [ProductController::class, 'productByprice']);
+Route::get('/products/price', [ProductController::class, 'productByPrice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
 Route::get('/products/filter-size', [ProductController::class, 'filterBySize']);
 

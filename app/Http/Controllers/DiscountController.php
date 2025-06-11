@@ -45,6 +45,7 @@ class DiscountController extends Controller
         ]);
     }
 
+
     public function store(Request $request)
     {
         $request->validate([
@@ -53,10 +54,12 @@ class DiscountController extends Controller
                 'unique:coupons,code',
                 'regex:/^(?=.*[A-Z])(?=.*\d)[A-Z0-9]+$/'
             ],
-            'discount_value' => 'required',
-            'expiry_date' => 'required|date',
+            'discount_value' => 'required|numeric|min:0',
+            'expiry_date' => 'required|date|after:today',
         ], [
-            'code.regex' => 'Mã giảm giá phải là chữ in hoa và số, không chứa ký tự thường hoặc ký tự đặc biệt.'
+            'code.regex' => 'Mã giảm giá phải là chữ in hoa và số, không chứa ký tự thường hoặc ký tự đặc biệt.',
+            'discount_value.min' => 'Giá trị giảm giá không được nhỏ hơn 0.',
+            'expiry_date.after' => 'Ngày hết hạn phải sau ngày hiện tại.'
         ]);
 
         $data = $request->all();
@@ -74,10 +77,12 @@ class DiscountController extends Controller
                 'regex:/^(?=.*[A-Z])(?=.*\d)[A-Z0-9]+$/',
                 'unique:coupons,code,' . $id
             ],
-            'discount_value' => 'required',
-            'expiry_date' => 'required|date',
+            'discount_value' => 'required|numeric|min:0',
+            'expiry_date' => 'required|date|after:today',
         ], [
-            'code.regex' => 'Mã giảm giá phải chữ là in hoa và số, không chứa ký tự thường hoặc ký tự đặc biệt.'
+            'code.regex' => 'Mã giảm giá phải là chữ in hoa và số, không chứa ký tự thường hoặc ký tự đặc biệt.',
+            'discount_value.min' => 'Giá trị giảm giá không được nhỏ hơn 0.',
+            'expiry_date.after' => 'Ngày hết hạn phải sau ngày mã được tạo.'
         ]);
 
         $coupon = Coupon::findOrFail($id);
