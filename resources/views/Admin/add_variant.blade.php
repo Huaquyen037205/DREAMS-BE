@@ -56,18 +56,28 @@
                             <option value="{{ $size }}" {{ $variant->size == $size ? 'selected' : '' }}>{{ $size }}</option>
                         @endforeach
                     </select>
+                    @error('size')
+                        <div class="text-red-500 text-sm">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 {{-- Số lượng --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Số Lượng</label>
                     <input type="number" name="stock_quantity" min="1" value="{{ $variant->stock_quantity }}" class="mt-1 w-full border px-3 py-2 rounded">
+                    @error('stock_quantity')
+                        <div class="text-red-500 text-sm">{{ $message }}</div>
+                    @enderror
+
                 </div>
 
                 {{-- Giá --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Giá</label>
                     <input type="number" name="price" min="0" value="{{ $variant->price }}" class="mt-1 w-full border px-3 py-2 rounded">
+                    @error('price')
+                        <div class="text-red-500 text-sm">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 {{-- Giá Giảm --}}

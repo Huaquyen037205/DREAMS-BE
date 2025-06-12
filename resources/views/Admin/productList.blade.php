@@ -44,11 +44,11 @@
                     </thead>
                     <tbody>
                         <!-- Sample row -->
-                        @foreach ( $products as  $product)
-
+                            @foreach($products as $product)
                                 <tr class="border-t hover:bg-gray-50">
                                     <td class="p-2"><input type="checkbox"></td>
-                                    <td class="p-2 text-indigo-600">{{$product->id}}</td>
+                                    <td class="p-2 text-indigo-600">{{ $loop->iteration }}</td>
+                                    {{-- <td class="p-2 text-indigo-600">{{ $product->id }}</td> --}}
                                     <td class="p-2">
                                      @if ($product->img && $product->img->first())
                                         <img src="{{ asset('img/' . $product->img->first()->name) }}" alt="Product Image" class="w-16 h-16 object-cover rounded">
