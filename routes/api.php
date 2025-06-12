@@ -13,7 +13,7 @@ use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\WishlistController;
-
+use App\Http\Controllers\ImageSearchController;
 // use App\Http\Middleware\CheckAdmin;
 
 // Web Routes:
@@ -152,3 +152,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wishlist/{productId}', [WishlistController::class, 'store']);
     Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy']);
 });
+
+
+
+Route::post('/image-search', [ImageSearchController::class, 'search']);
