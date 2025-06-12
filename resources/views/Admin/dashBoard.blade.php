@@ -57,7 +57,7 @@
       data: {
         labels: salesLabels,
         datasets: [{
-          label: 'Sales',
+          label: 'Doanh thu',
           data: salesData,
           borderColor: '#6366F1',
           backgroundColor: 'rgba(99, 102, 241, 0.2)',

@@ -266,7 +266,7 @@ class AdminManageController extends Controller
         ], 200);
     }
 
-      public function Chart(){
+    public function Chart(){
         $user = User::all();
         $userCount = $user->count();
         $activeCount = $user->where('is_active', 'on')->count();
