@@ -48,6 +48,10 @@ Route::post('/admin/product/add-img', [AdminController::class, 'addImg']);
 Route::post('/admin/product/edit-img/{id}', [AdminController::class, 'editImg']);
 Route::delete('/admin/product/delete-img/{id}', [AdminController::class, 'deleteImg']);
 //Review
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/review', [ProductController::class, 'reviews']);
+    Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
+});
 Route::get('/review', [ProductController::class, 'reviews']);
 Route::post('/review', [ProductController::class, 'reviews']);
 

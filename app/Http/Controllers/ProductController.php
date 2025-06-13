@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\User;
 use App\Models\Discount;
 use App\Models\Review;
+use App\Models\Order;
 use App\Models\Discount_user;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
@@ -264,7 +265,6 @@ public function hotProduct() {
 
     public function reviews(Request $request){
         $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
             'product_id' => 'required|integer|exists:products,id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000'
@@ -275,9 +275,24 @@ public function hotProduct() {
             return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
         }
 
+       $hasPurchased = Order::where('user_id', $user->id)
+        ->where('status', 'paid')
+        ->whereHas('order_items', function($query) use ($request) {
+            $query->whereHas('variant', function($q) use ($request) {
+                $q->where('product_id', $request->product_id);
+            });
+        })
+        ->exists();
+        if (!$hasPurchased) {
+            return response()->json([
+                'status' => 403,
+                'message' => 'Bạn phải mua sản phẩm này mới có thể đánh giá',
+            ], 403);
+        }
+
         $review = new Review();
-        $review->user_id = $request->user_id;
         $review->product_id = $request->product_id;
+        $review->user_id = $user->id;
         $review->rating = $request->rating;
         $review->comment = $request->comment;
         $review->save();
