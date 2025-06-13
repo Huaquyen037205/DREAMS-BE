@@ -263,6 +263,27 @@ public function hotProduct() {
         ], 200);
     }
 
+    public function reviewByProductId($product_id)
+    {
+        $reviews = Review::with('user')
+            ->where('product_id', $product_id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($reviews->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không có đánh giá cho sản phẩm này',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách đánh giá cho sản phẩm',
+            'data' => $reviews
+        ], 200);
+    }
+
     public function reviews(Request $request){
         $request->validate([
             'product_id' => 'required|integer|exists:products,id',
