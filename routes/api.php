@@ -42,12 +42,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/discount/apply', [DiscountController::class, 'applyDiscount']);
    //oder
    Route::get('/order', [PaymentController::class, 'getOrdersByUser']);
+    //Review
+    Route::post('/review', [ProductController::class, 'reviews']);
+    Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
+
 });
 
 
-//Review
-Route::post('/review', [ProductController::class, 'reviews']);
-Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
+
 
 
 //Img
