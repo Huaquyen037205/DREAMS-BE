@@ -43,9 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
    //oder
    Route::get('/order', [PaymentController::class, 'getOrdersByUser']);
     //Review
+    Route::get('/review', [ProductController::class, 'getReviews']);
     Route::post('/review', [ProductController::class, 'reviews']);
+    Route::get('/review/{id}', [ProductController::class, 'reviewByProductId']);
     Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
-
 });
 
 
