@@ -211,7 +211,68 @@ public function hotProduct() {
         ], 200);
     }
 
+    public function filterAll(Request $request)
+    {
+        $size = strtoupper($request->input('size', null));
+        $min = $request->input('min', 0);
+        $max = $request->input('max', null);
+        $sort = $request->input('sort', 'asc'); // 'asc' hoặc 'desc'
 
+        if (!in_array($sort, ['asc', 'desc'])) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Tham số sắp xếp không hợp lệ. Chỉ chấp nhận asc hoặc desc.',
+            ], 400);
+        }
+
+        if ($size && !in_array($size, ['S', 'M', 'L', 'XL'])) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Size không hợp lệ. Chỉ chấp nhận S, M, L, XL.',
+            ], 400);
+        }
+
+        $query = Product::with([
+            'img',
+            'category',
+            'variant' => function ($q) use ($size, $sort) {
+                if ($size) {
+                    $q->where('size', $size);
+                }
+                $q->orderByRaw('COALESCE(sale_price, price) ' . $sort);
+            }
+        ]);
+
+        // Lọc theo size
+        if ($size) {
+            $query->whereHas('variant', function ($q) use ($size) {
+                $q->where('size', $size);
+            });
+        }
+
+        // Lọc theo giá
+        $query->whereHas('variant', function ($q) use ($min, $max) {
+            $q->whereRaw('COALESCE(sale_price, price) >= ?', [$min]);
+            if ($max !== null) {
+                $q->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
+            }
+        });
+
+        $products = $query->get();
+
+        if ($products->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm phù hợp.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách sản phẩm đã lọc.',
+            'data' => $products
+        ], 200);
+    }
 
     public function filterBySize(Request $request)
     {
