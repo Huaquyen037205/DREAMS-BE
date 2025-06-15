@@ -26,6 +26,7 @@ Route::get('/category/{id}', [ProductController::class, 'productByCategory']);
 Route::get('/products/price', [ProductController::class, 'productByPrice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
 Route::get('/products/filter-size', [ProductController::class, 'filterBySize']);
+Route::get('/fill/product', [ProductController::class, 'filterAll']);
 
 //Login, Register
 Route::post('/register', [AuthController::class, 'register']);
@@ -48,8 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/review/{id}', [ProductController::class, 'reviewByProductId']);
     Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
 });
-
-
 
 
 
