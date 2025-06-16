@@ -47,14 +47,15 @@ class CateList extends Controller
     {
         $category = Category::findOrFail($id);
         $category->name = $request->name;
+        $category->status = $request->status;
        if ($request->hasFile('image_url')) {
-        $request->validate([
-            'image_url' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
-        $file = $request->file('image_url');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('img/'), $filename);
-        $category->image_url = $filename;
+            $request->validate([
+                'image_url' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+            $file = $request->file('image_url');
+            $filename = $file->getClientOriginalName();
+            $file->move(public_path('img/'), $filename);
+            $category->image_url = $filename;
         }
         $category->save();
 
