@@ -243,6 +243,7 @@ class AdminController extends Controller
     public function editCategory(Request $request,$id){
 
         $request->validate([
+            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'name' => 'required|string|max:255',
         ]);
 

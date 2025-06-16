@@ -26,11 +26,11 @@ class CateList extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'status' => 'required|boolean',
         ]);
 
-        Category::create($request->only('name', 'description', 'status'));
+        Category::create($request->only('name', 'image_url', 'status'));
 
         return redirect()->route('categories.index')->with('success', 'Tạo danh mục thành công!');
     }
@@ -47,7 +47,15 @@ class CateList extends Controller
     {
         $category = Category::findOrFail($id);
         $category->name = $request->name;
-        $category->status = $request->status;
+       if ($request->hasFile('image_url')) {
+        $request->validate([
+            'image_url' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+        $file = $request->file('image_url');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('img/'), $filename);
+        $category->image_url = $filename;
+        }
         $category->save();
 
         return redirect('/admin/categories')->with('success', 'Cập nhật thành công!');
