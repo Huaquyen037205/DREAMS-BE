@@ -30,7 +30,7 @@
         </li>
 
         <div class="group">
-          <div onclick="toggleSubMenu('users-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('users-submenu')" class="py-2.5 px-6 hover:bg-purple-50 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
             <a href="/admin/user/list"><i class="ph ph-users"></i> Người dùng </a>
           </div>
           <div id="users-submenu" class="hidden flex-col">
@@ -41,7 +41,7 @@
         </div>
 
         <div class="group">
-          <div onclick="toggleSubMenu('products-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('products-submenu')" class="py-2.5 px-6 hover:bg-purple-50 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
                <a href="/admin/product/list"><i class="ph ph-package"></i> Sản Phẩm </a>
           </div>
           <div id="products-submenu" class="hidden flex-col">
@@ -51,8 +51,8 @@
           </div>
         </div>
 
-        <div class="group">
-          <div onclick="toggleSubMenu('orders-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+        <div class="group hover:bg-purple-50">
+          <div onclick="toggleSubMenu('orders-submenu')" class="py-2.5 px-6 hover:bg-purple-50 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
             <a href="/admin/order"><i class="ph ph-truck"></i> Đơn Hàng</a>
           </div>
           {{-- <div id="orders-submenu" class="hidden flex-col">
@@ -62,17 +62,17 @@
         </div>
 
         <div class="group">
-          <div onclick="toggleSubMenu('discounts-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('discounts-submenu')" class="py-2.5 px-6 text-gray-700 hover:bg-purple-50 font-medium cursor-pointer flex items-center gap-2">
             <i class="ph ph-percent"></i> Mã Giảm giá <i class="ph ph-caret-down ml-auto"></i>
           </div>
           <div id="discounts-submenu" class="hidden flex-col">
-            <a href="{{ url('/admin/coupons') }}" class="block py-2 px-12 hover:text-indigo-600">Danh sách mã giảm giá</a>
-            <a href="{{ url('/admin/coupons/create') }}" class="block py-2 px-12 hover:text-indigo-600">Thêm mã giảm giá</a>
+            <a href="{{ url('/admin/coupons') }}" class="block py-2 px-12 hover:text-indigo-600 hover:bg-purple-50">Danh sách mã giảm giá</a>
+            <a href="{{ url('/admin/coupons/create') }}" class="block py-2 px-12 hover:text-indigo-600 hover:bg-purple-50">Thêm mã giảm giá</a>
           </div>
         </div>
 
          <div class="group">
-          <div onclick="toggleSubMenu('disscounts-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('disscounts-submenu')" class="py-2.5 px-6 text-gray-700 hover:bg-purple-50 font-medium cursor-pointer flex items-center gap-2">
             <a href="/admin/discount"><i class="ph ph-tag"></i> Chương trình giảm giá</a>
           </div>
           {{-- <div id="orders-submenu" class="hidden flex-col">
@@ -81,7 +81,7 @@
           </div> --}}
         </div>
 
-        <div class="group">
+        <div class="group hover:bg-purple-50">
             <div onclick="toggleSubMenu('flashsale-submenu')" class="py-2.5 px-6 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
                 <i class="ph ph-lightning"></i> Flash-Sale <i class="ph ph-caret-down ml-auto"></i>
             </div>
