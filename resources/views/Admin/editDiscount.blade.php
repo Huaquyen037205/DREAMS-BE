@@ -25,11 +25,17 @@
             <div>
                 <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Tên Chương Trình</label>
                 <input type="text" name="name" id="name" value="{{ old('name', $discount->name) }}" class="w-full border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                @error('name')
+                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                @enderror
             </div>
 
             <div>
                 <label for="percentage" class="block text-sm font-semibold text-gray-700 mb-1">Phần Trăm Giảm (%)</label>
                 <input type="number" name="percentage" id="percentage" min="1" max="100" value="{{ old('percentage', $discount->percentage) }}" class="w-full border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                @error('percentage')
+                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                @enderror
             </div>
         </div>
 
@@ -37,16 +43,18 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label for="start_day" class="block text-sm font-semibold text-gray-700 mb-1">Ngày Bắt Đầu</label>
-                <input type="date" name="start_day" id="start_day"
-                       value="{{ old('start_day', \Carbon\Carbon::parse($discount->start_day)->format('Y-m-d')) }}"
-                       class="w-full border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                <input type="date" name="start_day" id="start_day" value="{{ old('start_day', \Carbon\Carbon::parse($discount->start_day)->format('Y-m-d')) }}" class="w-full border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                @error('start_day')
+                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                @enderror
             </div>
 
             <div>
                 <label for="end_day" class="block text-sm font-semibold text-gray-700 mb-1">Ngày Kết Thúc</label>
-                <input type="date" name="end_day" id="end_day"
-                       value="{{ old('end_day', \Carbon\Carbon::parse($discount->end_day)->format('Y-m-d')) }}"
-                       class="w-full border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                <input type="date" name="end_day" id="end_day" value="{{ old('end_day', \Carbon\Carbon::parse($discount->end_day)->format('Y-m-d')) }}" class="w-full border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                @error('end_day')
+                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                @enderror
             </div>
         </div>
 
