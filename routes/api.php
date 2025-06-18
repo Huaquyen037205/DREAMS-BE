@@ -154,5 +154,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-
+//AI SEARCH
 Route::post('/image-search', [ImageSearchController::class, 'search']);
+
+
+
+

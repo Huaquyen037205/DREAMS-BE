@@ -121,7 +121,10 @@ Route::prefix('admin/flash-sale')->group(function () {
      // Route xử lý cập nhật sản phẩm Flash Sale
     Route::put('{flashsale}/variant/{variant}', [FlashSaleController::class, 'updateVariant'])->name('flashsale.variant.update');
     Route::delete('{flashsale}/variant/{variant}', [FlashSaleController::class, 'destroyVariant'])->name('flashsale.variant.destroy');
+
+    Route::get('/api/product/{id}/variants', [FlashSaleController::class, 'apiProductVariants']);
 });
+
 
 // Category Routes
 // Danh sách danh mục
@@ -132,6 +135,7 @@ Route::post('/admin/categories', [CateList::class, 'store'])->name('categories.s
 Route::get('/admin/categories/{id}', [CateList::class, 'show'])->name('categories.show');
 // Hiển thị form chỉnh sửa danh mục
 Route::put('/admin/categories/{id}', [CateList::class, 'update']);
+
 
 
 
