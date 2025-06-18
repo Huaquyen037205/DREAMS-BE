@@ -48,7 +48,12 @@ Route::post('/admin/product/add-img', [AdminController::class, 'addImg']);
 Route::post('/admin/product/edit-img/{id}', [AdminController::class, 'editImg']);
 Route::delete('/admin/product/delete-img/{id}', [AdminController::class, 'deleteImg']);
 //Review
-Route::get('/review', [ProductController::class, 'reviews']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/review', [ProductController::class, 'reviews']);
+    Route::post('/review', [ProductController::class, 'reviews']);
+    Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
+});
+;
 Route::post('/review', [ProductController::class, 'reviews']);
 
 Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function () {

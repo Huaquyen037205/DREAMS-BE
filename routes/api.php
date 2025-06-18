@@ -9,6 +9,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
+use App\Http\Controllers\virtualTryOn;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
@@ -26,6 +27,7 @@ Route::get('/category/{id}', [ProductController::class, 'productByCategory']);
 Route::get('/products/price', [ProductController::class, 'productByPrice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
 Route::get('/products/filter-size', [ProductController::class, 'filterBySize']);
+Route::get('/fill/product', [ProductController::class, 'filterAll']);
 
 //Login, Register
 Route::post('/register', [AuthController::class, 'register']);
@@ -35,19 +37,20 @@ Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
 route::post('/resetPassword', [AuthController::class, 'resetPassword']);
 Route::post('/change-password', [AuthController::class, 'changePassword']);
 
-
+Route::get('/review/{id}', [ProductController::class, 'reviewByProductId']);
 Route::middleware('auth:sanctum')->group(function () {
     //discount
     Route::post('/discount', [ProductController::class, 'discountUser']);
     Route::post('/discount/apply', [DiscountController::class, 'applyDiscount']);
    //oder
-   Route::get('/order', [PaymentController::class, 'getOrdersByUser']);
+    Route::get('/order', [PaymentController::class, 'getOrdersByUser']);
+    //Review
+    Route::get('/review', [ProductController::class, 'getReviews']);
+    Route::post('/review', [ProductController::class, 'reviews']);
+
+    Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
 });
 
-
-//Review
-Route::post('/review', [ProductController::class, 'reviews']);
-Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
 
 
 //Img

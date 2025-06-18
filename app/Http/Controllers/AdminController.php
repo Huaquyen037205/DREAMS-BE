@@ -13,7 +13,7 @@ class AdminController extends Controller
 {
     public function productAdmin(){
         $products = Product::with('img', 'variant', 'category')
-        ->orderBy('created_at')
+        ->orderBy('created_at', 'desc')
         ->paginate(8);
         return view('Admin.productList', ['products' => $products]);
         return response()->json([
@@ -85,7 +85,7 @@ class AdminController extends Controller
             $filename = $file->getClientOriginalName();
             $file->move(public_path('img'), $filename);
 
-                  if ($product->img && $product->img->first()) {
+            if ($product->img && $product->img->first()) {
                 $img = $product->img->first();
                 $img->name = $filename;
                 $img->save();
@@ -243,6 +243,7 @@ class AdminController extends Controller
     public function editCategory(Request $request,$id){
 
         $request->validate([
+            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'name' => 'required|string|max:255',
         ]);
 
@@ -322,7 +323,15 @@ class AdminController extends Controller
             'sale_price' => 'nullable|numeric',
             'status' => 'required|string|max:255',
             'active' => 'nullable|in:on,off',
+        ], [
+            'product_id.required' => 'Vui lòng chọn sản phẩm',
+            'size.required' => 'Vui lòng nhập kích cỡ',
+            'stock_quantity.required' => 'Vui lòng nhập số lượng tồn kho',
+            'price.required' => 'Vui lòng nhập giá sản phẩm',
+            'status.required' => 'Vui lòng chọn trạng thái sản phẩm',
+            'active.in' => 'Trạng thái kích hoạt không hợp lệ',
         ]);
+
         $variant = Variant::create($request->all());
         return redirect()->back()->with('success', 'Thêm biến thể sản phẩm thành công');
         // Log::info($request->all());
@@ -368,6 +377,13 @@ class AdminController extends Controller
             'sale_price' => 'nullable|numeric',
             'status' => 'required|string|max:255',
             'active' => 'nullable|in:on,off',
+        ], [
+            'product_id.required' => 'Vui lòng chọn sản phẩm',
+            'size.required' => 'Vui lòng nhập kích cỡ',
+            'stock_quantity.required' => 'Vui lòng nhập số lượng tồn kho',
+            'price.required' => 'Vui lòng nhập giá sản phẩm',
+            'status.required' => 'Vui lòng chọn trạng thái sản phẩm',
+            'active.in' => 'Trạng thái kích hoạt không hợp lệ',
         ]);
         $variant = Variant::findOrFail($id);
         if($variant) {
@@ -397,7 +413,7 @@ class AdminController extends Controller
             }
 
             if ($variant->save()) {
-                return redirect()->route('product.detail', ['id' => $variant->id])->with('success', 'Cập nhật biến thể thành công');
+                return redirect()->route('product.detail', ['id' => $variant->product_id])->with('success', 'Cập nhật biến thể thành công');
                 if ($request->wantsJson() || $request->ajax()) {
                     return response()->json([
                         'status' => 200,
@@ -479,14 +495,19 @@ class AdminController extends Controller
     }
 
     public function editImg(Request $request, $id){
-       $img = Img::find($id);
+        $img = Img::find($id);
         if ($img) {
             $request->validate([
                 'name' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
             if ($request->hasFile('name')) {
+                $oldPath = public_path('img/' . $img->name);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+
                 $file = $request->file('name');
-                $filename = time() . '_' . $file->getClientOriginalName();
+                $filename = $file->getClientOriginalName();
                 $file->move(public_path('img'), $filename);
                 $img->name = $filename;
                 $img->save();

@@ -171,6 +171,15 @@ class AdminManageController extends Controller
             'percentage' => 'required|integer|min:1|max:100',
             'start_day' => 'required|date',
             'end_day' => 'required|date|after_or_equal:start_day',
+        ], [
+            'name.required' => 'Tên mã giảm giá là bắt buộc',
+            'percentage.required' => 'Phần trăm giảm giá là bắt buộc',
+            'percentage.integer' => 'Phần trăm giảm giá phải là một số nguyên',
+            'percentage.min' => 'Phần trăm giảm giá phải lớn hơn 0',
+            'percentage.max' => 'Phần trăm giảm giá không được vượt quá 100',
+            'start_day.required' => 'Ngày bắt đầu là bắt buộc',
+            'end_day.required' => 'Ngày kết thúc là bắt buộc',
+            'end_day.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu',
         ]);
 
         $discount = new Discount();
@@ -189,6 +198,22 @@ class AdminManageController extends Controller
 
     public function editDiscount(Request $request, $id)
     {
+        $request->validate([
+            'name' => 'required',
+            'percentage' => 'required|integer|min:1|max:100',
+            'start_day' => 'required|date',
+            'end_day' => 'required|date|after_or_equal:start_day',
+        ], [
+            'name.required' => 'Tên mã giảm giá là bắt buộc',
+            'percentage.required' => 'Phần trăm giảm giá là bắt buộc',
+            'percentage.integer' => 'Phần trăm giảm giá phải là một số nguyên',
+            'percentage.min' => 'Phần trăm giảm giá phải lớn hơn 0',
+            'percentage.max' => 'Phần trăm giảm giá không được vượt quá 100',
+            'start_day.required' => 'Ngày bắt đầu là bắt buộc',
+            'end_day.required' => 'Ngày kết thúc là bắt buộc',
+            'end_day.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu',
+        ]);
+
         $discount = Discount::findOrFail($id);
         $discount->name = $request->name;
         $discount->percentage = $request->percentage;
@@ -266,7 +291,7 @@ class AdminManageController extends Controller
         ], 200);
     }
 
-      public function Chart(){
+    public function Chart(){
         $user = User::all();
         $userCount = $user->count();
         $activeCount = $user->where('is_active', 'on')->count();

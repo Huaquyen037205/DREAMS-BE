@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\User;
 use App\Models\Discount;
 use App\Models\Review;
+use App\Models\Order;
 use App\Models\Discount_user;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
@@ -210,7 +211,68 @@ public function hotProduct() {
         ], 200);
     }
 
+    public function filterAll(Request $request)
+    {
+        $size = strtoupper($request->input('size', null));
+        $min = $request->input('min', 0);
+        $max = $request->input('max', null);
+        $sort = $request->input('sort', 'asc'); // 'asc' hoặc 'desc'
 
+        if (!in_array($sort, ['asc', 'desc'])) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Tham số sắp xếp không hợp lệ. Chỉ chấp nhận asc hoặc desc.',
+            ], 400);
+        }
+
+        if ($size && !in_array($size, ['S', 'M', 'L', 'XL'])) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Size không hợp lệ. Chỉ chấp nhận S, M, L, XL.',
+            ], 400);
+        }
+
+        $query = Product::with([
+            'img',
+            'category',
+            'variant' => function ($q) use ($size, $sort) {
+                if ($size) {
+                    $q->where('size', $size);
+                }
+                $q->orderByRaw('COALESCE(sale_price, price) ' . $sort);
+            }
+        ]);
+
+        // Lọc theo size
+        if ($size) {
+            $query->whereHas('variant', function ($q) use ($size) {
+                $q->where('size', $size);
+            });
+        }
+
+        // Lọc theo giá
+        $query->whereHas('variant', function ($q) use ($min, $max) {
+            $q->whereRaw('COALESCE(sale_price, price) >= ?', [$min]);
+            if ($max !== null) {
+                $q->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
+            }
+        });
+
+        $products = $query->get();
+
+        if ($products->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm phù hợp.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách sản phẩm đã lọc.',
+            'data' => $products
+        ], 200);
+    }
 
     public function filterBySize(Request $request)
     {
@@ -262,9 +324,29 @@ public function hotProduct() {
         ], 200);
     }
 
+    public function reviewByProductId($product_id)
+    {
+        $reviews = Review::with('user')
+            ->where('product_id', $product_id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($reviews->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không có đánh giá cho sản phẩm này',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách đánh giá cho sản phẩm',
+            'data' => $reviews
+        ], 200);
+    }
+
     public function reviews(Request $request){
         $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
             'product_id' => 'required|integer|exists:products,id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000'
@@ -275,9 +357,24 @@ public function hotProduct() {
             return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
         }
 
+       $hasPurchased = Order::where('user_id', $user->id)
+        ->where('status', 'paid')
+        ->whereHas('order_items', function($query) use ($request) {
+            $query->whereHas('variant', function($q) use ($request) {
+                $q->where('product_id', $request->product_id);
+            });
+        })
+        ->exists();
+        if (!$hasPurchased) {
+            return response()->json([
+                'status' => 403,
+                'message' => 'Bạn phải mua sản phẩm này mới có thể đánh giá',
+            ], 403);
+        }
+
         $review = new Review();
-        $review->user_id = $request->user_id;
         $review->product_id = $request->product_id;
+        $review->user_id = $user->id;
         $review->rating = $request->rating;
         $review->comment = $request->comment;
         $review->save();

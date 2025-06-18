@@ -13,6 +13,7 @@
             <thead>
                 <tr class="bg-gray-100 text-gray-600 text-sm uppercase">
                     <th class="p-2">STT</th>
+                    <th class="p-2">Hình Ảnh</th>
                     <th class="p-2">Tên Danh Mục</th>
                     <th class="p-2">Trạng Thái</th>
                     <th class="p-2">Hành Động</th>
@@ -24,6 +25,9 @@
                     style="cursor:pointer"
                     onclick="window.location='{{ url('/admin/categories/'.$category->id) }}'">
                     <td class="p-2">{{ $index + 1 }}</td>
+                    <td class="p-2">
+                        <img src="{{ asset('img/'.$category->image_url) }}" alt="Ảnh danh mục" class="w-16 h-16 object-cover rounded">
+                    </td>
                     <td class="p-2">{{ $category->name }}</td>
                     <td class="p-2">
                         @if ($category->status)
@@ -52,6 +56,10 @@
             <h2 class="text-xl font-semibold mb-4">Thêm Danh Mục Mới</h2>
             <form action="{{ url('/admin/categories') }}" method="POST">
                 @csrf
+                 <div class="mb-4">
+                    <label class="block text-gray-700 mb-1" for="image_url">Thêm hình ảnh</label>
+                    <input type="file" name="image_url" id="image_url" class="w-full border rounded px-3 py-2" required>
+                </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-1" for="name">Tên danh mục</label>
                     <input type="text" name="name" id="name" class="w-full border rounded px-3 py-2" required>
@@ -75,9 +83,13 @@
     <div id="editCategoryModal" class="fixed inset-0 bg-black bg-opacity-30 hidden flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded shadow w-full max-w-md">
             <h2 class="text-xl font-semibold mb-4">Sửa Danh Mục</h2>
-            <form id="editForm" method="POST">
+            <form id="editForm" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-1">Tên hình ảnh</label>
+                    <input type="file" name="image_url" id="editImageUrl" class="w-full border rounded px-3 py-2" required>
+                </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-1">Tên danh mục</label>
                     <input type="text" name="name" id="editName" class="w-full border rounded px-3 py-2" required>

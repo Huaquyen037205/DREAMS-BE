@@ -33,6 +33,9 @@
                         <option value="{{ $product->id }}">{{ $product->name }}</option>
                     @endforeach
                 </select>
+                @error('product_id')
+                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                @enderror
             </div>
 
             <div>
@@ -44,10 +47,8 @@
                     @endforeach
                 </select>
             </div>
-            {{-- Hiển thị lỗi nếu có --}}
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {{-- Size --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Size</label>
                     <select name="size" class="mt-1 w-full border px-3 py-2 rounded">
@@ -56,27 +57,33 @@
                             <option value="{{ $size }}" {{ $variant->size == $size ? 'selected' : '' }}>{{ $size }}</option>
                         @endforeach
                     </select>
+                    @error('size')
+                        <div class="text-red-500 text-sm">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                {{-- Số lượng --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Số Lượng</label>
                     <input type="number" name="stock_quantity" min="1" value="{{ $variant->stock_quantity }}" class="mt-1 w-full border px-3 py-2 rounded">
+                    @error('stock_quantity')
+                        <div class="text-red-500 text-sm">{{ $message }}</div>
+                    @enderror
+
                 </div>
 
-                {{-- Giá --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Giá</label>
                     <input type="number" name="price" min="0" value="{{ $variant->price }}" class="mt-1 w-full border px-3 py-2 rounded">
+                    @error('price')
+                        <div class="text-red-500 text-sm">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                {{-- Giá Giảm --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Giá Giảm</label>
                     <input type="number" name="sale_price" min="0" value="{{ $variant->sale_price }}" class="mt-1 w-full border px-3 py-2 rounded">
                 </div>
 
-                {{-- Trạng Thái Hoạt Động --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Trạng Thái Hoạt Động</label>
                     <select name="active" class="mt-1 w-full border px-3 py-2 rounded">
@@ -85,7 +92,6 @@
                     </select>
                 </div>
 
-                {{-- Tình Trạng Hàng --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Tình Trạng</label>
                     <select name="status" class="mt-1 w-full border px-3 py-2 rounded">
@@ -95,7 +101,6 @@
                 </div>
             </div>
 
-            {{-- Nút hành động --}}
             <div class="pt-4">
                 <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded text-sm">Thêm Biến Thể</button>
                 <a href="{{ url('/admin/product/list') }}" class="ml-3 text-gray-600 hover:text-indigo-500 text-sm">Hủy</a>
