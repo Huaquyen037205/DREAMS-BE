@@ -9,6 +9,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
+use App\Http\Controllers\virtualTryOn;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
@@ -36,13 +37,13 @@ Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
 route::post('/resetPassword', [AuthController::class, 'resetPassword']);
 Route::post('/change-password', [AuthController::class, 'changePassword']);
 
-   Route::get('/review/{id}', [ProductController::class, 'reviewByProductId']);
+Route::get('/review/{id}', [ProductController::class, 'reviewByProductId']);
 Route::middleware('auth:sanctum')->group(function () {
     //discount
     Route::post('/discount', [ProductController::class, 'discountUser']);
     Route::post('/discount/apply', [DiscountController::class, 'applyDiscount']);
    //oder
-   Route::get('/order', [PaymentController::class, 'getOrdersByUser']);
+    Route::get('/order', [PaymentController::class, 'getOrdersByUser']);
     //Review
     Route::get('/review', [ProductController::class, 'getReviews']);
     Route::post('/review', [ProductController::class, 'reviews']);

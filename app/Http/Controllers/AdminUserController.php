@@ -108,40 +108,40 @@ class AdminUserController extends Controller
 
     public function resetPasswordAdmin(Request $request)
     {
-    $email = $request->query('email');
-    $token = $request->query('token');
+        $email = $request->query('email');
+        $token = $request->query('token');
 
-    $reset = DB::table('password_resets')->where([
-        ['email', $email],
-        ['token', $token]
-    ])->first();
+        $reset = DB::table('password_resets')->where([
+            ['email', $email],
+            ['token', $token]
+        ])->first();
 
-    if (!$reset) {
-        return response('Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.', 400);
-    }
-
-    $newPassword = Str::random(8);
-    $user = User::where('email', $email)->first();
-    if($user){
-        $user->password = Hash::make($newPassword);
-        $user->save();
-        DB::table('password_resets')->where('email', $email)->delete();
-
-        if($request->expectsJson() || $request->wantsJson()) {
-            return response()->json([
-                'status' => 200,
-                'message' => 'Mật khẩu đã được đặt lại thành công',
-                'new_password' => $newPassword
-            ], 200);
+        if (!$reset) {
+            return response('Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.', 400);
         }
-        return view('Admin.notification', ['newPassword' => $newPassword]);
-    } else {
-        return response()->json([
-            'status' => 404,
-            'message' => 'Email không tồn tại'
-        ], 404);
+
+        $newPassword = Str::random(8);
+        $user = User::where('email', $email)->first();
+        if($user){
+            $user->password = Hash::make($newPassword);
+            $user->save();
+            DB::table('password_resets')->where('email', $email)->delete();
+
+            if($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Mật khẩu đã được đặt lại thành công',
+                    'new_password' => $newPassword
+                ], 200);
+            }
+            return view('Admin.notification', ['newPassword' => $newPassword]);
+        } else {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Email không tồn tại'
+            ], 404);
+        }
     }
-}
 
     public function changePasswordAdmin(Request $request)
     {
