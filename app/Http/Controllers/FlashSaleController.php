@@ -62,14 +62,23 @@ class FlashSaleController extends Controller
 {
     $request->validate([
         'product_id' => 'required|exists:products,id',
+        'size' => 'required|string',
         'sale_price' => 'required|numeric|min:0',
         'flash_quantity' => 'required|integer|min:1',
     ]);
 
-    // Lấy variant đầu tiên của sản phẩm
-    $variant = Variant::where('product_id', $request->product_id)->first();
+    // Lấy variant đúng theo sản phẩm và size
+    $variant = \App\Models\Variant::where('product_id', $request->product_id)
+        ->where('size', $request->size)
+        ->first();
+
     if (!$variant) {
-        return back()->withErrors(['Sản phẩm này chưa có biến thể (size)!']);
+        return back()->withErrors(['Không tìm thấy biến thể size này!']);
+    }
+
+    // Kiểm tra số lượng tồn kho
+    if ($request->flash_quantity > $variant->stock_quantity) {
+        return back()->withErrors(['Số lượng flash sale không được lớn hơn số lượng còn lại!']);
     }
 
     // Lưu vào bảng flash_sale_variants
@@ -148,10 +157,11 @@ public function apiActiveFlashSales()
             ->where('flash_sale_variants.flash_sale_id', $flashSale->id)
             ->select(
                 'products.id as product_id',
-                'products.*',
+                'products.name as product_name',
                 'variant.id as variant_id',
-                'variant.price as original_price',
-                'flash_sale_variants.sale_price as flash_sale_price',
+                'variant.size as size',                    // Size của variant
+                'variant.price as original_price',         // Giá gốc của size
+                'flash_sale_variants.sale_price as flash_sale_price', // Giá flash sale của size
                 'flash_sale_variants.flash_quantity',
                 'flash_sale_variants.flash_sold'
             )
@@ -202,5 +212,20 @@ public function destroyVariant($flashSaleId, $variantId)
         ->firstOrFail();
     $variant->delete();
     return redirect()->route('flashsale.show', $flashSaleId)->with('success', 'Đã xóa sản phẩm khỏi chương trình!');
+}
+
+
+public function apiProductVariants($id)
+{
+    $variants = \DB::table('variant')
+        ->where('product_id', $id)
+        ->get()
+        ->map(function ($variant) {
+            $img = \DB::table('img')->where('id', $variant->img_id)->first();
+            $variant->img = $img ? asset('img/' . $img->name) : null;
+            $variant->quantity = $variant->stock_quantity;
+            return $variant;
+        });
+    return response()->json($variants);
 }
 }

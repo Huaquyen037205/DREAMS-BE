@@ -14,7 +14,7 @@ use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\WishlistController;
-
+use App\Http\Controllers\ImageSearchController;
 // use App\Http\Middleware\CheckAdmin;
 
 // Web Routes:
@@ -28,7 +28,7 @@ Route::get('/products/price', [ProductController::class, 'productByPrice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
 Route::get('/products/filter-size', [ProductController::class, 'filterBySize']);
 Route::get('/fill/product', [ProductController::class, 'filterAll']);
-
+Route::get('/products-by-category', [ProductController::class, 'productsByCategoryId']);
 //Login, Register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -155,3 +155,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wishlist/{productId}', [WishlistController::class, 'store']);
     Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy']);
 });
+
+
+//AI SEARCH
+Route::post('/image-search', [ImageSearchController::class, 'search']);
+
+
+
+

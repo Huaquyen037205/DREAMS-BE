@@ -1,3 +1,4 @@
+{{-- filepath: c:\xampp\htdocs\duantn\DREAMS-BE\resources\views\Admin\Fl_addp.blade.php --}}
 @extends('template.admin')
 
 @section('content')
@@ -29,62 +30,116 @@
                     class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
                     required>
                 <option value="">-- Chọn sản phẩm --</option>
-                @foreach ($products as $product)
-                    <option value="{{ $product->id }}"
-                            data-img="{{ $product->img && $product->img->first() ? asset('img/' . $product->img->first()->name) : '' }}">
-                        {{ $product->name }}
-                    </option>
+                @foreach($products as $product)
+                    <option value="{{ $product->id }}">{{ $product->name }}</option>
                 @endforeach
             </select>
+        </div>
 
-            <!-- Ảnh preview -->
-            <div id="variantImgWrap" class="mt-4">
-                <img id="variantImg" src="" alt="Ảnh sản phẩm"
-                     class="max-w-[120px] h-auto rounded border border-gray-300 shadow-sm hidden transition-opacity duration-300">
-            </div>
+        <!-- Chọn size -->
+        <div class="mt-4">
+            <label for="sizeSelect" class="block text-sm font-semibold text-gray-700 mb-2">📏 Chọn size</label>
+            <select id="sizeSelect" name="size"
+                    class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+                    required>
+                <option value="">-- Chọn size --</option>
+            </select>
+        </div>
+
+        <!-- Hiện số lượng còn lại -->
+        <div class="mt-2">
+            <span id="stockInfo" class="text-sm text-gray-600"></span>
+        </div>
+
+        <!-- Ảnh preview -->
+        <div id="variantImgWrap" class="mt-4">
+            <img id="variantImg" src="" alt="" class="hidden w-32 h-32 object-cover rounded-lg border" />
         </div>
 
         <!-- Giá Flash Sale -->
         <div>
             <label for="sale_price" class="block text-sm font-semibold text-gray-700 mb-2">💰 Giá flash sale</label>
             <input type="number" name="sale_price" id="sale_price" min="0" step="1000"
-                   placeholder="Nhập giá giảm trong chương trình"
-                   class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                   required />
+                   class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+                   required>
         </div>
 
         <!-- Số lượng Flash Sale -->
         <div>
             <label for="flash_quantity" class="block text-sm font-semibold text-gray-700 mb-2">📦 Số lượng flash sale</label>
             <input type="number" name="flash_quantity" id="flash_quantity" min="1"
-                   placeholder="Nhập số lượng áp dụng giảm giá"
-                   class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                   required />
+                   class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+                   required>
         </div>
 
         <!-- Nút submit -->
         <div class="flex justify-end pt-4">
             <button type="submit"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg shadow transition duration-200">
-                ✅ Thêm sản phẩm
+                    class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                Thêm vào flash sale
             </button>
         </div>
     </form>
 
-    <!-- JS hiện ảnh -->
+    <!-- JS hiện ảnh, size, số lượng -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const select = document.getElementById('productSelect');
             const img = document.getElementById('variantImg');
+            const sizeSelect = document.getElementById('sizeSelect');
+            const stockInfo = document.getElementById('stockInfo');
+            const flashQuantity = document.getElementById('flash_quantity');
+
+            let variants = [];
 
             select.addEventListener('change', function () {
-                const selected = select.options[select.selectedIndex];
-                const imgUrl = selected.getAttribute('data-img');
-                if (imgUrl) {
-                    img.src = imgUrl;
-                    img.classList.remove('hidden');
+                // Reset size select
+                sizeSelect.innerHTML = '<option value="">-- Chọn size --</option>';
+                stockInfo.textContent = '';
+                flashQuantity.value = '';
+                flashQuantity.max = '';
+                img.classList.add('hidden');
+
+                // Lấy variants theo sản phẩm
+                const productId = select.value;
+                if (productId) {
+                    fetch(`/admin/flash-sale/api/product/${productId}/variants`)
+                        .then(res => res.json())
+                        .then(data => {
+                            variants = data;
+                            data.forEach(variant => {
+                                const opt = document.createElement('option');
+                                opt.value = variant.size;
+                                opt.textContent = variant.size;
+                                sizeSelect.appendChild(opt);
+                            });
+                        });
+                }
+            });
+
+            sizeSelect.addEventListener('change', function () {
+                const variant = variants.find(v => v.size === sizeSelect.value);
+                if (variant) {
+                    stockInfo.textContent = `Số lượng còn lại: ${variant.quantity}`;
+                    flashQuantity.max = variant.quantity;
+                    if (variant.img) {
+                        img.src = variant.img;
+                        img.classList.remove('hidden');
+                    } else {
+                        img.classList.add('hidden');
+                    }
                 } else {
+                    stockInfo.textContent = '';
+                    flashQuantity.max = '';
                     img.classList.add('hidden');
+                }
+                flashQuantity.value = '';
+            });
+
+            flashQuantity.addEventListener('input', function () {
+                const max = parseInt(flashQuantity.max, 10);
+                if (max && flashQuantity.value > max) {
+                    flashQuantity.value = max;
                 }
             });
         });
