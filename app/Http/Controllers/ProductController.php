@@ -372,6 +372,16 @@ public function hotProduct() {
             ], 403);
         }
 
+         $hasReviewed = Review::where('user_id', $user->id)
+            ->where('product_id', $request->product_id)
+            ->exists();
+        if ($hasReviewed) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Bạn chỉ được đánh giá sản phẩm này một lần',
+            ], 400);
+        }
+
         $review = new Review();
         $review->product_id = $request->product_id;
         $review->user_id = $user->id;

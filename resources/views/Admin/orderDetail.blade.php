@@ -9,7 +9,7 @@
             <p><strong>Họ tên:</strong> {{ $orderInfo->user->name }}</p>
             <p><strong>Email:</strong> {{ $orderInfo->user->email }}</p>
             <p><strong>Điện thoại:</strong> {{ $orderInfo->user->phone ?? 'N/A' }}</p>
-            <p><strong>Địa chỉ:</strong> {{ $orderInfo->user->address ?? 'N/A' }}</p>
+            <p><strong>Địa chỉ:</strong> {{ $orderInfo->address->adress ?? 'N/A' }}</p>
         </div>
 
         <div class="bg-white p-6 rounded-2xl shadow-md">

@@ -58,22 +58,40 @@
                                     <td class="p-2"><a href="{{ url('/admin/product/'. $product->id) }}">{{$product->name}}</a></td>
                                     <td class="p-2">{{ $product->category->name ?? $product->category_id}}</td>
                                     <td class="p-2 max-w-xs truncate" style="max-width: 200px;">{{$product->description}}</td>
-                                    @if ($product->active == 'on')
-                                        <td class="p-2">
-                                            <span class="bg-green-100 text-green-500 text-xs px-2 py-1 rounded">Đang hoạt động</span>
-                                        </td>
-                                    @else
-                                        <td class="p-2">
-                                            <span class="bg-red-100 text-red-500 text-xs px-2 py-1 rounded">Ngưng kích hoạt</span>
-                                        </td>
-                                    @endif
+
+                                    @php
+                                        $variants = $product->variant;
+                                        if ($variants->count() == 0) {
+                                            $status = 'hết hàng';
+                                            $active = 'off';
+                                        } else {
+                                            $allOutOfStock = $variants->every(function($variant) {
+                                                return $variant->stock_quantity == 0;
+                                            });
+                                            if ($allOutOfStock) {
+                                                $status = 'hết hàng';
+                                                $active = 'off';
+                                            } else {
+                                                $status = $product->status;
+                                                $active = $product->active;
+                                            }
+                                        }
+                                    @endphp
 
                                     <td class="p-2">
-                                        @if ($product->status == 'còn hàng')
+                                        @if ($active == 'on')
+                                            <span class="bg-green-100 text-green-500 text-xs px-2 py-1 rounded">Đang hoạt động</span>
+                                        @else
+                                            <span class="bg-red-100 text-red-500 text-xs px-2 py-1 rounded">Ngưng kích hoạt</span>
+                                        @endif
+                                    </td>
+                                    <td class="p-2">
+                                        @if ($status == 'còn hàng')
                                             <span class="bg-green-100 text-green-500 text-xs px-2 py-1 rounded">Còn hàng</span>
                                         @else
                                             <span class="bg-red-100 text-red-500 text-xs px-2 py-1 rounded">Hết hàng</span>
                                         @endif
+                                    </td>
                                     <td class="p-2 flex gap-2">
                                         <a href="{{ url('/admin/product/edit/'. $product->id) }}" class="bg-green-100 text-green-500 px-2 py-1 rounded">
                                             <i class="ph ph-pencil"></i>

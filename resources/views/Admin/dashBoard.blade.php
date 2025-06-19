@@ -17,8 +17,8 @@
           {{-- <div class="text-blue-500 text-sm mt-2">+80.00%</div> --}}
         </div>
         <div class="bg-white p-4 shadow rounded">
-          <div class="text-gray-500">Daily Visitors</div>
-          <div class="text-xl font-bold">$987.21M</div>
+          <div class="text-gray-500">Tổng số sản phẩm</div>
+          <div class="text-xl font-bold">{{$totalProducts}}</div>
           {{-- <div class="text-yellow-500 text-sm mt-2">+80.00%</div> --}}
         </div>
       </div>
