@@ -28,7 +28,7 @@ Route::get('/products/price', [ProductController::class, 'productByPrice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
 Route::get('/products/filter-size', [ProductController::class, 'filterBySize']);
 Route::get('/fill/product', [ProductController::class, 'filterAll']);
-
+Route::get('/products-by-category', [ProductController::class, 'productsByCategoryId']);
 //Login, Register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);

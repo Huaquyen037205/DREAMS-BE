@@ -384,7 +384,26 @@ public function hotProduct() {
             'data' => $review
         ], 200);
     }
+public function productsByCategoryId(Request $request)
+{
+    $categoryId = $request->query('category_id');
+    if (!$categoryId) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Thiếu category_id'
+        ], 400);
+    }
 
+    $products = Product::with(['variant', 'img', 'category'])
+        ->where('category_id', $categoryId)
+        ->get();
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm theo category',
+        'data' => $products
+    ], 200);
+}
     public function deleteReview(Request $request, $id){
         $review = Review::findOrFail($id);
         if ($review->user_id !== auth()->id()) {
