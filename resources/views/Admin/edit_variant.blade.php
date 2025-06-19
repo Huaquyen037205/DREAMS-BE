@@ -26,8 +26,7 @@
         {{-- Tên sản phẩm (readonly hoặc select nếu cần thay đổi) --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Sản phẩm</label>
-            <input type="text" value="{{ $variant->product->name ?? '---' }}" readonly
-                class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100">
+            <input type="text" value="{{ $variant->product->name ?? '---' }}" readonly class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100">
             <input type="hidden" name="product_id" value="{{ $variant->product_id }}">
         </div>
 
@@ -45,29 +44,25 @@
         {{-- Size --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Size</label>
-            <input type="text" name="size" value="{{ old('size', $variant->size) }}"
-                class="w-full border border-gray-300 rounded px-3 py-2" required>
+            <input type="text" name="size" value="{{ old('size', $variant->size) }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
         </div>
 
         {{-- Số lượng --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Số lượng</label>
-            <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $variant->stock_quantity) }}"
-                class="w-full border border-gray-300 rounded px-3 py-2" required>
+            <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $variant->stock_quantity) }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
         </div>
 
         {{-- Giá --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Giá</label>
-            <input type="number" name="price" value="{{ old('price', number_format($variant->price, 0, ',', '.')) }}"
-                class="w-full border border-gray-300 rounded px-3 py-2" required>
+            <input type="number" name="price" value="{{ old('price', $variant->price) }}" class="w-full border border-gray-300 rounded px-3 py-2" required>
         </div>
 
         {{-- Giá giảm (nếu có) --}}
         <div class="mb-4">
             <label class="block font-medium mb-1">Giá giảm</label>
-            <input type="number" name="sale_price" value="{{ old('sale_price', number_format($variant->sale_price, 0, ',', '.')) }}"
-                class="w-full border border-gray-300 rounded px-3 py-2">
+            <input type="number" name="sale_price" value="{{ old('sale_price', $variant->sale_price) }}" class="w-full border border-gray-300 rounded px-3 py-2">
         </div>
 
         {{-- Tình trạng --}}

@@ -57,4 +57,11 @@ class Product extends Model
     {
         return $this->hasMany(Wishlist::class);
     }
+
+    public function flashSale()
+    {
+        return $this->hasOne(Flash_Sale_Variant::class)
+            ->where('start_time', '<=', now())
+            ->where('end_time', '>=', now());
+    }
 }

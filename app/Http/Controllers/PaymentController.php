@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Order_item;
+use App\Models\Flash_Sale_Variant;
 use App\Models\Variant;
 use App\Models\Address;
 use App\Models\Coupon;
@@ -23,9 +24,26 @@ class PaymentController extends Controller
         $total = 0;
         foreach ($cart as $item) {
             $variant = Variant::find($item['variant_id']);
-            $price = $variant && $variant->sale_price !== null ? $variant->sale_price : ($variant ? $variant->price : 0);
+            $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
+                ->whereHas('flashSale', function($q) {
+                    $now = now();
+                    $q->where('start_time', '<=', $now)
+                    ->where('end_time', '>=', $now);
+                })
+                ->first();
+
+
+            if ($flashSaleVariant) {
+                $price = $flashSaleVariant->sale_price;
+            } elseif ($variant && $variant->sale_price !== null) {
+                $price = $variant->sale_price;
+            } else {
+                $price = $variant ? $variant->price : 0;
+            }
+
             $total += $price * $item['quantity'];
         }
+
         $coupon_id = $request->input('coupon_id');
         $discountAmount = 0;
             if ($coupon_id) {
@@ -52,7 +70,21 @@ class PaymentController extends Controller
         $cart = $request->input('cart', []);
             foreach ($cart as $item) {
                 $variant = Variant::find($item['variant_id']);
-                $price = $variant && $variant->sale_price !== null ? $variant->sale_price : ($variant ? $variant->price : 0);
+                $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
+                    ->whereHas('flashSale', function($q) {
+                        $now = now();
+                        $q->where('start_time', '<=', $now)
+                        ->where('end_time', '>=', $now);
+                    })
+                    ->first();
+
+                if ($flashSaleVariant) {
+                    $price = $flashSaleVariant->sale_price;
+                } elseif ($variant && $variant->sale_price !== null) {
+                    $price = $variant->sale_price;
+                } else {
+                    $price = $variant ? $variant->price : 0;
+                }
 
                 $order->order_items()->create([
                 'variant_id' => $item['variant_id'],
@@ -161,7 +193,7 @@ class PaymentController extends Controller
 
     public function getOrderDetails($id)
     {
-        $order = Order::with(['order_items', 'order_items.variant', 'order_items.product', 'order_items.product.img'])
+        $order = Order::with(['order_items', 'order_items.variant', 'order_items.product', 'order_items.product.img', 'address'])
             ->findOrFail($id);
 
         return response()->json([
@@ -201,9 +233,25 @@ class PaymentController extends Controller
 
     $cart = $request->input('cart', []);
     $total = 0;
-    foreach ($cart as $item) {
+       foreach ($cart as $item) {
         $variant = Variant::find($item['variant_id']);
-        $price = $variant && $variant->sale_price !== null ? $variant->sale_price : ($variant ? $variant->price : 0);
+        $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
+            ->whereHas('flashSale', function($q) {
+                $now = now();
+                $q->where('start_time', '<=', $now)
+                  ->where('end_time', '>=', $now);
+            })
+            ->first();
+
+
+        if ($flashSaleVariant) {
+            $price = $flashSaleVariant->sale_price;
+        } elseif ($variant && $variant->sale_price !== null) {
+            $price = $variant->sale_price;
+        } else {
+            $price = $variant ? $variant->price : 0;
+        }
+
         $total += $price * $item['quantity'];
     }
 
@@ -215,7 +263,6 @@ class PaymentController extends Controller
             $discountAmount = (int)$coupon->discount_value;
         }
     }
-
     $totalAfterDiscount = max($total - $discountAmount, 0);
 
     $order = Order::create([
@@ -231,17 +278,22 @@ class PaymentController extends Controller
 
     foreach ($cart as $item) {
         $variant = Variant::find($item['variant_id']);
-        $price = $variant && $variant->sale_price !== null ? $variant->sale_price : ($variant ? $variant->price : 0);
+        $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
+            ->whereHas('flashSale', function($q) {
+                $now = now();
+                $q->where('start_time', '<=', $now)
+                ->where('end_time', '>=', $now);
+            })
+            ->first();
 
-        $order->order_items()->create([
-            'variant_id' => $item['variant_id'],
-            'quantity' => $item['quantity'],
-            'price' => $price,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        if ($flashSaleVariant) {
+            $price = $flashSaleVariant->sale_price;
+        } elseif ($variant && $variant->sale_price !== null) {
+            $price = $variant->sale_price;
+        } else {
+            $price = $variant ? $variant->price : 0;
+        }
     }
-
     return response()->json([
         'status' => 200,
         'message' => 'Đặt hàng thành công. Vui lòng thanh toán khi nhận hàng!',
