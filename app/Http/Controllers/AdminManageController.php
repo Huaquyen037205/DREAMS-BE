@@ -244,17 +244,19 @@ class AdminManageController extends Controller
 
         if (!empty($selectedProducts)) {
             foreach ($selectedProducts as $productId) {
-                $product = Product::with('variant')->find($productId);
-                if ($product) {
-                    $product->discount_id = $discount->id;
-                    $product->save();
-                    foreach ($product->variant as $variant) {
-                        $variant->sale_price = round($variant->price * (1 - $discount->percentage / 100));
-                        $variant->save();
-                    }
+            $product = Product::with('variant')->find($productId);
+            if ($product) {
+                if ($product->discount_id && $product->discount_id != $discount->id) {
+                        $product->discount_id = null;
                 }
+                $product->discount_id = $discount->id;
+                $product->save();
+                foreach ($product->variant as $variant) {
+                    $variant->sale_price = round($variant->price * (1 - $discount->percentage / 100));
+                    $variant->save();
             }
-
+        }
+    }
             $productsToRemove = Product::where('discount_id', $discount->id)
                 ->whereNotIn('id', $selectedProducts)
                 ->get();
