@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 class PaymentController extends Controller
 {
-     public function createVnpayPayment(Request $request)
+    public function createVnpayPayment(Request $request)
     {
         $user = $request->user();
         if (!$user) {
@@ -32,7 +32,6 @@ class PaymentController extends Controller
                 })
                 ->first();
 
-
             if ($flashSaleVariant) {
                 $price = $flashSaleVariant->sale_price;
             } elseif ($variant && $variant->sale_price !== null) {
@@ -46,63 +45,33 @@ class PaymentController extends Controller
 
         $coupon_id = $request->input('coupon_id');
         $discountAmount = 0;
-            if ($coupon_id) {
-                $coupon = Coupon::find($coupon_id);
-                if ($coupon && now()->lt($coupon->expiry_date)) {
-                    $discountAmount = (int)$coupon->discount_value;
-                }
+        if ($coupon_id) {
+            $coupon = Coupon::find($coupon_id);
+            if ($coupon && now()->lt($coupon->expiry_date)) {
+                $discountAmount = (int)$coupon->discount_value;
             }
-
+        }
         $totalAfterDiscount = max($total - $discountAmount, 0);
 
-        $vnp_TxnRef = uniqid(); // Mã giao dịch
-        $order = Order::create([
+        $vnp_TxnRef = uniqid();
+
+        cache()->put('vnpay_' . $vnp_TxnRef, [
             'user_id' => $user->id,
-            'shipping_id' => $request->input('shipping_id', null),
-            'payment_id' => $request->input('payment_id', null),
+            'cart' => $cart,
             'coupon_id' => $coupon_id,
+            'shipping_id' => $request->input('shipping_id', null),
             'address_id' => $request->input('address_id', null),
-            'total_price' => $totalAfterDiscount,
-            'status' => 'pending',
-            'vnp_TxnRef' => $vnp_TxnRef,
-        ]);
+            'payment_id' => $request->input('payment_id', null),
+            'totalAfterDiscount' => $totalAfterDiscount,
+        ], now()->addMinutes(30));
 
-        $cart = $request->input('cart', []);
-            foreach ($cart as $item) {
-                $variant = Variant::find($item['variant_id']);
-                $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
-                    ->whereHas('flashSale', function($q) {
-                        $now = now();
-                        $q->where('start_time', '<=', $now)
-                        ->where('end_time', '>=', $now);
-                    })
-                    ->first();
-
-                if ($flashSaleVariant) {
-                    $price = $flashSaleVariant->sale_price;
-                } elseif ($variant && $variant->sale_price !== null) {
-                    $price = $variant->sale_price;
-                } else {
-                    $price = $variant ? $variant->price : 0;
-                }
-
-                $order->order_items()->create([
-                'variant_id' => $item['variant_id'],
-                'quantity' => $item['quantity'],
-                'price' => $price,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Lấy thông tin đơn hàng từ request
+        // Tạo link thanh toán VNPAY
         $vnp_OrderInfo = $request->input('order_desc', 'Thanh toan don hang');
-        $vnp_Amount = $total * 100; // VNPAY yêu cầu đơn vị là VND * 100
+        $vnp_Amount = $totalAfterDiscount * 100;
         $vnp_Locale = 'vn';
         $vnp_BankCode = $request->input('bank_code', '');
         $vnp_IpAddr = $request->ip();
 
-        // Các thông tin cấu hình VNPAY
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = url('/api/payment/vnpay/return');
         $vnp_TmnCode = env('VNP_TMN_CODE');
@@ -126,7 +95,6 @@ class PaymentController extends Controller
             $inputData['vnp_BankCode'] = $vnp_BankCode;
         }
 
-        // Sắp xếp dữ liệu theo key
         ksort($inputData);
         $query = [];
         foreach ($inputData as $key => $value) {
@@ -137,41 +105,85 @@ class PaymentController extends Controller
         $vnp_Url .= "?" . implode('&', $query);
         $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
         $vnp_Url .= '&vnp_SecureHash=' . $vnpSecureHash;
-        $order = Order::with('order_items')->find($order->id);
+
+        // Trả về link thanh toán và vnp_TxnRef để client lưu lại
         return response()->json([
             'status' => 200,
             'payment_url' => $vnp_Url,
-            'order' => $order,
+            'vnp_TxnRef' => $vnp_TxnRef,
         ]);
     }
 
     public function vnpayReturn(Request $request)
     {
-       if ($request->input('vnp_ResponseCode') == '00') {
-        $vnp_TxnRef = $request->input('vnp_TxnRef');
-        $order = Order::where('vnp_TxnRef', $vnp_TxnRef)->first();
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
-        if (!$order) {
+       if ($request->input('vnp_ResponseCode') == '00') {
+            $vnp_TxnRef = $request->input('vnp_TxnRef');
+            $temp = cache()->pull('vnpay_' . $vnp_TxnRef);
+
+            if (!$temp) {
+                return response()->json(['status' => 400, 'message' => 'Không tìm thấy thông tin đơn hàng!'], 400);
+            }
+
+            $cart = $temp['cart'];
+            $coupon_id = $temp['coupon_id'];
+            $shipping_id = $temp['shipping_id'];
+            $address_id = $temp['address_id'];
+            $payment_id = $temp['payment_id'];
+            $totalAfterDiscount = $temp['totalAfterDiscount'];
+
+            $order = Order::create([
+                'user_id' => $user->id,
+                'shipping_id' => $shipping_id,
+                'payment_id' => $payment_id,
+                'coupon_id' => $coupon_id,
+                'address_id' => $address_id,
+                'total_price' => $totalAfterDiscount,
+                'status' => 'pending',
+                'vnp_TxnRef' => $vnp_TxnRef,
+            ]);
+
+            foreach ($cart as $item) {
+                $variant = Variant::find($item['variant_id']);
+                $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
+                    ->whereHas('flashSale', function($q) {
+                        $now = now();
+                        $q->where('start_time', '<=', $now)
+                        ->where('end_time', '>=', $now);
+                    })
+                    ->first();
+
+                if ($flashSaleVariant) {
+                    $price = $flashSaleVariant->sale_price;
+                } elseif ($variant && $variant->sale_price !== null) {
+                    $price = $variant->sale_price;
+                } else {
+                    $price = $variant ? $variant->price : 0;
+                }
+
+                $order->order_items()->create([
+                    'variant_id' => $item['variant_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $price,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            return response()->json([
+                'status' => 200,
+                'message' => 'Thanh toán thành công',
+                'order' => $order,
+            ]);
+        } else {
             return response()->json([
                 'status' => 400,
-                'message' => 'Không tìm thấy đơn hàng với mã giao dịch này',
-            ]);
+                'message' => 'Thanh toán không thành công. Mã phản hồi: ' . $request->input('vnp_ResponseCode'),
+            ], 400);
         }
-        $order->status = 'pending';
-        $order->save();
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Thanh toán thành công, đã cập nhật đơn hàng!',
-            'order' => $order
-        ]);
-    } else {
-        return response()->json([
-            'status' => 200,
-            'message' => 'Kết quả thanh toán',
-            'data' => $request->all()
-        ]);
-    }
     }
 
     public function getOrdersByUser(Request $request)
