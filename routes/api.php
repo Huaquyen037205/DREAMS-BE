@@ -91,9 +91,9 @@ Route::middleware(['auth:sanctum'])->group(function (){
     Route::post('/admin/logout', [AdminUserController::class, 'logoutAdmin']);
 
     //Payment
-    // Route::get('/orders', [PaymentController::class, 'getOrdersByUser']);
-    // Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
     // Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
+    // Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
+    // Route::post('/payment/cod', [PaymentController::class, 'createCodPayment']);
 
     //Order routes
     Route::get('/admin/order', [AdminManageController::class, 'ShowOrder']);
@@ -127,10 +127,11 @@ Route::middleware(['auth:sanctum'])->group(function (){
     Route::get('/admin/orderDetail/{id}', [AdminManageController::class, 'OrderDetail']);
 });
 
-Route::get('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
+
 Route::middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])->group(function () {
-Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
-Route::post('/payment/cod', [PaymentController::class, 'createCodPayment']);
+    Route::post('/payment/vnpay/return', [PaymentController::class, 'vnpayReturn']);
+    Route::post('/payment/vnpay', [PaymentController::class, 'createVnpayPayment']);
+    Route::post('/payment/cod', [PaymentController::class, 'createCodPayment']);
 });
 
 //flash sale routes
