@@ -9,7 +9,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
-use App\Http\Controllers\virtualTryOn;
+use App\Http\Controllers\VirtualTryOnController;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
@@ -65,7 +65,7 @@ Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);
 Route::post('/admin/forgotPassword', [AdminUserController::class, 'forgotPasswordAdmin']);
 Route::post('/admin/resetPassword', [AdminUserController::class, 'resetPasswordAdmin']);
 Route::post('/admin/change-password', [AdminUserController::class, 'changePasswordAdmin']);
-
+Route::post('/admin/addUser', [AdminUserController::class, 'addUser']);
 Route::middleware(['auth:sanctum'])->group(function (){
     //Product routes
     Route::get('/admin/product', [AdminController::class, 'productAdmin']);
@@ -112,7 +112,7 @@ Route::middleware(['auth:sanctum'])->group(function (){
     //User routes
     Route::get('/admin/user', [AdminUserController::class, 'userAdmin']);
     Route::get('/admin/searchUser', [AdminUserController::class, 'searchUser']);
-    Route::post('/admin/addUser', [AdminUserController::class, 'addUser']);
+
     Route::patch('/admin/updateUser/{id}', [AdminUserController::class, 'updateUser']);
     Route::patch('/admin/editUser/{id}', [AdminUserController::class, 'editUser']);
     Route::patch('/admin/setActive/{id}', [AdminUserController::class, 'setActiveUser']);
@@ -158,8 +158,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy']);
 });
 
+
 //AI SEARCH
 Route::post('/image-search', [ImageSearchController::class, 'search']);
 
 // gửi mã giảm giá
 Route::middleware('auth:sanctum')->post('/apply-coupon', [CouponController::class, 'applyCoupon']);
+
+
+//AI SEARCH IMG
+Route::post('/image-search', [ImageSearchController::class, 'search']);
+
+
+
+
+
+// Virtual Try-On
+
+Route::post('/tryon', [VirtualTryOnController::class, 'tryOn']);
+Route::get('/result/{id}', [VirtualTryOnController::class, 'getResult']);
+
+
+
+
+//login gg
+Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle']);
+
