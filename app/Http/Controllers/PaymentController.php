@@ -73,7 +73,7 @@ class PaymentController extends Controller
         $vnp_IpAddr = $request->ip();
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = url('/api/payment/vnpay/return');
+        $vnp_Returnurl = url('/payment/vnpay/return');
         $vnp_TmnCode = env('VNP_TMN_CODE');
         $vnp_HashSecret = env('VNP_HASH_SECRET');
 
@@ -305,6 +305,14 @@ class PaymentController extends Controller
         } else {
             $price = $variant ? $variant->price : 0;
         }
+
+        $order->order_items()->create([
+            'variant_id' => $item['variant_id'],
+            'quantity' => $item['quantity'],
+            'price' => $price,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
     return response()->json([
         'status' => 200,

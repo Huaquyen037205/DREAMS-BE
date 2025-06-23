@@ -342,12 +342,22 @@ class AdminManageController extends Controller
             ->toArray();
 
         $salesByDay = Order::where('status', 'paid')
-        ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
-        ->selectRaw('DATE(created_at) as day, SUM(total_price) as total')
-        ->groupBy('day')
-        ->orderBy('day')
-        ->pluck('total', 'day')
-        ->toArray();
+            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+            ->selectRaw('DATE(created_at) as day, SUM(total_price) as total')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->pluck('total', 'day')
+            ->toArray();
+
+        $ordersToday = Order::with('user', 'shipping', 'payment')
+            ->whereDate('created_at', now()->startOfDay())
+            ->orderByDesc('created_at')
+            ->paginate(8);
+
+        $hotProduct = Product::with('variant', 'img')
+            ->orderByDesc('hot')
+            ->take(6)
+            ->get();
 
         $profit = Order::where('status', 'paid')
             ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
@@ -375,7 +385,7 @@ class AdminManageController extends Controller
             $monthlyStats['refunds'][] = isset($refunds[$i]) ? $refunds[$i] : 0;
             $monthlyStats['expenses'][] = isset($expenses[$i]) ? $expenses[$i] : 0;
         }
-        return view('Admin.dashBoard', compact('totalSells', 'totalOrders', 'dailyVisitors', 'salesByMonth', 'salesByDay', 'monthlyStats', 'totalProducts'));
+        return view('Admin.dashBoard', compact('totalSells', 'totalOrders', 'dailyVisitors', 'salesByMonth', 'salesByDay', 'monthlyStats', 'totalProducts', 'profit', 'refunds', 'expenses', 'ordersToday', 'hotProduct'));
     }
 
     public function ProductChart(){
