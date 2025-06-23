@@ -466,6 +466,7 @@ class AdminController extends Controller
             $file = $request->file('name');
             $filename = $file->getClientOriginalName();
             $path = $file->storeAs('public/img', $filename);
+            $file->move(public_path('img'), $filename);
 
             $img = new Img();
             $img->product_id = $request->product_id;

@@ -9,12 +9,13 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
-use App\Http\Controllers\virtualTryOn;
+use App\Http\Controllers\VirtualTryOnController;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ImageSearchController;
+
 // use App\Http\Middleware\CheckAdmin;
 
 // Web Routes:
@@ -157,9 +158,21 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-//AI SEARCH
+//AI SEARCH IMG
 Route::post('/image-search', [ImageSearchController::class, 'search']);
 
 
 
+
+
+// Virtual Try-On
+
+Route::post('/tryon', [VirtualTryOnController::class, 'tryOn']);
+Route::get('/result/{id}', [VirtualTryOnController::class, 'getResult']);
+
+
+
+
+//login gg
+Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle']);
 
