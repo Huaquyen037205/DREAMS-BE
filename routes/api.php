@@ -15,8 +15,9 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ImageSearchController;
+use App\Http\Controllers\CouponController;
 // use App\Http\Middleware\CheckAdmin;
-
+;
 // Web Routes:
 Route::get('/product', [ProductController::class, 'product']);
 Route::get('/hotProduct', [ProductController::class, 'hotProduct']);
@@ -157,10 +158,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy']);
 });
 
-
 //AI SEARCH
 Route::post('/image-search', [ImageSearchController::class, 'search']);
 
-
-
-
+// gửi mã giảm giá
+Route::middleware('auth:sanctum')->post('/apply-coupon', [CouponController::class, 'applyCoupon']);

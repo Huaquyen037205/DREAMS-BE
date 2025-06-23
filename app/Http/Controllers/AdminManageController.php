@@ -97,7 +97,18 @@ class AdminManageController extends Controller
             'data' => $order
         ], 200);
     }
+    
+public function ShowOrder(Request $request){
+        $orders = Order::with('user', 'discount', 'shipping', 'payment', 'coupon', 'address')
+            ->orderByDesc('created_at')
+            ->paginate(12);
 
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách đơn hàng',
+            'data' => $orders
+        ], 200);
+    }
     public function OrderDetail(Request $request, $id)
     {
         $order = Order_item::with('variant.product', 'variant.product.img', 'variant')->where('order_id', $id)->get();
