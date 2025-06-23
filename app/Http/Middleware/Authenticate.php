@@ -18,13 +18,10 @@ class Authenticate
         return $next($request);
     }
 
-    // protected function redirectTo($request)
-    //     {
-    //         if (!$request->expectsJson()) {
-    //             if ($request->is('Admin') || $request->is('admin/*')) {
-    //                 return route('Admin.Login');
-    //             }
-    //             return route('Login');
-    //         }
-    //     }
+   protected function redirectTo($request)
+{
+    if (! $request->expectsJson()) {
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+}
 }

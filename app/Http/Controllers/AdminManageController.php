@@ -52,6 +52,25 @@ class AdminManageController extends Controller
         return redirect()->back()->with('error', 'Không thể chuyển về trạng thái trước hoặc trạng thái hiện tại!');
     }
 
+    if ($order->status !== 'paid' && $request->status === 'paid') {
+        $orderItems = Order_item::where('order_id', $order->id)->get();
+        foreach ($orderItems as $item) {
+            if ($item->variant) {
+                $item->variant->stock_quantity -= $item->quantity;
+                if ($item->variant->stock_quantity < 0) $item->variant->stock_quantity = 0;
+                $item->variant->save();
+            }
+            elseif ($item->product_id) {
+                $product = Product::find($item->product_id);
+                if ($product && isset($product->stock_quantity)) {
+                    $product->stock_quantity -= $item->quantity;
+                    if ($product->stock_quantity < 0) $product->stock_quantity = 0;
+                    $product->save();
+                }
+            }
+        }
+    }
+
         if ($order->status !== 'paid' && $request->status === 'paid') {
         $orderItems = Order_item::where('order_id', $order->id)->get();
         foreach ($orderItems as $item) {
@@ -225,17 +244,19 @@ class AdminManageController extends Controller
 
         if (!empty($selectedProducts)) {
             foreach ($selectedProducts as $productId) {
-                $product = Product::with('variant')->find($productId);
-                if ($product) {
-                    $product->discount_id = $discount->id;
-                    $product->save();
-                    foreach ($product->variant as $variant) {
-                        $variant->sale_price = round($variant->price * (1 - $discount->percentage / 100));
-                        $variant->save();
-                    }
+            $product = Product::with('variant')->find($productId);
+            if ($product) {
+                if ($product->discount_id && $product->discount_id != $discount->id) {
+                        $product->discount_id = null;
                 }
+                $product->discount_id = $discount->id;
+                $product->save();
+                foreach ($product->variant as $variant) {
+                    $variant->sale_price = round($variant->price * (1 - $discount->percentage / 100));
+                    $variant->save();
             }
-
+        }
+    }
             $productsToRemove = Product::where('discount_id', $discount->id)
                 ->whereNotIn('id', $selectedProducts)
                 ->get();
@@ -311,6 +332,7 @@ class AdminManageController extends Controller
     public function OrderChart(){
         $totalSells = Order::where('status', 'paid')->sum('total_price');
         $totalOrders = Order::count();
+        $totalProducts = Product::count();
         $dailyVisitors = User::count();
         $salesByMonth = Order::where('status', 'paid')
             ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
@@ -353,7 +375,7 @@ class AdminManageController extends Controller
             $monthlyStats['refunds'][] = isset($refunds[$i]) ? $refunds[$i] : 0;
             $monthlyStats['expenses'][] = isset($expenses[$i]) ? $expenses[$i] : 0;
         }
-        return view('Admin.dashBoard', compact('totalSells', 'totalOrders', 'dailyVisitors', 'salesByMonth', 'salesByDay', 'monthlyStats'));
+        return view('Admin.dashBoard', compact('totalSells', 'totalOrders', 'dailyVisitors', 'salesByMonth', 'salesByDay', 'monthlyStats', 'totalProducts'));
     }
 
     public function ProductChart(){

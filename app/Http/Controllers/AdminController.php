@@ -80,6 +80,23 @@ class AdminController extends Controller
             $product->view = $request->view;
             $product->hot = $request->hot;
 
+            $variants = $product->variant;
+            if ($variants->count() == 0) {
+                $product->status = 'hết hàng';
+                $product->active = 'off';
+            } else {
+                $allOutOfStock = $variants->every(function($variant) {
+                    return $variant->stock_quantity == 0;
+                });
+                if ($allOutOfStock) {
+                    $product->status = 'hết hàng';
+                    $product->active = 'off';
+                } else {
+                    $product->status = $request->status;
+                    $product->active = $request->active;
+                }
+            }
+
             if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
@@ -395,6 +412,15 @@ class AdminController extends Controller
             $variant->status = $request->status;
             $variant->active = $request->active;
 
+            if ($variant->stock_quantity == 0) {
+                $variant->status = 'hết hàng';
+                $variant->active = 'off';
+            }
+            else {
+                $variant->status = 'còn hàng';
+                $variant->active = 'on';
+            }
+
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
                 $filename = $file->getClientOriginalName();
@@ -464,7 +490,7 @@ class AdminController extends Controller
 
         if ($request->hasFile('name')) {
             $file = $request->file('name');
-            $filename = $file->getClientOriginalName();
+            $filename = time() . '_' .  $file->getClientOriginalName();
             $path = $file->storeAs('public/img', $filename);
             $file->move(public_path('img'), $filename);
 

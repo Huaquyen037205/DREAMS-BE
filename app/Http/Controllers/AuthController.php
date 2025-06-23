@@ -175,7 +175,18 @@ class AuthController extends Controller
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
+            'day_of_birth' => 'nullable|date',
         ]);
+
+
+    if (!empty($validated['day_of_birth'])) {
+        $date = \DateTime::createFromFormat('d-m-Y', $validated['day_of_birth']);
+        if ($date) {
+            $validated['day_of_birth'] = $date->format('Y-m-d');
+        } else {
+            unset($validated['day_of_birth']);
+        }
+    }
 
         $user->update($validated);
         $user->refresh();
