@@ -64,7 +64,7 @@ Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);
 Route::post('/admin/forgotPassword', [AdminUserController::class, 'forgotPasswordAdmin']);
 Route::post('/admin/resetPassword', [AdminUserController::class, 'resetPasswordAdmin']);
 Route::post('/admin/change-password', [AdminUserController::class, 'changePasswordAdmin']);
-
+Route::post('/admin/addUser', [AdminUserController::class, 'addUser']);
 Route::middleware(['auth:sanctum'])->group(function (){
     //Product routes
     Route::get('/admin/product', [AdminController::class, 'productAdmin']);
@@ -111,7 +111,7 @@ Route::middleware(['auth:sanctum'])->group(function (){
     //User routes
     Route::get('/admin/user', [AdminUserController::class, 'userAdmin']);
     Route::get('/admin/searchUser', [AdminUserController::class, 'searchUser']);
-    Route::post('/admin/addUser', [AdminUserController::class, 'addUser']);
+
     Route::patch('/admin/updateUser/{id}', [AdminUserController::class, 'updateUser']);
     Route::patch('/admin/editUser/{id}', [AdminUserController::class, 'editUser']);
     Route::patch('/admin/setActive/{id}', [AdminUserController::class, 'setActiveUser']);
