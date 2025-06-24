@@ -28,7 +28,11 @@
             @foreach($orders as $index => $order)
                 <tr class="text-center">
                     <td class="p-2">{{ $index + 1 }}</td>
-                    <td class="p-2">{{ $order->vnp_TxnRef }}</td>
+                    @if ($order->order_code)
+                        <td class="p-2">{{ $order->order_code}}</td>
+                    @else
+                        <td class="p-2">{{ $order->vnp_TxnRef }}</td>
+                    @endif
                     <td class="p-2">{{ $order->user->name }}</td>
                     <td class="p-2">{{ $order->user->email }}</td>
                     <td class="p-2">{{ number_format($order->total_price) }}₫</td>
