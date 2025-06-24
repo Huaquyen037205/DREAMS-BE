@@ -19,6 +19,7 @@ class Order extends Model
         'status',
         'total_price',
         'vnp_TxnRef',
+        'order_code',
     ];
 
     public function order_items() {
