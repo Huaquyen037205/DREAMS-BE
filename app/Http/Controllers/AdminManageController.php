@@ -97,7 +97,7 @@ class AdminManageController extends Controller
             'data' => $order
         ], 200);
     }
-    
+
 public function ShowOrder(Request $request){
         $orders = Order::with('user', 'discount', 'shipping', 'payment', 'coupon', 'address')
             ->orderByDesc('created_at')
@@ -372,7 +372,7 @@ public function ShowOrder(Request $request){
             ->paginate(8);
 
         $hotProduct = Product::with('variant', 'img')
-            ->orderByDesc('hot')
+            ->orderByDesc('hot', 'desc')
             ->take(6)
             ->get();
 

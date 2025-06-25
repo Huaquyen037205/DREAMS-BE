@@ -167,31 +167,30 @@ class AuthController extends Controller
     }
 
 
-       public function updateProfile(Request $request)
-{
-    $user = Auth::user();
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
 
-    $validated = $request->validate([
-        'name' => 'nullable|string|max:255',
-        'email' => 'nullable|email|unique:users,email,' . $user->id,
-        'phone' => 'nullable|string|max:20',
-        'day_of_birth' => 'nullable|date',
-    ]);
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'day_of_birth' => 'nullable|date',
+        ]);
 
-    // Nếu FE gửi lên dạng YYYY-MM-DD thì không cần chuyển đổi gì cả
-    // Nếu muốn chắc chắn, có thể ép lại format:
-    if (!empty($validated['day_of_birth'])) {
-        $date = date_create($validated['day_of_birth']);
-        if ($date) {
-            $validated['day_of_birth'] = $date->format('Y-m-d');
-        } else {
-            unset($validated['day_of_birth']);
+        // Nếu FE gửi lên dạng YYYY-MM-DD thì không cần chuyển đổi gì cả
+        // Nếu muốn chắc chắn, có thể ép lại format:
+        if (!empty($validated['day_of_birth'])) {
+            $date = date_create($validated['day_of_birth']);
+            if ($date) {
+                $validated['day_of_birth'] = $date->format('Y-m-d');
+            } else {
+                unset($validated['day_of_birth']);
+            }
         }
-    }
 
-    $user->update($validated);
-    $user->refresh();
-
+        $user->update($validated);
+        $user->refresh();
 
         return response()->json([
             'status' => 200,
