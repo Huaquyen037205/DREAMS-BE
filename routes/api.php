@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
 use App\Http\Controllers\VirtualTryOnController;
+use App\Http\Controllers\StylistAiController;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
@@ -184,3 +185,5 @@ Route::get('/result/{id}', [VirtualTryOnController::class, 'getResult']);
 //login gg
 Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle']);
 
+//StyleAI
+Route::post('/style-ai/analyze', [StylistAiController::class, 'analyzeStyle']);
