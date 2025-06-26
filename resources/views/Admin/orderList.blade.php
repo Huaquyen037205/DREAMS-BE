@@ -35,7 +35,14 @@
                     @endif
                     <td class="p-2">{{ $order->user->name }}</td>
                     <td class="p-2">{{ $order->user->email }}</td>
-                    <td class="p-2">{{ number_format($order->total_price) }}₫</td>
+                     <td class="p-2">
+                        @if($order->vnp_TxnRef)
+                            <span class="text-gray-400 line-through">{{ number_format($order->total_price) }}₫</span>
+                            <span class="text-green-600">0₫</span>
+                        @else
+                            {{ number_format($order->total_price) }}₫
+                        @endif
+                    </td>
                     <td class="p-2">
                         @if($order->status === 'pending')
                             <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-sm">Chờ xử lý</span>
