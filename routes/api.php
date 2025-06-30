@@ -10,14 +10,15 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlashSaleController;
 use App\Models\Flash_Sale_Variant;
 use App\Http\Controllers\VirtualTryOnController;
+use App\Http\Controllers\StylistAiController;
 use App\Models\Flash_Sale;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ImageSearchController;
-
+use App\Http\Controllers\CouponController;
 // use App\Http\Middleware\CheckAdmin;
-
+;
 // Web Routes:
 Route::get('/product', [ProductController::class, 'product']);
 Route::get('/hotProduct', [ProductController::class, 'hotProduct']);
@@ -28,7 +29,8 @@ Route::get('/category/{id}', [ProductController::class, 'productByCategory']);
 Route::get('/products/price', [ProductController::class, 'productByPrice']);
 Route::get('/products/sort', [ProductController::class, 'SortByPrice']);
 Route::get('/products/filter-size', [ProductController::class, 'filterBySize']);
-Route::get('/fill/product', [ProductController::class, 'filterAll']);
+// Route::get('/fill/product', [ProductController::class, 'filterAll']);
+Route::get('/products/filter-all', [ProductController::class, 'filterAll']);
 Route::get('/products-by-category', [ProductController::class, 'productsByCategoryId']);
 //Login, Register
 Route::post('/register', [AuthController::class, 'register']);
@@ -65,7 +67,7 @@ Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);
 Route::post('/admin/forgotPassword', [AdminUserController::class, 'forgotPasswordAdmin']);
 Route::post('/admin/resetPassword', [AdminUserController::class, 'resetPasswordAdmin']);
 Route::post('/admin/change-password', [AdminUserController::class, 'changePasswordAdmin']);
-
+Route::post('/admin/addUser', [AdminUserController::class, 'addUser']);
 Route::middleware(['auth:sanctum'])->group(function (){
     //Product routes
     Route::get('/admin/product', [AdminController::class, 'productAdmin']);
@@ -112,7 +114,7 @@ Route::middleware(['auth:sanctum'])->group(function (){
     //User routes
     Route::get('/admin/user', [AdminUserController::class, 'userAdmin']);
     Route::get('/admin/searchUser', [AdminUserController::class, 'searchUser']);
-    Route::post('/admin/addUser', [AdminUserController::class, 'addUser']);
+
     Route::patch('/admin/updateUser/{id}', [AdminUserController::class, 'updateUser']);
     Route::patch('/admin/editUser/{id}', [AdminUserController::class, 'editUser']);
     Route::patch('/admin/setActive/{id}', [AdminUserController::class, 'setActiveUser']);
@@ -159,6 +161,13 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+//AI SEARCH
+Route::post('/image-search', [ImageSearchController::class, 'search']);
+
+// gửi mã giảm giá
+Route::middleware('auth:sanctum')->post('/apply-coupon', [CouponController::class, 'applyCoupon']);
+
+
 //AI SEARCH IMG
 Route::post('/image-search', [ImageSearchController::class, 'search']);
 
@@ -177,3 +186,5 @@ Route::get('/result/{id}', [VirtualTryOnController::class, 'getResult']);
 //login gg
 Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle']);
 
+//StyleAI
+Route::post('/style-ai/analyze', [StylistAiController::class, 'analyzeStyle']);

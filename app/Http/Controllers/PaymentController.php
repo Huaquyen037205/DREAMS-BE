@@ -34,7 +34,7 @@ class PaymentController extends Controller
 
             if ($flashSaleVariant) {
                 $price = $flashSaleVariant->sale_price;
-            } elseif ($variant && $variant->sale_price !== null) {
+            } elseif ($variant->sale_price !== null) {
                 $price = $variant->sale_price;
             } else {
                 $price = $variant ? $variant->price : 0;
@@ -73,7 +73,7 @@ class PaymentController extends Controller
         $vnp_IpAddr = $request->ip();
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = url('/api/payment/vnpay/return');
+        $vnp_Returnurl = "http://localhost:3000/vnpay-success";
         $vnp_TmnCode = env('VNP_TMN_CODE');
         $vnp_HashSecret = env('VNP_HASH_SECRET');
 
@@ -145,6 +145,7 @@ class PaymentController extends Controller
                 'total_price' => $totalAfterDiscount,
                 'status' => 'pending',
                 'vnp_TxnRef' => $vnp_TxnRef,
+                'order_code' => null,
             ]);
 
             foreach ($cart as $item) {
@@ -168,7 +169,7 @@ class PaymentController extends Controller
                 $order->order_items()->create([
                     'variant_id' => $item['variant_id'],
                     'quantity' => $item['quantity'],
-                    'price' => $price,
+                    'price' => $item['price'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -237,79 +238,88 @@ class PaymentController extends Controller
 
 
     public function createCodPayment(Request $request)
-{
-    $user = $request->user();
-    if (!$user) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
-
-    $cart = $request->input('cart', []);
-    $total = 0;
-       foreach ($cart as $item) {
-        $variant = Variant::find($item['variant_id']);
-        $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
-            ->whereHas('flashSale', function($q) {
-                $now = now();
-                $q->where('start_time', '<=', $now)
-                  ->where('end_time', '>=', $now);
-            })
-            ->first();
-
-
-        if ($flashSaleVariant) {
-            $price = $flashSaleVariant->sale_price;
-        } elseif ($variant && $variant->sale_price !== null) {
-            $price = $variant->sale_price;
-        } else {
-            $price = $variant ? $variant->price : 0;
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $total += $price * $item['quantity'];
-    }
+        $cart = $request->input('cart', []);
+        $total = 0;
+        foreach ($cart as $item) {
+            $variant = Variant::find($item['variant_id']);
+            $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
+                ->whereHas('flashSale', function($q) {
+                    $now = now();
+                    $q->where('start_time', '<=', $now)
+                    ->where('end_time', '>=', $now);
+                })
+                ->first();
 
-    $coupon_id = $request->input('coupon_id');
-    $discountAmount = 0;
-    if ($coupon_id) {
-        $coupon = Coupon::find($coupon_id);
-        if ($coupon && now()->lt($coupon->expiry_date)) {
-            $discountAmount = (int)$coupon->discount_value;
+
+            if ($flashSaleVariant) {
+                $price = $flashSaleVariant->sale_price;
+            } elseif ($variant && $variant->sale_price !== null) {
+                $price = $variant->sale_price;
+            } else {
+                $price = $variant ? $variant->price : 0;
+            }
+
+            $total += $price * $item['quantity'];
         }
-    }
-    $totalAfterDiscount = max($total - $discountAmount, 0);
 
-    $order = Order::create([
-        'user_id' => $user->id,
-        'shipping_id' => $request->input('shipping_id', null),
-        'payment_id' => $request->input('payment_id', null),
-        'coupon_id' => $coupon_id,
-        'address_id' => $request->input('address_id', null),
-        'total_price' => $totalAfterDiscount,
-        'status' => 'pending', // hoặc 'cod'
-        'vnp_TxnRef' => null,
-    ]);
-
-    foreach ($cart as $item) {
-        $variant = Variant::find($item['variant_id']);
-        $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
-            ->whereHas('flashSale', function($q) {
-                $now = now();
-                $q->where('start_time', '<=', $now)
-                ->where('end_time', '>=', $now);
-            })
-            ->first();
-
-        if ($flashSaleVariant) {
-            $price = $flashSaleVariant->sale_price;
-        } elseif ($variant && $variant->sale_price !== null) {
-            $price = $variant->sale_price;
-        } else {
-            $price = $variant ? $variant->price : 0;
+        $coupon_id = $request->input('coupon_id');
+        $discountAmount = 0;
+        if ($coupon_id) {
+            $coupon = Coupon::find($coupon_id);
+            if ($coupon && now()->lt($coupon->expiry_date)) {
+                $discountAmount = (int)$coupon->discount_value;
+            }
         }
+        $totalAfterDiscount = max($total - $discountAmount, 0);
+
+        $order = Order::create([
+            'user_id' => $user->id,
+            'shipping_id' => $request->input('shipping_id', null),
+            'payment_id' => $request->input('payment_id', null),
+            'coupon_id' => $coupon_id,
+            'address_id' => $request->input('address_id', null),
+            'total_price' => $totalAfterDiscount,
+            'status' => 'pending',
+            'vnp_TxnRef' => null,
+            'order_code' => 'COD' . strtoupper(uniqid()),
+        ]);
+
+        foreach ($cart as $item) {
+            $variant = Variant::find($item['variant_id']);
+            $flashSaleVariant = Flash_Sale_Variant::where('variant_id', $variant->id)
+                ->whereHas('flashSale', function($q) {
+                    $now = now();
+                    $q->where('start_time', '<=', $now)
+                    ->where('end_time', '>=', $now);
+                })
+                ->first();
+
+            if ($flashSaleVariant) {
+                $price = $flashSaleVariant->sale_price;
+            } elseif ($variant && $variant->sale_price !== null) {
+                $price = $variant->sale_price;
+            } else {
+                $price = $variant ? $variant->price : 0;
+            }
+
+            $order->order_items()->create([
+                'variant_id' => $item['variant_id'],
+                'quantity' => $item['quantity'],
+                'price' => $price,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+        return response()->json([
+            'status' => 200,
+            'message' => 'Đặt hàng thành công. Vui lòng thanh toán khi nhận hàng!',
+            'order' => $order,
+        ]);
     }
-    return response()->json([
-        'status' => 200,
-        'message' => 'Đặt hàng thành công. Vui lòng thanh toán khi nhận hàng!',
-        'order' => $order,
-    ]);
-}
 }

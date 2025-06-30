@@ -178,15 +178,16 @@ class AuthController extends Controller
             'day_of_birth' => 'nullable|date',
         ]);
 
-
-    if (!empty($validated['day_of_birth'])) {
-        $date = \DateTime::createFromFormat('d-m-Y', $validated['day_of_birth']);
-        if ($date) {
-            $validated['day_of_birth'] = $date->format('Y-m-d');
-        } else {
-            unset($validated['day_of_birth']);
+        // Nếu FE gửi lên dạng YYYY-MM-DD thì không cần chuyển đổi gì cả
+        // Nếu muốn chắc chắn, có thể ép lại format:
+        if (!empty($validated['day_of_birth'])) {
+            $date = date_create($validated['day_of_birth']);
+            if ($date) {
+                $validated['day_of_birth'] = $date->format('Y-m-d');
+            } else {
+                unset($validated['day_of_birth']);
+            }
         }
-    }
 
         $user->update($validated);
         $user->refresh();

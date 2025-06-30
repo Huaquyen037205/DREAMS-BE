@@ -21,7 +21,7 @@
       <ul>
         <a href="/admin/dashboard">
             <li class="px-6 py-3 bg-purple {{ request()->is('admin/dashboard') ? 'bg-purple-100 text-purple-700' : '' }} text-gray-700 font-medium flex items-center gap-2">
-                <i class="ph ph-gauge"></i> Báo cáo
+            <i class="ph ph-gauge"></i> Dashboard
             </li>
         </a>
         {{-- <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">

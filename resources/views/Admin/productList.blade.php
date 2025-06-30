@@ -50,7 +50,7 @@
                                     <td class="p-2 text-indigo-600">{{ $loop->iteration }}</td>
                                     {{-- <td class="p-2 text-indigo-600">{{ $product->id }}</td> --}}
                                     <td class="p-2">
-                                     @if ($product->img && $product->img->first())
+                                    @if ($product->img && $product->img->first())
                                         <img src="{{ asset('img/' . $product->img->first()->name) }}" alt="Product Image" class="w-16 h-16 object-cover rounded">
                                     @else
                                         <img src="{{ asset('images/no-image.png') }}" alt="No Image" class="w-16 h-16 object-cover rounded">

@@ -98,6 +98,17 @@ class AdminManageController extends Controller
         ], 200);
     }
 
+public function ShowOrder(Request $request){
+        $orders = Order::with('user', 'discount', 'shipping', 'payment', 'coupon', 'address')
+            ->orderByDesc('created_at')
+            ->paginate(12);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Danh sách đơn hàng',
+            'data' => $orders
+        ], 200);
+    }
     public function OrderDetail(Request $request, $id)
     {
         $order = Order_item::with('variant.product', 'variant.product.img', 'variant')->where('order_id', $id)->get();
@@ -120,6 +131,7 @@ class AdminManageController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('vnp_TxnRef', 'like', "%$search%")
+                ->orWhere('order_code', 'like', "%$search%")
                 ->orWhereHas('user', function($q2) use ($search) {
                     $q2->where('email', 'like', "%$search%");
                 });
@@ -251,8 +263,13 @@ class AdminManageController extends Controller
                 }
                 $product->discount_id = $discount->id;
                 $product->save();
+                $now = now();
                 foreach ($product->variant as $variant) {
-                    $variant->sale_price = round($variant->price * (1 - $discount->percentage / 100));
+                    if ($discount->start_day <= $now && $discount->end_day >= $now) {
+                        $variant->sale_price = round($variant->price * (1 - $discount->percentage / 100));
+                    } else {
+                        $variant->sale_price = null;
+                    }
                     $variant->save();
             }
         }
@@ -342,12 +359,22 @@ class AdminManageController extends Controller
             ->toArray();
 
         $salesByDay = Order::where('status', 'paid')
-        ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
-        ->selectRaw('DATE(created_at) as day, SUM(total_price) as total')
-        ->groupBy('day')
-        ->orderBy('day')
-        ->pluck('total', 'day')
-        ->toArray();
+            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+            ->selectRaw('DATE(created_at) as day, SUM(total_price) as total')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->pluck('total', 'day')
+            ->toArray();
+
+        $ordersToday = Order::with('user', 'shipping', 'payment')
+            ->whereDate('created_at', now()->startOfDay())
+            ->orderByDesc('created_at')
+            ->paginate(8);
+
+        $hotProduct = Product::with('variant', 'img')
+            ->orderByDesc('hot', 'desc')
+            ->take(6)
+            ->get();
 
         $profit = Order::where('status', 'paid')
             ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
@@ -375,7 +402,7 @@ class AdminManageController extends Controller
             $monthlyStats['refunds'][] = isset($refunds[$i]) ? $refunds[$i] : 0;
             $monthlyStats['expenses'][] = isset($expenses[$i]) ? $expenses[$i] : 0;
         }
-        return view('Admin.dashBoard', compact('totalSells', 'totalOrders', 'dailyVisitors', 'salesByMonth', 'salesByDay', 'monthlyStats', 'totalProducts'));
+        return view('Admin.dashBoard', compact('totalSells', 'totalOrders', 'dailyVisitors', 'salesByMonth', 'salesByDay', 'monthlyStats', 'totalProducts', 'profit', 'refunds', 'expenses', 'ordersToday', 'hotProduct'));
     }
 
     public function ProductChart(){
