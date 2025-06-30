@@ -62,9 +62,9 @@
         </div>
 
         <div class="group">
-          <div onclick="toggleSubMenu('discounts-submenu')" class="py-2.5 px-6 text-gray-700 hover:bg-purple-50 {{ request()->is('admin/flash-sale/*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
-            <i class="ph ph-percent"></i> Mã Giảm giá <i class="ph ph-caret-down ml-auto"></i>
-          </div>
+            <div onclick="toggleSubMenu('discounts-submenu')" class="py-2.5 px-6 text-gray-700 hover:bg-purple-50 {{ request()->is('admin/coupons*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
+                <i class="ph ph-percent"></i> Mã Giảm giá <i class="ph ph-caret-down ml-auto"></i>
+            </div>
           <div id="discounts-submenu" class="hidden flex-col">
             <a href="{{ url('/admin/coupons') }}" class="block py-2 px-12 hover:text-indigo-600 hover:bg-purple-50">Danh sách mã giảm giá</a>
             <a href="{{ url('/admin/coupons/create') }}" class="block py-2 px-12 hover:text-indigo-600 hover:bg-purple-50">Thêm mã giảm giá</a>
@@ -82,8 +82,13 @@
         </div>
 
         <div class="group">
-            <div onclick="toggleSubMenu('flashsale-submenu')" class="py-2.5 px-6 hover:bg-purple-50 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
-                <i class="ph ph-lightning"></i> Flash-Sale <i class="ph ph-caret-down ml-auto"></i>
+            <div onclick="toggleSubMenu('flashsale-submenu')"
+                class="py-2.5 px-6 font-medium flex items-center gap-2 cursor-pointer
+                        hover:bg-purple-50 transition
+                        {{ request()->is('admin/flash-sale*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }}">
+                <i class="ph ph-lightning"></i>
+                Flash-Sale
+                <i class="ph ph-caret-down ml-auto"></i>
             </div>
             <div id="flashsale-submenu" class="hidden flex-col">
                 <a href="/admin/flash-sale" class="block py-2 px-12 hover:bg-purple-50 hover:text-indigo-600">Danh sách FlSale</a>

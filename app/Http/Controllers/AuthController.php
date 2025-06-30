@@ -198,54 +198,53 @@ class AuthController extends Controller
         ]);
     }
 
-
-    // login gg
+// login gg
    public function loginOrRegisterWithGoogle(Request $request)
-{
-    $request->validate([
-        'id_token' => 'required|string',
-    ]);
+    {
+        $request->validate([
+            'id_token' => 'required|string',
+        ]);
 
-    $client = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
-    $payload = $client->verifyIdToken($request->id_token);
+        $client = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
+        $payload = $client->verifyIdToken($request->id_token);
 
-    if (!$payload) {
-        return response()->json(['message' => 'ID Token không hợp lệ'], 401);
-    }
-
-    $email = $payload['email'];
-    $name = $payload['name'] ?? 'No Name';
-    $googleId = $payload['sub'];
-
-    // ✅ Ưu tiên tìm user theo google_id
-    $user = User::where('google_id', $googleId)->first();
-
-    if (!$user) {
-        // Nếu chưa có user với google_id này, tìm theo email
-        $user = User::where('email', $email)->first();
-
-        if ($user) {
-            // Nếu có user với email nhưng chưa liên kết google_id
-            $user->google_id = $googleId;
-            $user->save();
-        } else {
-            // Nếu không có user nào cả, tạo mới
-            $user = User::create([
-                'name' => $name,
-                'email' => $email,
-                'google_id' => $googleId,
-                'password' => bcrypt(Str::random(16)),
-            ]);
+        if (!$payload) {
+            return response()->json(['message' => 'ID Token không hợp lệ'], 401);
         }
+
+        $email = $payload['email'];
+        $name = $payload['name'] ?? 'No Name';
+        $googleId = $payload['sub'];
+
+        // ✅ Ưu tiên tìm user theo google_id
+        $user = User::where('google_id', $googleId)->first();
+
+        if (!$user) {
+            // Nếu chưa có user với google_id này, tìm theo email
+            $user = User::where('email', $email)->first();
+
+            if ($user) {
+                // Nếu có user với email nhưng chưa liên kết google_id
+                $user->google_id = $googleId;
+                $user->save();
+            } else {
+                // Nếu không có user nào cả, tạo mới
+                $user = User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'google_id' => $googleId,
+                    'password' => bcrypt(Str::random(16)),
+                ]);
+            }
+        }
+
+        $token = $user->createToken('google_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Đăng nhập thành công',
+            'access_token' => $token,
+            'user' => $user,
+        ]);
     }
-
-    $token = $user->createToken('google_token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Đăng nhập thành công',
-        'access_token' => $token,
-        'user' => $user,
-    ]);
-}
 }
 
