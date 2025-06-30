@@ -9,10 +9,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-
-
-
-
 <body class="bg-gray-100 font-sans">
   <div class="flex h-screen">
     <!-- Sidebar -->
