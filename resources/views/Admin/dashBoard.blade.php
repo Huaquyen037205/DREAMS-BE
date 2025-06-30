@@ -69,15 +69,15 @@
             </thead>
             <tbody>
                 @foreach($ordersToday as $order)
-                    <tr class="border-b hover:bg-gray-50">
+                <tr class="border-b hover:bg-gray-50">
                         <td class="px-3 py-2">
-                        @if($order->order_code)
-                            {{ $order->order_code }}
-                        @else
-                            {{ $order->vnp_TxnRef }}
-                        @endif
-                    </td>
-                    <td class="px-3 py-2">{{ $order->user->name ?? '-' }}</td>
+                            @if($order->order_code)
+                                <a href="{{url('/admin/order/'. $order->id)}}">{{ $order->order_code }}</a>
+                            @else
+                                <a href="{{url('/admin/order/'. $order->id)}}">{{ $order->vnp_TxnRef }}</a>
+                            @endif
+                        </td>
+                    <td class="px-3 py-2"><a href="{{url('/admin/order/'. $order->id)}}">{{ $order->user->name ?? '-' }}</a></td>
                     <td class="px-3 py-2">{{ number_format($order->total_price, 0, ',', '.') }}₫</td>
                     <td class="px-3 py-2">
                         @switch($order->status)
