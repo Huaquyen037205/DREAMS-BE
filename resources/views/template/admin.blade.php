@@ -9,20 +9,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-
 <body class="bg-gray-100 font-sans">
   <div class="flex h-screen">
     <!-- Sidebar -->
     <aside class="w-64 bg-white shadow-lg overflow-y-auto">
-   <div class="p-6 text-2xl font-bold text-purple-600 flex justify-center">
+      <div class="p-6 text-2xl font-bold text-purple-600 flex justify-center">
         <a href="/admin/dashboard">
             <img src="{{ asset('img/logoDreams.png') }}" alt="" class="w-32 h-auto">
         </a>
-    </div>
+      </div>
       <ul>
-        <a href="/admin/dashboard" >
+        <a href="/admin/dashboard">
             <li class="px-6 py-3 bg-purple {{ request()->is('admin/dashboard') ? 'bg-purple-100 text-purple-700' : '' }} text-gray-700 font-medium flex items-center gap-2">
-            <i class="ph ph-gauge"></i> Báo cáo
+            <i class="ph ph-gauge"></i> Dashboard
             </li>
         </a>
         {{-- <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
@@ -30,7 +29,7 @@
         </li> --}}
 
         <div class="group">
-          <div onclick="toggleSubMenu('users-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('admin/user*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('users-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('admin/user*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
             <a href="/admin/user/list"><i class="ph ph-users"></i> Người dùng </a>
           </div>
           <div id="users-submenu" class="hidden flex-col">
@@ -41,7 +40,7 @@
         </div>
 
         <div class="group">
-          <div onclick="toggleSubMenu('products-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('admin/product/list*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('products-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('admin/product/list*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
                <a href="/admin/product/list"><i class="ph ph-package"></i> Sản Phẩm </a>
           </div>
           <div id="products-submenu" class="hidden flex-col">
@@ -52,7 +51,7 @@
         </div>
 
         <div class="group">
-          <div onclick="toggleSubMenu('orders-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('admin/order*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('orders-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('admin/order*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
             <a href="/admin/order"><i class="ph ph-truck"></i> Đơn Hàng</a>
           </div>
           {{-- <div id="orders-submenu" class="hidden flex-col">
@@ -61,8 +60,9 @@
           </div> --}}
         </div>
 
+        <!-- Mã Giảm giá -->
         <div class="group">
-          <div onclick="toggleSubMenu('discounts-submenu')" class="py-2.5 px-6 text-gray-700 hover:bg-purple-50 {{ request()->is('admin/flash-sale/*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
+          <div onclick="toggleSubMenu('discounts-submenu')" class="py-2.5 px-6 text-gray-700 hover:bg-purple-50 {{ request()->is('admin/coupons*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
             <i class="ph ph-percent"></i> Mã Giảm giá <i class="ph ph-caret-down ml-auto"></i>
           </div>
           <div id="discounts-submenu" class="hidden flex-col">
@@ -71,8 +71,9 @@
           </div>
         </div>
 
-         <div class="group">
-          <div onclick="toggleSubMenu('disscounts-submenu')" class="py-2.5 px-6 text-gray-700 hover:bg-purple-50 {{ request()->is('admin/discount*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
+        <!-- Chương trình giảm giá -->
+        <div class="group">
+          <div onclick="toggleSubMenu('disscounts-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('admin/discount*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
             <a href="/admin/discount"><i class="ph ph-tag"></i> Chương trình giảm giá</a>
           </div>
           {{-- <div id="orders-submenu" class="hidden flex-col">
@@ -81,8 +82,9 @@
           </div> --}}
         </div>
 
+        <!-- Flash-Sale -->
         <div class="group">
-            <div onclick="toggleSubMenu('flashsale-submenu')" class="py-2.5 px-6 hover:bg-purple-50 text-gray-700 font-medium cursor-pointer flex items-center gap-2">
+            <div onclick="toggleSubMenu('flashsale-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('admin/flash-sale*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
                 <i class="ph ph-lightning"></i> Flash-Sale <i class="ph ph-caret-down ml-auto"></i>
             </div>
             <div id="flashsale-submenu" class="hidden flex-col">
@@ -96,53 +98,48 @@
             <i class="ph ph-grid-four"></i> Danh Mục Sản Phẩm
         </a>
 
-          <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
+        <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
             <i class="ph ph-gear"></i> Cài đặt
-          </li>
-          <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
+        </li>
+        <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
             <a href="/admin/message"><i class="ph ph-chat-circle-text"></i> Tin nhắn</a>
-          </li>
-          <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
+        </li>
+        <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
             <i class="ph ph-copy"></i> Pages
-          </li>
-        </ul>
-      </nav>
+        </li>
+      </ul>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 p-6 overflow-auto">
       <!-- Top Bar -->
-    <div class="flex justify-between items-center mb-6">
+      <div class="flex justify-between items-center mb-6">
         <input type="text" placeholder="Search" class="px-4 py-2 border rounded-md w-1/3" />
         <div class="flex items-center space-x-4">
-        <span class="bg-purple-200 text-purple-800 rounded-full px-3 py-1 text-sm">
+          <span class="bg-purple-200 text-purple-800 rounded-full px-3 py-1 text-sm">
             {{ (Auth::user()->name ?? 'Admin DREAMS')  . ' ADMIN'}}
-        </span>
+          </span>
         </div>
-    </div>
+      </div>
 
-        <div class="flex justify-between items-center mb-6">
-            <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: inline;">
-                @csrf
-                <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
-                    Đăng xuất
-                </button>
-            </form>
-        </div>
+      <div class="flex justify-between items-center mb-6">
+        <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: inline;">
+            @csrf
+            <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
+                Đăng xuất
+            </button>
+        </form>
+      </div>
 
       <!-- Stats Cards -->
       @yield('content')
-
-
-
+    </main>
+  </div>
 </body>
 <script>
-
     function toggleSubMenu(id) {
         const submenu = document.getElementById(id);
         submenu.classList.toggle('hidden');
     }
-
-
 </script>
 </html>
