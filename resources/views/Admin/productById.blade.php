@@ -64,7 +64,7 @@
                     <tr class="hover:bg-gray-50 transition">
                         <td class="p-3 border text-center">{{ $variant->size }}</td>
                         <td class="p-3 border text-center">{{ $variant->stock_quantity }}</td>
-                        <td class="p-3 border text-center text-green-600 font-semibold">{{ number_format($variant->price) }} đ</td>
+                        <td class="p-3 border text-center text-green-600 font-semibold">{{ number_format($variant->price) }}₫</td>
                         <td class="p-3 border text-center text-red-500">
                             {{ $variant->sale_price ? number_format($variant->sale_price).' đ' : '---' }}
                         </td>
