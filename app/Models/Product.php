@@ -52,7 +52,6 @@ class Product extends Model
         }
         return $this->variant->first()->price;
     }
-
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class);

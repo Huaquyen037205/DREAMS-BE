@@ -1,16 +1,16 @@
 @extends('template.admin')
 
 @section('content')
-<main class="flex-1 p-6 overflow-y-auto">
+<main class="flex-1 px-4 md:px-8 py-6 overflow-y-auto bg-gray-50 min-h-screen">
     <div class="text-2xl font-semibold mb-6 text-indigo-700">⚡ Chi Tiết Chương Trình Flash Sale</div>
 
-    <div class="bg-white p-6 rounded-xl shadow mb-6 border border-gray-200">
+    <div class="bg-white p-6 rounded-2xl shadow mb-6 border border-gray-200">
         <h2 class="text-xl font-bold mb-2">{{ $flashSale->name }}</h2>
         <p class="text-gray-700"><strong>⏰ Thời gian bắt đầu:</strong> {{ $flashSale->start_time }}</p>
         <p class="text-gray-700"><strong>⏰ Thời gian kết thúc:</strong> {{ $flashSale->end_time }}</p>
     </div>
 
-    <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+    <div class="bg-white p-6 rounded-2xl shadow border border-gray-200">
         <h3 class="text-lg font-semibold mb-4">🛒 Danh sách sản phẩm trong chương trình</h3>
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm border border-gray-200 rounded-lg shadow">
@@ -34,7 +34,7 @@
                         @php
                             $productName = $items->first()->variant->product->name ?? 'Không xác định';
                         @endphp
-                        <tr class=" transition">
+                        <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-3 font-bold align-middle" rowspan="{{ $items->count() }}">{{ $productName }}</td>
                             <td class="px-4 py-3 text-center align-middle">{{ $items[0]->variant->size ?? '-' }}</td>
                             <td class="px-4 py-3 text-center text-green-600 font-semibold align-middle">{{ number_format($items[0]->sale_price) }}₫</td>
@@ -42,7 +42,7 @@
                             <td class="px-4 py-3 text-center align-middle">{{ $items[0]->flash_sold ?? 0 }}</td>
                             <td class="px-4 py-3 text-center space-x-2 align-middle">
                                 <button onclick="openEditModal({{ $items[0]->id }}, '{{ $items[0]->sale_price }}', '{{ $items[0]->flash_quantity }}')"
-                                        class="px-3 py-1 text-sm text-white bg-blue-500 :bg-blue-600 rounded shadow transition">
+                                        class="px-3 py-1 text-sm text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition">
                                     Sửa
                                 </button>
                                 <form action="{{ route('flashsale.variant.destroy', [$flashSale->id, $items[0]->id]) }}" method="POST" class="inline-block"
@@ -50,21 +50,21 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                            class="px-3 py-1 text-sm text-white bg-red-500 :bg-red-600 rounded shadow transition">
+                                            class="px-3 py-1 text-sm text-white bg-red-500 hover:bg-red-600 rounded shadow transition">
                                         Xóa
                                     </button>
                                 </form>
                             </td>
                         </tr>
                         @for ($i = 1; $i < $items->count(); $i++)
-                            <tr class=":bg-gray-50 transition">
+                            <tr class="hover:bg-gray-50 transition">
                                 <td class="px-4 py-3 text-center align-middle">{{ $items[$i]->variant->size ?? '-' }}</td>
                                 <td class="px-4 py-3 text-center text-green-600 font-semibold align-middle">{{ number_format($items[$i]->sale_price) }}₫</td>
                                 <td class="px-4 py-3 text-center align-middle">{{ $items[$i]->flash_quantity }}</td>
                                 <td class="px-4 py-3 text-center align-middle">{{ $items[$i]->flash_sold ?? 0 }}</td>
                                 <td class="px-4 py-3 text-center space-x-2 align-middle">
                                     <button onclick="openEditModal({{ $items[$i]->id }}, '{{ $items[$i]->sale_price }}', '{{ $items[$i]->flash_quantity }}')"
-                                            class="px-3 py-1 text-sm text-white bg-blue-500 :bg-blue-600 rounded shadow transition">
+                                            class="px-3 py-1 text-sm text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition">
                                         Sửa
                                     </button>
                                     <form action="{{ route('flashsale.variant.destroy', [$flashSale->id, $items[$i]->id]) }}" method="POST" class="inline-block"
@@ -72,7 +72,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                                class="px-3 py-1 text-sm text-white bg-red-500 :bg-red-600 rounded shadow transition">
+                                                class="px-3 py-1 text-sm text-white bg-red-500 hover:bg-red-600 rounded shadow transition">
                                             Xóa
                                         </button>
                                     </form>
