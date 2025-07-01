@@ -189,7 +189,6 @@ Route::get('/result/{id}', [VirtualTryOnController::class, 'getResult']);
 Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle']);
 
 //StyleAI
-
 Route::post('/stylist/analyze', [StylistAiController::class, 'analyzeStyle']);
 
 Route::middleware('auth:sanctum')->group(function () {
