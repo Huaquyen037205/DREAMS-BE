@@ -17,6 +17,8 @@ use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ImageSearchController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\VoiceOrderController;
+
 // use App\Http\Middleware\CheckAdmin;
 ;
 // Web Routes:
@@ -187,4 +189,11 @@ Route::get('/result/{id}', [VirtualTryOnController::class, 'getResult']);
 Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle']);
 
 //StyleAI
+
 Route::post('/stylist/analyze', [StylistAiController::class, 'analyzeStyle']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/voice-order/parse', [VoiceOrderController::class, 'parseVoiceOrder']);
+    Route::post('/voice-order/quick', [VoiceOrderController::class, 'quickOrder']);
+    Route::post('/voice-order/confirm-otp/{orderId}', [VoiceOrderController::class, 'confirmOtp']);
+});
