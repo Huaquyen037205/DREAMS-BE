@@ -412,6 +412,21 @@ class AdminController extends Controller
             $variant->status = $request->status;
             $variant->active = $request->active;
 
+            $duplicate = Variant::where('product_id', $request->product_id)
+                ->where('size', $request->size)
+                ->where('id', '!=', $variant->id)
+                ->first();
+
+            if ($duplicate) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'status' => 409,
+                        'message' => 'Sản phẩm đã có biến thể với kích cỡ này',
+                    ], 409);
+                }
+                return redirect()->back()->withErrors(['size' => 'Sản phẩm đã có biến thể với kích cỡ này']);
+            }
+
             if ($variant->stock_quantity == 0) {
                 $variant->status = 'hết hàng';
                 $variant->active = 'off';

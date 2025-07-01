@@ -203,7 +203,6 @@ class PaymentController extends Controller
         ], 200);
     }
 
-
     public function getOrderDetails($id)
     {
         $order = Order::with(['order_items', 'order_items.variant', 'order_items.product', 'order_items.product.img', 'address'])
@@ -235,7 +234,6 @@ class PaymentController extends Controller
             'data' => $order
         ], 200);
     }
-
 
     public function createCodPayment(Request $request)
     {
