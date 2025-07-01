@@ -188,7 +188,6 @@ class AuthController extends Controller
                 unset($validated['day_of_birth']);
             }
         }
-
         $user->update($validated);
         $user->refresh();
 

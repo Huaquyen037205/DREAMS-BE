@@ -1,8 +1,8 @@
 @extends('template.admin')
 
 @section('content')
-<main class="flex-1 p-6 overflow-y-auto">
-    <div class="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-2">
+<main class="flex-1 p-6 overflow-y-auto bg-gray-50 min-h-screen">
+    <div class="text-2xl font-bold text-gray-800 mb-8 flex items-center gap-2">
         🛠️ Chỉnh Sửa Chương Trình Flash Sale
     </div>
 
@@ -18,7 +18,7 @@
     @endif
 
     <form action="{{ url('/admin/flash-sale/' . $sale->id) }}" method="POST"
-          class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 w-full max-w-2xl mx-auto space-y-6">
+          class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 w-full max-w-2xl mx-auto space-y-6">
         @csrf
         @method('PUT')
 

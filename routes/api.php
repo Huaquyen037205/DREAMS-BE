@@ -17,6 +17,8 @@ use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ImageSearchController;
 use App\Http\Controllers\CouponController;
+
+use App\Http\Controllers\AIChatController;
 // use App\Http\Middleware\CheckAdmin;
 ;
 // Web Routes:
@@ -188,3 +190,9 @@ Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle'])
 
 //StyleAI
 Route::post('/style-ai/analyze', [StylistAiController::class, 'analyzeStyle']);
+
+
+
+Route::post('/chat-ai', [AIChatController::class, 'chat']);
+
+
