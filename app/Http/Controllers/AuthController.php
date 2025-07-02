@@ -170,6 +170,7 @@ class AuthController extends Controller
 
 
 
+
 public function updateProfile(Request $request)
 {
     $user = Auth::user();

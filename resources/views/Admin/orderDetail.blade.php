@@ -13,18 +13,22 @@
         </div>
 
         <div class="bg-white p-6 rounded-2xl shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">📦 Thông Tin Đơn Hàng</h3>
-            <p><strong>Mã đơn:</strong> {{ $orderInfo->vnp_TxnRef }}</p>
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Thông Tin Đơn Hàng</h3>
+            @if ($orderInfo->vnp_TxnRef)
+                <p><strong>Mã giao dịch:</strong> {{ $orderInfo->vnp_TxnRef }}</p>
+            @else
+                <p><strong>Mã giao dịch:</strong> {{ $orderInfo->order_code }} </p>
+            @endif
             <p><strong>Ngày đặt:</strong> {{ $orderInfo->created_at->format('d/m/Y H:i') }}</p>
             <p><strong>Trạng thái:</strong>
                 @if($orderInfo->status === 'pending')
-                    <span class="text-yellow-600 font-medium">🕒 Chờ xử lý</span>
+                    <span class="text-yellow-600 font-medium">Chờ xử lý</span>
                 @elseif($orderInfo->status === 'processing')
-                    <span class="text-blue-600 font-medium">🚚 Đang giao</span>
+                    <span class="text-blue-600 font-medium">Đang giao</span>
                 @elseif($orderInfo->status === 'paid')
-                    <span class="text-green-600 font-medium">✅ Hoàn tất</span>
+                    <span class="text-green-600 font-medium">Hoàn tất</span>
                 @else
-                    <span class="text-red-600 font-medium">❌ Đã huỷ</span>
+                    <span class="text-red-600 font-medium">Đã huỷ</span>
                 @endif
             </p>
             <p><strong>Tổng tiền:</strong> <span class="text-lg font-semibold text-green-600">{{ number_format($orderInfo->total_price) }}₫</span></p>
@@ -32,7 +36,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">🔧 Cập Nhật Trạng Thái Đơn Hàng</h3>
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Cập Nhật Trạng Thái Đơn Hàng</h3>
         <form action="{{url('/admin/order/update-status/'. $orderInfo->id) }}" method="POST" class="flex items-center gap-4">
             @csrf
             @method('PUT')
