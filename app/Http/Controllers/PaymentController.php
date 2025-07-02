@@ -11,6 +11,7 @@ use App\Models\Shipping;
 use App\Models\Discount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 class PaymentController extends Controller
 {
     public function createVnpayPayment(Request $request)
@@ -121,7 +122,7 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-       if ($request->input('vnp_ResponseCode') == '00') {
+        if ($request->input('vnp_ResponseCode') == '00') {
             $vnp_TxnRef = $request->input('vnp_TxnRef');
             $temp = cache()->pull('vnpay_' . $vnp_TxnRef);
 
@@ -166,10 +167,21 @@ class PaymentController extends Controller
                     $price = $variant ? $variant->price : 0;
                 }
 
+                // Trừ số lượng flash sale nếu có
+                if ($flashSaleVariant) {
+                    if ($flashSaleVariant->flash_quantity >= $item['quantity']) {
+                        $flashSaleVariant->flash_quantity -= $item['quantity'];
+                        $flashSaleVariant->flash_sold += $item['quantity'];
+                        $flashSaleVariant->save();
+                    } else {
+                        return response()->json(['error' => 'Số lượng flash sale không đủ'], 400);
+                    }
+                }
+
                 $order->order_items()->create([
                     'variant_id' => $item['variant_id'],
                     'quantity' => $item['quantity'],
-                    'price' => $item['price'],
+                    'price' => $price,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -254,7 +266,6 @@ class PaymentController extends Controller
                 })
                 ->first();
 
-
             if ($flashSaleVariant) {
                 $price = $flashSaleVariant->sale_price;
             } elseif ($variant && $variant->sale_price !== null) {
@@ -304,6 +315,17 @@ class PaymentController extends Controller
                 $price = $variant->sale_price;
             } else {
                 $price = $variant ? $variant->price : 0;
+            }
+
+            // Trừ số lượng flash sale nếu có
+            if ($flashSaleVariant) {
+                if ($flashSaleVariant->flash_quantity >= $item['quantity']) {
+                    $flashSaleVariant->flash_quantity -= $item['quantity'];
+                    $flashSaleVariant->flash_sold += $item['quantity'];
+                    $flashSaleVariant->save();
+                } else {
+                    return response()->json(['error' => 'Số lượng flash sale không đủ'], 400);
+                }
             }
 
             $order->order_items()->create([
