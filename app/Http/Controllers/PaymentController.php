@@ -9,6 +9,7 @@ use App\Models\Address;
 use App\Models\Coupon;
 use App\Models\Shipping;
 use App\Models\Discount;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -60,8 +61,8 @@ class PaymentController extends Controller
             'user_id' => $user->id,
             'cart' => $cart,
             'coupon_id' => $coupon_id,
+            'address_id' => $request->input('address_id'),
             'shipping_id' => $request->input('shipping_id', null),
-            'address_id' => $request->input('address_id', null),
             'payment_id' => $request->input('payment_id', null),
             'totalAfterDiscount' => $totalAfterDiscount,
         ], now()->addMinutes(30));
@@ -145,7 +146,7 @@ class PaymentController extends Controller
                 'address_id' => $address_id,
                 'total_price' => $totalAfterDiscount,
                 'status' => 'pending',
-                'vnp_TxnRef' => $vnp_TxnRef,
+                'vnp_TxnRef' => 'VnP' . $vnp_TxnRef,
                 'order_code' => null,
             ]);
 
@@ -167,6 +168,7 @@ class PaymentController extends Controller
                     $price = $variant ? $variant->price : 0;
                 }
 
+
                 // Trừ số lượng flash sale nếu có
                 if ($flashSaleVariant) {
                     if ($flashSaleVariant->flash_quantity >= $item['quantity']) {
@@ -176,6 +178,13 @@ class PaymentController extends Controller
                     } else {
                         return response()->json(['error' => 'Số lượng flash sale không đủ'], 400);
                     }
+
+                if ($order) {
+                    Notification::create([
+                    'user_id' => null,
+                    'message' => '🛒 Có đơn hàng mới: ' . $order->vnp_TxnRef,
+                    'status' => 'unread',
+                ]);
                 }
 
                 $order->order_items()->create([
@@ -315,6 +324,13 @@ class PaymentController extends Controller
                 $price = $variant->sale_price;
             } else {
                 $price = $variant ? $variant->price : 0;
+            }
+            if ($order) {
+                    Notification::create([
+                    'user_id' => null,
+                    'message' => '🛒 Có đơn hàng mới:' . $order->order_code,
+                    'status' => 'unread',
+                ]);
             }
 
             // Trừ số lượng flash sale nếu có

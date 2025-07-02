@@ -1,34 +1,59 @@
+@extends('template.admin')
+@section('content')
+@php
+    use Illuminate\Support\Str;
+@endphp
+<div class="p-6">
+    <h2 class="text-2xl font-bold mb-4">Thông Báo</h2>
+    <div class="space-y-4">
+        @php
+            $grouped = $notifications->groupBy(function($item) {
+                return $item->created_at->format('d/m/Y');
+            });
+        @endphp
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Liên kết đã được gửi</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 font-sans flex items-center justify-center min-h-screen">
-  <div class="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
-    <h1 class="text-3xl font-extrabold text-indigo-600 text-center mb-4">DREAMS</h1>
+        @forelse($grouped as $date => $notis)
+            <h4 class="font-bold text-indigo-600 mt-4 mb-2">{{ $date }}</h4>
+            <ul class="mb-4">
+                @foreach($notis as $notification)
+                    @php
+                        $message = $notification->message;
+                        $isOrder = Str::contains($message, 'đơn hàng mới') || Str::contains($message, 'Đơn hàng');
+                        $isOutOfStock = Str::contains($message, 'đã hết hàng');
+                        $isLowStock = Str::contains($message, 'chỉ còn') && Str::contains($message, 'sản phẩm!');
+                    @endphp
 
-    <h2 class="text-xl font-semibold text-gray-800 text-center mb-2">
-        Chúng tôi nhận thấy yêu cầu đặt lại mật khẩu từ bạn.
-    </h2>
-
-    <p class="text-gray-600 text-center mb-6">
-        Đây là mật khẩu của bạn:  {{ $newPassword }}
-    </p>
-
-    <h2 class="text-xl font-semibold text-gray-800 text-center mb-2">
-        Khi bạn đã đăng nhập, hãy thay đổi mật khẩu của bạn. DREAMS xin cảm ơn.
-    </h2>
-
-    <a href="{{ url('/admin/login') }}"
-       class="block text-center bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition duration-200">
-      Quay lại đăng nhập
-    </a>
-
-  </div>
-</body>
-</html>
-
+                    <li class="p-4 rounded-md shadow mb-2
+                        @if($isOrder)
+                            bg-green-100 border-l-4 border-green-500
+                        @elseif($isOutOfStock)
+                            bg-red-100 border-l-4 border-red-500
+                        @elseif($isLowStock)
+                            bg-yellow-100 border-l-4 border-yellow-500
+                        @else
+                            bg-blue-100 border-l-4 border-blue-500
+                        @endif
+                    ">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold
+                                    @if($isOrder) text-green-700
+                                    @elseif($isOutOfStock) text-red-700
+                                    @elseif($isLowStock) text-yellow-700
+                                    @else text-blue-700
+                                    @endif
+                                ">
+                                    {{ $notification->message }}
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-1">{{ $notification->created_at->format('d/m/Y H:i') }}</p>
+                            </div>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        @empty
+            <div class="text-gray-400">Không có thông báo nào.</div>
+        @endforelse
+    </div>
+</div>
+@endsection
