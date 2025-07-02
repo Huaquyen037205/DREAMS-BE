@@ -12,6 +12,7 @@ use App\Models\Coupon;
 use App\Models\Address;
 use App\Models\Review;
 use Carbon\Carbon;
+use App\Models\Notification;
 use App\Mail\OrderInvoiceMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
@@ -60,6 +61,22 @@ class AdminManageController extends Controller
                 if ($item->variant->stock_quantity < 0) $item->variant->stock_quantity = 0;
                 $item->variant->save();
             }
+
+            if ($item->variant->stock_quantity <= 10 && $item->variant->stock_quantity > 0) {
+                Notification::create([
+                    'user_id' => null,
+                    'message' => '📦 Sản phẩm "' . $item->variant->product->name . '" chỉ còn ' . $item->variant->stock_quantity . ' sản phẩm!',
+                    'status' => 'unread',
+                ]);
+            }
+            if ($item->variant->stock_quantity == 0) {
+                Notification::create([
+                    'user_id' => null,
+                    'message' => '❌ Sản phẩm "' . $item->variant->product->name . '" đã hết hàng!',
+                    'status' => 'unread',
+                ]);
+            }
+
             elseif ($item->product_id) {
                 $product = Product::find($item->product_id);
                 if ($product && isset($product->stock_quantity)) {
@@ -86,6 +103,12 @@ class AdminManageController extends Controller
         $order->save();
 
         return redirect()->back()->with('success', 'Trạng thái đơn hàng đã được cập nhật.');
+    }
+
+    public function markNotificationsRead(Request $request)
+    {
+        Notification::where('status', 'unread')->update(['status' => 'read']);
+        return response()->json(['success' => true]);
     }
 
     public function OrderCancel(Request $request)
@@ -432,5 +455,11 @@ class AdminManageController extends Controller
         $order = Order::with('user', 'order_items.variant.product')->findOrFail($id);
         Mail::to($order->user->email)->send(new OrderInvoiceMail($order));
         return back()->with('success', 'Đã gửi hóa đơn tới email khách hàng!');
+    }
+
+    public function notifications()
+    {
+        $notifications = Notification::orderByDesc('created_at')->paginate(10);
+        return view('Admin.notification', compact('notifications'));
     }
 }

@@ -103,6 +103,9 @@ Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function
     Route::put('/variant/edit/{id}', [AdminController::class, 'editVariant']);
     Route::get('/variant/delete/{id}', [AdminController::class, 'deleteVariant']);
 
+    //notification
+    Route::get('/notifications', [AdminManageController::class, 'notifications']);
+    Route::post('/admin/notifications/read', [AdminManageController::class, 'markNotificationsRead'])->name('admin.notifications.read');
 
     //Coupons
     Route::get('/coupons', [PageController::class, 'couponList'])->name('coupons.index');
