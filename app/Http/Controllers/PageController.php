@@ -12,9 +12,13 @@ use Illuminate\Http\Request;
 
 class PageController extends Controller
 {
-    public function dashBoard(){
+    public function template(){
+        $notifications = Notification::orderByDesc('created_at')->take(10)->get();
+        return view('template.admin', compact('notifications'));
+    }
 
-        return view('Admin.dashBoard');
+    public function dashBoard(){
+        return view('Admin.dashBoard', compact('notifications'));
     }
 
     public function loginAdmin(){
@@ -96,7 +100,7 @@ class PageController extends Controller
     public function orderList(){
         $orders = Order::with('user', 'discount', 'shipping', 'payment', 'coupon', 'address')
         ->orderByDesc('created_at')
-        ->paginate(12);
+        ->paginate(12);;
        return view('Admin.orderList', compact('orders'));
     }
 

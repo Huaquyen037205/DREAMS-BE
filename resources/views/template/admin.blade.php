@@ -15,7 +15,7 @@
     <aside class="w-64 bg-white shadow-lg overflow-y-auto">
       <div class="p-6 text-2xl font-bold text-purple-600 flex justify-center">
         <a href="/admin/dashboard">
-            <img src="{{ asset('img/logoDreams.png') }}" alt="" class="w-32 h-auto">
+            <img src="{{ asset('img/dr2025.png') }}" alt="" class="w-32 h-auto">
         </a>
       </div>
       <ul>
@@ -98,9 +98,15 @@
             <i class="ph ph-grid-four"></i> Danh Mục Sản Phẩm
         </a>
 
-        <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
-            <i class="ph ph-gear"></i> Cài đặt
-        </li>
+         <div class="group">
+          <div onclick="toggleSubMenu('notification-submenu')" class="py-2.5 px-6 hover:bg-purple-50 {{ request()->is('/admin/notifications*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700' }} font-medium cursor-pointer flex items-center gap-2">
+            <a href="/admin/notifications"><i class="ph ph-bell"></i> Thông Báo</a>
+          </div>
+          {{-- <div id="orders-submenu" class="hidden flex-col">
+            <a href="orderList.html" class="block py-2 px-12 hover:text-indigo-600">Danh sách đơn hàng</a>
+            <a href="#" class="block py-2 px-12 hover:text-indigo-600">Cập nhật đơn hàng</a>
+          </div> --}}
+        </div>
         <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
             <a href="/admin/message"><i class="ph ph-chat-circle-text"></i> Tin nhắn</a>
         </li>
@@ -113,33 +119,77 @@
     <!-- Main Content -->
     <main class="flex-1 p-6 overflow-auto">
       <!-- Top Bar -->
-      <div class="flex justify-between items-center mb-6">
-        <input type="text" placeholder="Search" class="px-4 py-2 border rounded-md w-1/3" />
-        <div class="flex items-center space-x-4">
-          <span class="bg-purple-200 text-purple-800 rounded-full px-3 py-1 text-sm">
-            {{ (Auth::user()->name ?? 'Admin DREAMS')  . ' ADMIN'}}
-          </span>
+    <div class="flex justify-between items-center mb-6 relative">
+  <!-- Left: Search or Logo -->
+  <div class="flex items-center gap-4">
+    <span class="bg-purple-200 text-purple-800 rounded-full px-3 py-1 text-sm">
+      {{ (Auth::user()->name ?? 'Admin DREAMS')  . ', ADMIN DREAMS'}}
+    </span>
+  </div>
+
+  <!-- Right: Notifications + Logout -->
+  <div class="flex items-center gap-4 relative">
+    <!-- Notification Bell -->
+    <div class="relative">
+      <button onclick="toggleNotificationDropdown()" class="relative cursor-pointer hover:text-purple-600 text-gray-600 focus:outline-none">
+        <i class="ph ph-bell text-2xl"></i>
+            @if($unreadCount > 0)
+                <span class="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs font-bold border-2 border-white">
+                    {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                </span>
+            @endif
+      </button>
+
+      <!-- Dropdown -->
+      <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-72 bg-white shadow-lg rounded-lg ring-1 ring-gray-200 z-50">
+        <div class="p-4 font-semibold text-gray-700 border-b">🔔 Thông báo</div>
+            <ul class="max-h-60 overflow-y-auto divide-y divide-gray-100">
+                @forelse($notifications as $noti)
+                    <li class="px-4 py-2 hover:bg-gray-50 text-sm cursor-pointer">
+                        {!! $noti->message !!}
+                    </li>
+                @empty
+                    <li class="px-4 py-2 text-sm text-gray-400">Không có thông báo</li>
+                @endforelse
+            </ul>
+        <div class="p-2 text-center text-sm text-indigo-600 hover:underline hover:bg-gray-50 cursor-pointer">
+          <a href="/admin/notifications">Xem tất cả</a>
         </div>
       </div>
+    </div>
 
-      <div class="flex justify-between items-center mb-6">
-        <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: inline;">
-            @csrf
-            <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
-                Đăng xuất
-            </button>
-        </form>
-      </div>
-
+    <!-- Logout -->
+    <form id="logout-form" action="{{ url('/logout') }}" method="POST">
+      @csrf
+      <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition">
+        Đăng xuất
+      </button>
+    </form>
+  </div>
+</div>
       <!-- Stats Cards -->
       @yield('content')
     </main>
   </div>
 </body>
 <script>
-    function toggleSubMenu(id) {
-        const submenu = document.getElementById(id);
-        submenu.classList.toggle('hidden');
+  function toggleNotificationDropdown() {
+    const dropdown = document.getElementById('notification-dropdown');
+    dropdown.classList.toggle('hidden');
+
+    if (!dropdown.classList.contains('hidden')) {
+        fetch("{{ route('admin.notifications.read') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                "Accept": "application/json"
+            }
+        }).then(res => {
+            if (res.ok) {
+                document.querySelectorAll('.ph-bell + span').forEach(e => e.style.display = 'none');
+            }
+        });
     }
+}
 </script>
 </html>
