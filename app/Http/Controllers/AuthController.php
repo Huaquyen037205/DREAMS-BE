@@ -10,6 +10,8 @@ use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Google\Client as Google_Client;
+use Illuminate\Support\Facades\Storage;
+
 
 class AuthController extends Controller
 {
@@ -167,49 +169,50 @@ class AuthController extends Controller
     }
 
 
-    public function updateProfile(Request $request)
-    {
-        $user = Auth::user();
 
-        $validated = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'email' => 'nullable|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
-            'day_of_birth' => 'nullable|date',
-        ]);
 
-        // Nếu FE gửi lên dạng YYYY-MM-DD thì không cần chuyển đổi gì cả
-        // Nếu muốn chắc chắn, có thể ép lại format:
-        if (!empty($validated['day_of_birth'])) {
-            $date = date_create($validated['day_of_birth']);
-            if ($date) {
-                $validated['day_of_birth'] = $date->format('Y-m-d');
-            } else {
-                unset($validated['day_of_birth']);
-            }
-        }
+public function updateProfile(Request $request)
+{
+    $user = Auth::user();
 
-        if ($request->hasFile('avatar')) {
+    $validated = $request->validate([
+        'name' => 'nullable|string|max:255',
+        'email' => 'nullable|email|unique:users,email,' . $user->id,
+        'phone' => 'nullable|string|max:20',
+        'day_of_birth' => 'nullable|date',
+        'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    // Xử lý ngày sinh
+    if (!empty($validated['day_of_birth'])) {
+        $date = date_create($validated['day_of_birth']);
+        $validated['day_of_birth'] = $date ? $date->format('Y-m-d') : null;
+    }
+
+    // Xử lý ảnh
+    if ($request->hasFile('avatar')) {
         $file = $request->file('avatar');
-        $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $filename = time() . '_' . $file->getClientOriginalName();
         $path = $file->storeAs('avatars', $filename, 'public');
-        $validated['avatar'] = $path;
 
-        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+        // Xoá ảnh cũ nếu có
+        if ($user->avatar) {
             Storage::disk('public')->delete($user->avatar);
         }
+
+        $validated['avatar'] = $path;
     }
 
-        $user->update($validated);
-        $user->refresh();
+    $user->update($validated);
+    $user->refresh();
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Cập nhật thông tin thành công',
-            'data' => $user
-        ]);
-    }
+    return response()->json([
+        'status' => 200,
+        'message' => 'Cập nhật thông tin thành công',
+        'data' => $user
+    ]);
+}
+
 
 // login gg
    public function loginOrRegisterWithGoogle(Request $request)

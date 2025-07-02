@@ -2,8 +2,8 @@
 @extends('template.admin')
 
 @section('content')
-<main class="flex-1 p-6 overflow-y-auto">
-    <div class="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-2">
+<main class="flex-1 p-6 overflow-y-auto bg-gray-50 min-h-screen">
+    <div class="text-2xl font-bold text-gray-800 mb-8 flex items-center gap-2">
         ➕ Thêm Sản Phẩm Vào:
         <span class="text-indigo-600">{{ $flashSale->name }}</span>
     </div>
@@ -20,7 +20,7 @@
     @endif
 
     <form method="POST" action="{{ url('/admin/flash-sale/'.$flashSale->id.'/add-product') }}"
-          class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 w-full max-w-2xl mx-auto space-y-6">
+          class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 w-full max-w-2xl mx-auto space-y-6">
         @csrf
 
         <!-- Sản phẩm -->
@@ -93,14 +93,12 @@
             let variants = [];
 
             select.addEventListener('change', function () {
-                // Reset size select
                 sizeSelect.innerHTML = '<option value="">-- Chọn size --</option>';
                 stockInfo.textContent = '';
                 flashQuantity.value = '';
                 flashQuantity.max = '';
                 img.classList.add('hidden');
 
-                // Lấy variants theo sản phẩm
                 const productId = select.value;
                 if (productId) {
                     fetch(`/admin/flash-sale/api/product/${productId}/variants`)

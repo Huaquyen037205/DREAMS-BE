@@ -19,8 +19,9 @@ use App\Http\Controllers\ImageSearchController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\VoiceOrderController;
 
+
+
 // use App\Http\Middleware\CheckAdmin;
-;
 // Web Routes:
 Route::get('/product', [ProductController::class, 'product']);
 Route::get('/hotProduct', [ProductController::class, 'hotProduct']);
@@ -150,7 +151,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // edit user profile
-Route::middleware('auth:sanctum')->patch('/user/profile', [\App\Http\Controllers\AuthController::class, 'updateProfile']);
+Route::middleware('auth:sanctum')->patch('/user/profile', [AuthController::class, 'updateProfile']);
 
 //coupons
 Route::get('/coupons', [DiscountController::class, 'index']);
@@ -189,6 +190,11 @@ Route::get('/result/{id}', [VirtualTryOnController::class, 'getResult']);
 Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle']);
 
 //StyleAI
+
+
+
+
+
 Route::post('/stylist/analyze', [StylistAiController::class, 'analyzeStyle']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -196,3 +202,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/voice-order/quick', [VoiceOrderController::class, 'quickOrder']);
     Route::post('/voice-order/confirm-otp/{orderId}', [VoiceOrderController::class, 'confirmOtp']);
 });
+
