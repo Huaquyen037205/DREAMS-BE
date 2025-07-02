@@ -4,9 +4,8 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
       function handleCredentialResponse(response) {
-        console.log("ID Token:", response.credential); // Đây là id_token
+        console.log("ID Token:", response.credential);
       }
-
       window.onload = function () {
         google.accounts.id.initialize({
             client_id: "618672128676-6dopq4dgv5p5qgl83mphuppi9vkrmd2k.apps.googleusercontent.com",

@@ -17,9 +17,9 @@ use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ImageSearchController;
 use App\Http\Controllers\CouponController;
-use App\Http\Controllers\AIChatController;
-
 use App\Http\Controllers\VoiceOrderController;
+
+
 
 // use App\Http\Middleware\CheckAdmin;
 // Web Routes:
@@ -151,7 +151,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // edit user profile
-Route::middleware('auth:sanctum')->patch('/user/profile', [\App\Http\Controllers\AuthController::class, 'updateProfile']);
+Route::middleware('auth:sanctum')->patch('/user/profile', [AuthController::class, 'updateProfile']);
 
 //coupons
 Route::get('/coupons', [DiscountController::class, 'index']);
@@ -192,9 +192,6 @@ Route::post('auth/google', [AuthController::class, 'loginOrRegisterWithGoogle'])
 //StyleAI
 
 
-
-
-Route::post('/chat-ai', [AIChatController::class, 'chat']);
 
 
 
