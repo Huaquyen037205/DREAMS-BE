@@ -173,6 +173,7 @@ class AuthController extends Controller
 
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'email' => 'nullable|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'day_of_birth' => 'nullable|date',
@@ -188,6 +189,17 @@ class AuthController extends Controller
                 unset($validated['day_of_birth']);
             }
         }
+
+        if ($request->hasFile('avatar')) {
+        $file = $request->file('avatar');
+        $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('avatars', $filename, 'public');
+        $validated['avatar'] = $path;
+
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+    }
 
         $user->update($validated);
         $user->refresh();

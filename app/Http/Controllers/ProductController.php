@@ -176,6 +176,27 @@ public function hotProduct() {
     ], 200);
 }
 
+    public function searchProduct(Request $request){
+        $search = $request->input('search');
+        $product = Product::with('img', 'variant', 'category')
+            ->where('name', 'LIKE', "%{$search}%")
+            ->orWhere('description', 'LIKE', "%{$search}%")
+            ->paginate(12);
+            return view('Admin.productList', ['products' => $product]);
+        if($product->isEmpty()){
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ],404);
+        }else{
+            return response()->json([
+                'status' => 200,
+                'message' => 'Tôi đai',
+                'data' => $product
+            ],200);
+        }
+    }
+
         public function productByPrice(Request $request)
     {
         $min = $request->input('min', 0);
