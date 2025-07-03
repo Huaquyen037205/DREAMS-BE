@@ -179,10 +179,10 @@ class PaymentController extends Controller
 
                 if ($order) {
                     Notification::create([
-                    'user_id' => null,
-                    'message' => '🛒 Có đơn hàng mới: ' . $order->vnp_TxnRef,
-                    'status' => 'unread',
-                ]);
+                        'user_id' => null,
+                        'message' => '🛒 Có đơn hàng mới: ' . $order->vnp_TxnRef,
+                        'status' => 'unread',
+                    ]);
                 }
 
                 $order->order_items()->create([
@@ -325,7 +325,7 @@ class PaymentController extends Controller
                 $price = $variant ? $variant->price : 0;
             }
             if ($order) {
-                    Notification::create([
+                Notification::create([
                     'user_id' => null,
                     'message' => '🛒 Có đơn hàng mới:' . $order->order_code . '',
                     'status' => 'unread',

@@ -125,7 +125,7 @@ public function hotProduct() {
         ], 200);
     }
 
-    public function productById($id) {
+   public function productById($id) {
     $product = Product::with('img', 'variant', 'category')->where('id', $id)->first();
 
     if (!$product) {
@@ -144,25 +144,20 @@ public function hotProduct() {
         ->whereIn('flash_sale_variants.variant_id', $variantIds)
         ->where('flash_sales.start_time', '<=', $now)
         ->where('flash_sales.end_time', '>=', $now)
-        ->select('flash_sale_variants.sale_price')
-        ->get();
+        ->select('flash_sale_variants.variant_id', 'flash_sale_variants.sale_price')
+        ->get()
+        ->keyBy('variant_id');
 
-    if ($flashSaleVariants->count() > 0) {
-        // Lấy giá flash sale đầu tiên (áp dụng cho tất cả size)
-        $flashSalePrice = $flashSaleVariants->first()->sale_price;
-        foreach ($product->variant as $variant) {
-            $variant->final_price = $flashSalePrice;
+    foreach ($product->variant as $variant) {
+        if ($flashSaleVariants->has($variant->id)) {
+            $variant->final_price = $flashSaleVariants[$variant->id]->sale_price;
             $variant->price_type = 'flash_sale';
-        }
-    } else {
-        foreach ($product->variant as $variant) {
-            if (!empty($variant->sale_price)) {
-                $variant->final_price = $variant->sale_price;
-                $variant->price_type = 'sale_price';
-            } else {
-                $variant->final_price = $variant->price;
-                $variant->price_type = 'origin';
-            }
+        } elseif (!empty($variant->sale_price)) {
+            $variant->final_price = $variant->sale_price;
+            $variant->price_type = 'sale_price';
+        } else {
+            $variant->final_price = $variant->price;
+            $variant->price_type = 'origin';
         }
     }
 
