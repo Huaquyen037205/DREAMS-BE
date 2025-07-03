@@ -168,49 +168,47 @@ class AuthController extends Controller
         }
     }
 
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
 
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'day_of_birth' => 'nullable|date',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-public function updateProfile(Request $request)
-{
-    $user = Auth::user();
-
-    $validated = $request->validate([
-        'name' => 'nullable|string|max:255',
-        'email' => 'nullable|email|unique:users,email,' . $user->id,
-        'phone' => 'nullable|string|max:20',
-        'day_of_birth' => 'nullable|date',
-        'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    // Xử lý ngày sinh
-    if (!empty($validated['day_of_birth'])) {
-        $date = date_create($validated['day_of_birth']);
-        $validated['day_of_birth'] = $date ? $date->format('Y-m-d') : null;
-    }
-
-    // Xử lý ảnh
-    if ($request->hasFile('avatar')) {
-        $file = $request->file('avatar');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $path = $file->storeAs('avatars', $filename, 'public');
-
-        // Xoá ảnh cũ nếu có
-        if ($user->avatar) {
-            Storage::disk('public')->delete($user->avatar);
+        // Xử lý ngày sinh
+        if (!empty($validated['day_of_birth'])) {
+            $date = date_create($validated['day_of_birth']);
+            $validated['day_of_birth'] = $date ? $date->format('Y-m-d') : null;
         }
 
-        $validated['avatar'] = $path;
+        // Xử lý ảnh
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('avatars', $filename, 'public');
+
+            // Xoá ảnh cũ nếu có
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            $validated['avatar'] = $path;
+        }
+
+        $user->update($validated);
+        $user->refresh();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Cập nhật thông tin thành công',
+            'data' => $user
+        ]);
     }
-
-    $user->update($validated);
-    $user->refresh();
-
-    return response()->json([
-        'status' => 200,
-        'message' => 'Cập nhật thông tin thành công',
-        'data' => $user
-    ]);
-}
 
 
 // login gg

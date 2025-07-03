@@ -41,7 +41,6 @@ Route::post('/login', [AuthController::class, 'login']);
 route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
 route::post('/resetPassword', [AuthController::class, 'resetPassword']);
-Route::post('/change-password', [AuthController::class, 'changePassword']);
 
 Route::get('/review/{id}', [ProductController::class, 'reviewByProductId']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -53,7 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Review
     Route::get('/review', [ProductController::class, 'getReviews']);
     Route::post('/review', [ProductController::class, 'reviews']);
-
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
     Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
 });
 

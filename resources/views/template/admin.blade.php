@@ -183,6 +183,13 @@ function toggleSubMenu(id) {
 
 </body>
 <script>
+    function toggleSubMenu(id) {
+    const submenu = document.getElementById(id);
+    if (submenu) {
+        submenu.classList.toggle('hidden');
+    }
+}
+
   function toggleNotificationDropdown() {
     const dropdown = document.getElementById('notification-dropdown');
     dropdown.classList.toggle('hidden');
