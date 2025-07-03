@@ -217,11 +217,11 @@ public function destroyVariant($flashSaleId, $variantId)
 
 public function apiProductVariants($id)
 {
-    $variants = \DB::table('variant')
+    $variants = DB::table('variant')
         ->where('product_id', $id)
         ->get()
         ->map(function ($variant) {
-            $img = \DB::table('img')->where('id', $variant->img_id)->first();
+            $img = DB::table('img')->where('id', $variant->img_id)->first();
             $variant->img = $img ? asset('img/' . $img->name) : null;
             $variant->quantity = $variant->stock_quantity;
             return $variant;

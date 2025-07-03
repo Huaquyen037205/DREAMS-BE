@@ -171,6 +171,16 @@
       @yield('content')
     </main>
   </div>
+
+<script>
+function toggleSubMenu(id) {
+    const submenu = document.getElementById(id);
+    if (submenu) {
+        submenu.classList.toggle('hidden');
+    }
+}
+</script>
+
 </body>
 <script>
   function toggleNotificationDropdown() {
