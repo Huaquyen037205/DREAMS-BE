@@ -18,6 +18,8 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ImageSearchController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\VoiceOrderController;
+use App\Http\Controllers\AIChatController;
+
 
 
 
@@ -202,3 +204,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/voice-order/confirm-otp/{orderId}', [VoiceOrderController::class, 'confirmOtp']);
 });
 
+//  chat
+// Route::post('/chat-ai', [AIChatController::class, 'chat']);
+Route::post('/chat-ai', [AIChatController::class, 'chat']);
