@@ -141,49 +141,63 @@ class FlashSaleController extends Controller
 
 
 public function apiActiveFlashSales()
-{
-    $now = now();
+    {
+        $now = now();
 
-    $flashSales = Flash_Sale::where('start_time', '<=', $now)
-        ->where('end_time', '>=', $now)
-        ->orderByDesc('start_time')
-        ->get();
-
-    $result = [];
-    foreach ($flashSales as $flashSale) {
-        $variants = DB::table('flash_sale_variants')
-            ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
-            ->join('products', 'variant.product_id', '=', 'products.id')
-            ->where('flash_sale_variants.flash_sale_id', $flashSale->id)
-            ->select(
-                'products.id as product_id',
-                'products.name as product_name',
-                'variant.id as variant_id',
-                'variant.size as size',                    // Size của variant
-                'variant.price as original_price',         // Giá gốc của size
-                'flash_sale_variants.sale_price as flash_sale_price', // Giá flash sale của size
-                'flash_sale_variants.flash_quantity',
-                'flash_sale_variants.flash_sold'
-            )
+        $flashSales = Flash_Sale::where('start_time', '<=', $now)
+            ->where('end_time', '>=', $now)
+            ->orderByDesc('start_time')
             ->get();
 
-        foreach ($variants as $variant) {
-            $variant->images = DB::table('img')
-                ->where('product_id', $variant->product_id)
-                ->pluck('name');
+        $result = [];
+
+        foreach ($flashSales as $flashSale) {
+            $variants = DB::table('flash_sale_variants')
+                ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
+                ->join('products', 'variant.product_id', '=', 'products.id')
+                ->where('flash_sale_variants.flash_sale_id', $flashSale->id)
+                ->select(
+                    'products.id as product_id',
+                    'products.name as product_name',
+                    'variant.id as variant_id',
+                    'variant.size as size',
+                    'variant.price as original_price',
+                    'flash_sale_variants.sale_price as flash_sale_price',
+                    'flash_sale_variants.flash_quantity',
+                    'flash_sale_variants.flash_sold'
+                )
+                ->get();
+
+            foreach ($variants as $variant) {
+                // Lấy danh sách ảnh của sản phẩm
+                $variant->images = DB::table('img')
+                    ->where('product_id', $variant->product_id)
+                    ->pluck('name');
+
+                // Tính phần trăm giảm giá
+                if ($variant->original_price > 0) {
+                    $variant->percent_discount = round(
+                        ($variant->original_price - $variant->flash_sale_price) / $variant->original_price * 100
+                    );
+                } else {
+                    $variant->percent_discount = 0;
+                }
+            }
+
+            $result[] = [
+                'flash_sale_id'   => $flashSale->id,
+                'flash_sale_name' => $flashSale->name,
+                'start_time'      => $flashSale->start_time,
+                'end_time'        => $flashSale->end_time,
+                'variants'        => $variants
+            ];
         }
 
-        $result[] = [
-            'flash_sale_id' => $flashSale->id,
-            'flash_sale_name' => $flashSale->name,
-            'start_time' => $flashSale->start_time,
-            'end_time' => $flashSale->end_time,
-            'variants' => $variants
-        ];
+        return response()->json($result);
     }
 
-    return response()->json($result);
-}
+
+
 
 public function updateVariant(Request $request, $flashsaleId, $variantId)
 {

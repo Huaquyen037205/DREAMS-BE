@@ -5,11 +5,25 @@
     <script>
       function handleCredentialResponse(response) {
         console.log("ID Token:", response.credential);
+
+        // Gửi id_token về server để login
+        fetch("http://localhost:8000/api/auth/google", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ id_token: response.credential })
+        })
+        .then(res => res.json())
+        .then(data => console.log("SERVER RESPONSE:", data));
       }
+
       window.onload = function () {
         google.accounts.id.initialize({
-            client_id: "618672128676-6dopq4dgv5p5qgl83mphuppi9vkrmd2k.apps.googleusercontent.com",
-            callback: handleCredentialResponse
+          client_id: "618672128676-6dopq4dgv5p5qgl83mphuppi9vkrmd2k.apps.googleusercontent.com",
+          callback: handleCredentialResponse,
+          ux_mode: "popup",
+          scope: "openid email profile"
         });
 
         google.accounts.id.renderButton(
@@ -24,5 +38,3 @@
     <div id="buttonDiv"></div>
   </body>
 </html>
-
-
