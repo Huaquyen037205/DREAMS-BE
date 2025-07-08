@@ -12,6 +12,7 @@ use App\Models\Discount_user;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class ProductController extends Controller
 {
@@ -125,7 +126,7 @@ public function hotProduct() {
         ], 200);
     }
 
-   public function productById($id) {
+   public function productById(Request $request, $id) {
     $product = Product::with('img', 'variant', 'category')->where('id', $id)->first();
 
     if (!$product) {
@@ -135,6 +136,18 @@ public function hotProduct() {
         ], 404);
     }
 
+    // Nếu có token (user đăng nhập) thì lưu lịch sử xem
+    $user = $request->user();
+    if (!$user && $request->bearerToken()) {
+        $user = \Laravel\Sanctum\PersonalAccessToken::findToken($request->bearerToken())?->tokenable;
+    }
+    if ($user) {
+        \DB::table('product_views')->insert([
+            'user_id' => $user->id,
+            'product_id' => $id,
+            'viewed_at' => now(),
+        ]);
+    }
     $now = now();
     $variantIds = $product->variant->pluck('id')->toArray();
 
@@ -446,4 +459,82 @@ public function hotProduct() {
             'message' => 'Đánh giá đã được xóa thành công',
         ], 200);
     }
+
+
+    public function viewedProducts(Request $request)
+{
+    $userId = $request->user()->id;
+    $productIds = \DB::table('product_views')
+        ->where('user_id', $userId)
+        ->orderByDesc('viewed_at')
+        ->pluck('product_id')
+        ->unique()
+        ->take(10);
+
+    $products = Product::with('img', 'variant', 'category')
+        ->whereIn('id', $productIds)
+        ->get();
+
+    return response()->json([
+        'status' => 200,
+        'products' => $products
+    ]);
+}
+
+
+public function aiRecommend(Request $request)
+{
+    $userId = $request->user()->id;
+    $viewed = \DB::table('product_views')
+        ->where('user_id', $userId)
+        ->orderByDesc('viewed_at')
+        ->pluck('product_id')
+        ->unique()
+        ->take(10);
+
+    $products = Product::whereIn('id', $viewed)->pluck('name')->toArray();
+
+    // Lấy thêm danh sách sản phẩm mới nhất để AI gợi ý
+    $allProducts = Product::orderByDesc('created_at')->take(20)->pluck('name')->toArray();
+
+    $prompt = "Dựa trên lịch sử người dùng đã xem các sản phẩm: " . implode(', ', $products) .
+        ". Trong số các sản phẩm sau: " . implode(', ', $allProducts) .
+        ". Hãy gợi ý 4 sản phẩm phù hợp nhất với sở thích của người dùng. Chỉ trả về mảng tên sản phẩm ở dạng JSON, không giải thích, không văn bản, không bọc ```json```.";
+
+    $apiKey = env('GEMINI_API_KEY');
+    $response = Http::withHeaders([
+        'Content-Type' => 'application/json',
+    ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey", [
+        'contents' => [[ 'parts' => [['text' => $prompt]] ]]
+    ]);
+
+    $text = $response->json('candidates.0.content.parts.0.text');
+
+    // Xử lý nếu Gemini trả về có bọc ```json```
+    if (preg_match('/```json(.*?)```/s', $text, $matches)) {
+        $json = trim($matches[1]);
+    } elseif (preg_match('/```(.*?)```/s', $text, $matches)) {
+        $json = trim($matches[1]);
+    } else {
+        $json = trim($text);
+    }
+
+    $suggestedNames = json_decode($json, true);
+
+    // Nếu Gemini trả về không đúng mảng, trả về rỗng
+    if (!is_array($suggestedNames)) {
+        return response()->json([
+            'suggested' => []
+        ]);
+    }
+
+    // Lấy đầy đủ thông tin sản phẩm theo tên
+    $suggestedProducts = Product::with('img', 'variant', 'category')
+        ->whereIn('name', $suggestedNames)
+        ->get();
+
+    return response()->json([
+        'suggested' => $suggestedProducts
+    ]);
+}
 }

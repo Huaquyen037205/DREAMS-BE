@@ -29,6 +29,7 @@ Route::get('/product', [ProductController::class, 'product']);
 Route::get('/hotProduct', [ProductController::class, 'hotProduct']);
 Route::get('/viewProduct', [ProductController::class, 'viewProduct']);
 Route::get('/product/{id}', [ProductController::class, 'productById']);
+// Route::middleware('auth:sanctum')->get('/product/{id}', [ProductController::class, 'productById']);
 Route::get('/search', [ProductController::class, 'searchProduct']);
 Route::get('/category/{id}', [ProductController::class, 'productByCategory']);
 Route::get('/products/price', [ProductController::class, 'productByPrice']);
@@ -207,3 +208,6 @@ Route::middleware('auth:sanctum')->group(function () {
 //  chat
 // Route::post('/chat-ai', [AIChatController::class, 'chat']);
 Route::post('/chat-ai', [AIChatController::class, 'chat']);
+//AI xem chi tiết sẽ gợi ý sản phẩm
+Route::middleware('auth:sanctum')->get('/user/viewed-products', [ProductController::class, 'viewedProducts']);
+Route::middleware('auth:sanctum')->get('/user/ai-recommend', [ProductController::class, 'aiRecommend']);
