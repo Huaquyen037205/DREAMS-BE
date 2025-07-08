@@ -18,7 +18,9 @@
                     <tr>
                         <th class="px-4 py-3 text-left">Tên sản phẩm</th>
                         <th class="px-4 py-3 text-center">Size</th>
+                        <th class="px-4 py-3 text-center">Giá gốc</th>
                         <th class="px-4 py-3 text-center">Giá Flash Sale</th>
+                        <th class="px-4 py-3 text-center">% Giảm</th>
                         <th class="px-4 py-3 text-center">Số lượng</th>
                         <th class="px-4 py-3 text-center">Đã bán</th>
                         <th class="px-4 py-3 text-center">Hành động</th>
@@ -37,7 +39,20 @@
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-3 font-bold align-middle" rowspan="{{ $items->count() }}">{{ $productName }}</td>
                             <td class="px-4 py-3 text-center align-middle">{{ $items[0]->variant->size ?? '-' }}</td>
-                            <td class="px-4 py-3 text-center text-green-600 font-semibold align-middle">{{ number_format($items[0]->sale_price) }}₫</td>
+                            <td class="px-4 py-3 text-center align-middle text-gray-800">
+                                {{ number_format($items[0]->variant->price ?? 0) }}₫
+                            </td>
+                            <td class="px-4 py-3 text-center text-green-600 font-semibold align-middle">
+                                {{ number_format($items[0]->sale_price) }}₫
+                            </td>
+                            <td class="px-4 py-3 text-center text-red-600 font-bold align-middle">
+                                @php
+                                    $original = $items[0]->variant->price ?? 0;
+                                    $sale = $items[0]->sale_price ?? 0;
+                                    $percent = $original > 0 ? round((($original - $sale) / $original) * 100) : 0;
+                                @endphp
+                                {{ $percent }}%
+                            </td>
                             <td class="px-4 py-3 text-center align-middle">{{ $items[0]->flash_quantity }}</td>
                             <td class="px-4 py-3 text-center align-middle">{{ $items[0]->flash_sold ?? 0 }}</td>
                             <td class="px-4 py-3 text-center space-x-2 align-middle">
@@ -59,7 +74,20 @@
                         @for ($i = 1; $i < $items->count(); $i++)
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="px-4 py-3 text-center align-middle">{{ $items[$i]->variant->size ?? '-' }}</td>
-                                <td class="px-4 py-3 text-center text-green-600 font-semibold align-middle">{{ number_format($items[$i]->sale_price) }}₫</td>
+                                <td class="px-4 py-3 text-center align-middle text-gray-800">
+                                    {{ number_format($items[$i]->variant->price ?? 0) }}₫
+                                </td>
+                                <td class="px-4 py-3 text-center text-green-600 font-semibold align-middle">
+                                    {{ number_format($items[$i]->sale_price) }}₫
+                                </td>
+                                <td class="px-4 py-3 text-center text-red-600 font-bold align-middle">
+                                    @php
+                                        $original = $items[$i]->variant->price ?? 0;
+                                        $sale = $items[$i]->sale_price ?? 0;
+                                        $percent = $original > 0 ? round((($original - $sale) / $original) * 100) : 0;
+                                    @endphp
+                                    {{ $percent }}%
+                                </td>
                                 <td class="px-4 py-3 text-center align-middle">{{ $items[$i]->flash_quantity }}</td>
                                 <td class="px-4 py-3 text-center align-middle">{{ $items[$i]->flash_sold ?? 0 }}</td>
                                 <td class="px-4 py-3 text-center space-x-2 align-middle">
@@ -83,7 +111,7 @@
 
                     @if($flashSale->variants->isEmpty())
                         <tr>
-                            <td colspan="6" class="text-center text-gray-500 py-4">Chưa có sản phẩm nào trong chương trình.</td>
+                            <td colspan="8" class="text-center text-gray-500 py-4">Chưa có sản phẩm nào trong chương trình.</td>
                         </tr>
                     @endif
                 </tbody>

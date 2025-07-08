@@ -218,6 +218,7 @@ class AuthController extends Controller
             'id_token' => 'required|string',
         ]);
 
+        // Tạo Google Client
         $client = new \Google_Client(['client_id' => env('GOOGLE_CLIENT_ID')]);
         $payload = $client->verifyIdToken($request->id_token);
 
@@ -225,32 +226,47 @@ class AuthController extends Controller
             return response()->json(['message' => 'ID Token không hợp lệ'], 401);
         }
 
+        // Lấy dữ liệu từ token
         $email = $payload['email'];
         $name = $payload['name'] ?? 'No Name';
         $googleId = $payload['sub'];
+        $avatar = $payload['picture'] ?? null;
 
-        // ✅ Ưu tiên tìm user theo google_id
+        // Ưu tiên tìm theo google_id
         $user = User::where('google_id', $googleId)->first();
 
         if (!$user) {
-            // Nếu chưa có user với google_id này, tìm theo email
+            // Nếu chưa có user theo google_id, tìm theo email
             $user = User::where('email', $email)->first();
 
             if ($user) {
-                // Nếu có user với email nhưng chưa liên kết google_id
+                // Nếu đã có user theo email, cập nhật google_id và avatar nếu cần
                 $user->google_id = $googleId;
+
+                if ($avatar && !$user->avatar) {
+                    $user->avatar = $avatar;
+                }
+
                 $user->save();
             } else {
-                // Nếu không có user nào cả, tạo mới
+                // Tạo mới user nếu hoàn toàn chưa tồn tại
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
                     'google_id' => $googleId,
+                    'avatar' => $avatar,
                     'password' => bcrypt(Str::random(16)),
                 ]);
             }
+        } else {
+            // User đã có, nếu thiếu avatar thì cập nhật
+            if ($avatar && !$user->avatar) {
+                $user->avatar = $avatar;
+                $user->save();
+            }
         }
 
+        // Tạo access token
         $token = $user->createToken('google_token')->plainTextToken;
 
         return response()->json([

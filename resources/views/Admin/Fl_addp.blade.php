@@ -1,4 +1,3 @@
-{{-- filepath: c:\xampp\htdocs\duantn\DREAMS-BE\resources\views\Admin\Fl_addp.blade.php --}}
 @extends('template.admin')
 
 @section('content')
@@ -31,7 +30,11 @@
                     required>
                 <option value="">-- Chọn sản phẩm --</option>
                 @foreach($products as $product)
-                    <option value="{{ $product->id }}">{{ $product->name }}</option>
+                    @if(is_null($product->discount_id))
+                        <option value="{{ $product->id }}">{{ $product->name }}</option>
+                    @else
+                        <option disabled class="text-gray-400">{{ $product->name }} (Đang trong chương trình giảm giá)</option>
+                    @endif
                 @endforeach
             </select>
         </div>
@@ -49,6 +52,11 @@
         <!-- Hiện số lượng còn lại -->
         <div class="mt-2">
             <span id="stockInfo" class="text-sm text-gray-600"></span>
+        </div>
+
+        <!-- Giá gốc -->
+        <div class="mt-2">
+            <span id="originalPrice" class="text-sm text-gray-600"></span>
         </div>
 
         <!-- Ảnh preview -->
@@ -81,7 +89,7 @@
         </div>
     </form>
 
-    <!-- JS hiện ảnh, size, số lượng -->
+    <!-- JS hiện ảnh, size, số lượng, giá gốc -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const select = document.getElementById('productSelect');
@@ -89,15 +97,20 @@
             const sizeSelect = document.getElementById('sizeSelect');
             const stockInfo = document.getElementById('stockInfo');
             const flashQuantity = document.getElementById('flash_quantity');
+            const flashPriceInput = document.getElementById('sale_price');
+            const originalPriceSpan = document.getElementById('originalPrice');
 
             let variants = [];
 
             select.addEventListener('change', function () {
                 sizeSelect.innerHTML = '<option value="">-- Chọn size --</option>';
                 stockInfo.textContent = '';
+                originalPriceSpan.textContent = '';
                 flashQuantity.value = '';
                 flashQuantity.max = '';
                 img.classList.add('hidden');
+                flashPriceInput.value = '';
+                flashPriceInput.removeAttribute('data-original-price');
 
                 const productId = select.value;
                 if (productId) {
@@ -120,6 +133,11 @@
                 if (variant) {
                     stockInfo.textContent = `Số lượng còn lại: ${variant.quantity}`;
                     flashQuantity.max = variant.quantity;
+                    flashQuantity.value = '';
+                    flashPriceInput.value = '';
+                    flashPriceInput.setAttribute('data-original-price', variant.price);
+                    originalPriceSpan.textContent = `💵 Giá gốc: ${variant.price.toLocaleString()}₫`;
+
                     if (variant.img) {
                         img.src = variant.img;
                         img.classList.remove('hidden');
@@ -128,16 +146,26 @@
                     }
                 } else {
                     stockInfo.textContent = '';
+                    originalPriceSpan.textContent = '';
                     flashQuantity.max = '';
+                    flashPriceInput.removeAttribute('data-original-price');
                     img.classList.add('hidden');
                 }
-                flashQuantity.value = '';
             });
 
             flashQuantity.addEventListener('input', function () {
                 const max = parseInt(flashQuantity.max, 10);
                 if (max && flashQuantity.value > max) {
                     flashQuantity.value = max;
+                }
+            });
+
+            flashPriceInput.addEventListener('input', function () {
+                const original = parseInt(this.getAttribute('data-original-price'), 10);
+                const sale = parseInt(this.value, 10);
+                if (!isNaN(original) && sale >= original) {
+                    alert('⚠️ Giá flash sale phải nhỏ hơn giá gốc!');
+                    this.value = '';
                 }
             });
         });
