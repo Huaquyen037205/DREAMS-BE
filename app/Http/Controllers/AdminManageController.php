@@ -183,8 +183,27 @@ class AdminManageController extends Controller
         ], 200);
     }
 
+    public function removeExpiredDiscounts()
+    {
+        $now = now();
+        $expiredDiscounts = Discount::where('end_day', '<', $now)->get();
+
+        foreach ($expiredDiscounts as $discount) {
+            $products = Product::where('discount_id', $discount->id)->get();
+            foreach ($products as $product) {
+                $product->discount_id = null;
+                $product->save();
+                foreach ($product->variant as $variant) {
+                    $variant->sale_price = null;
+                    $variant->save();
+                }
+            }
+        }
+    }
+
     public function discount(Request $request)
     {
+        $this->removeExpiredDiscounts();
         $discounts = Discount::orderBy('created_at', 'desc')->paginate(12);
         return view ('Admin.discountList', compact('discounts'));
         return response()->json([
@@ -212,6 +231,7 @@ class AdminManageController extends Controller
     }
 
     public function discountDetail($id){
+        $this->removeExpiredDiscounts();
         $discount = Discount::with('products')->find($id);
         if (!$discount) {
             return redirect('/admin/discount')->with('error', 'Không tìm thấy chương trình giảm giá');
@@ -253,6 +273,7 @@ class AdminManageController extends Controller
 
     public function editDiscount(Request $request, $id)
     {
+        $this->removeExpiredDiscounts();
         $request->validate([
             'name' => 'required',
             'percentage' => 'required|integer|min:1|max:100',
