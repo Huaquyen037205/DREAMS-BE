@@ -31,6 +31,8 @@
                     <span class="text-red-600 font-medium">Đã huỷ</span>
                 @endif
             </p>
+            <p><strong>Mã giảm giá:</strong> {{$orderInfo->coupons->name ?? 'Không áp dụng'}}</p>
+            <p><strong>Phí vận chuyển:</strong> {{ number_format($orderInfo->shipping_fee)}}₫</p>
             <p><strong>Tổng tiền:</strong> <span class="text-lg font-semibold text-green-600">{{ number_format($orderInfo->total_price) }}₫</span></p>
         </div>
     </div>

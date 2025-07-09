@@ -20,6 +20,7 @@ class Order extends Model
         'total_price',
         'vnp_TxnRef',
         'order_code',
+        'shipping_fee',
     ];
 
     public function order_items() {
