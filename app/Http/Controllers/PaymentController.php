@@ -54,6 +54,29 @@ class PaymentController extends Controller
         }
         $totalAfterDiscount = max($total - $discountAmount, 0);
 
+        $address_id = $request->input('address_id');
+        $shipping_fee = 0;
+        if ($address_id) {
+            $address = Address::find($address_id);
+            if ($address) {
+                $addr = mb_strtolower($address->adress);
+                if (
+                    str_contains($addr, 'quận 1') ||
+                    str_contains($addr, 'quận 3') ||
+                    str_contains($addr, 'quận 7') ||
+                    str_contains($addr, 'quận 9') ||
+                    str_contains($addr, 'quận 12') ||
+                    str_contains($addr, 'Tp.HCM') ||
+                    str_contains($addr, 'thành phố Hồ Chí Minh')
+                ) {
+                    $shipping_fee = 10000;
+                } else {
+                    $shipping_fee = 50000;
+                }
+            }
+        }
+        $totalAfterDiscount += $shipping_fee;
+
         $vnp_TxnRef = uniqid();
 
         cache()->put('vnpay_' . $vnp_TxnRef, [
@@ -64,6 +87,7 @@ class PaymentController extends Controller
             'shipping_id' => $request->input('shipping_id', null),
             'payment_id' => $request->input('payment_id', null),
             'totalAfterDiscount' => $totalAfterDiscount,
+            'shipping_fee' => $shipping_fee,
         ], now()->addMinutes(30));
 
         // Tạo link thanh toán VNPAY
@@ -136,6 +160,7 @@ class PaymentController extends Controller
             $address_id = $temp['address_id'];
             $payment_id = $temp['payment_id'];
             $totalAfterDiscount = $temp['totalAfterDiscount'];
+            $shipping_fee = $temp['shipping_fee'] ?? 0;
 
             $order = Order::create([
                 'user_id' => $user->id,
@@ -146,6 +171,7 @@ class PaymentController extends Controller
                 'total_price' => $totalAfterDiscount,
                 'status' => 'pending',
                 'vnp_TxnRef' => 'VnP' . $vnp_TxnRef,
+                'shipping_fee' => $shipping_fee,
                 'order_code' => null,
             ]);
 
@@ -188,7 +214,7 @@ class PaymentController extends Controller
                 $order->order_items()->create([
                     'variant_id' => $item['variant_id'],
                     'quantity' => $item['quantity'],
-                    'price' => $item['price'],
+                    'price' => $price,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -295,6 +321,29 @@ class PaymentController extends Controller
         }
         $totalAfterDiscount = max($total - $discountAmount, 0);
 
+        $address_id = $request->input('address_id');
+        $shipping_fee = 0;
+        if ($address_id) {
+            $address = Address::find($address_id);
+            if ($address) {
+                $addr = mb_strtolower($address->adress);
+                if (
+                    str_contains($addr, 'quận 1') ||
+                    str_contains($addr, 'quận 3') ||
+                    str_contains($addr, 'quận 7') ||
+                    str_contains($addr, 'quận 9') ||
+                    str_contains($addr, 'quận 12') ||
+                    str_contains($addr, 'Tp.HCM') ||
+                    str_contains($addr, 'thành phố Hồ Chí Minh')
+                ) {
+                    $shipping_fee = 10000;
+                } else {
+                    $shipping_fee = 50000;
+                }
+            }
+        }
+        $totalAfterDiscount += $shipping_fee;
+
         $order = Order::create([
             'user_id' => $user->id,
             'shipping_id' => $request->input('shipping_id', null),
@@ -302,6 +351,7 @@ class PaymentController extends Controller
             'coupon_id' => $coupon_id,
             'address_id' => $request->input('address_id', null),
             'total_price' => $totalAfterDiscount,
+            'shipping_fee' => $shipping_fee,
             'status' => 'pending',
             'vnp_TxnRef' => null,
             'order_code' => 'COD' . strtoupper(uniqid()),
