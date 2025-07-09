@@ -303,12 +303,13 @@ class AdminManageController extends Controller
             foreach ($selectedProducts as $productId) {
             $product = Product::with('variant')->find($productId);
             if ($product) {
+                $now = now()->toDateString();
                 if ($product->discount_id && $product->discount_id != $discount->id) {
                         $product->discount_id = null;
                 }
                 $product->discount_id = $discount->id;
                 $product->save();
-                $now = now();
+
                 foreach ($product->variant as $variant) {
                     if ($discount->start_day <= $now && $discount->end_day >= $now) {
                         $variant->sale_price = round($variant->price * (1 - $discount->percentage / 100));

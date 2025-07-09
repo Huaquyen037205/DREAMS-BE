@@ -1,5 +1,7 @@
 @extends('template.admin')
-
+@php
+    use Carbon\Carbon;
+@endphp
 @section('content')
 <main class="flex-1 p-6 overflow-y-auto bg-gray-50 min-h-screen">
     <div class="text-2xl font-bold text-gray-800 mb-8 flex items-center gap-2">
@@ -29,12 +31,20 @@
                     class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
                     required>
                 <option value="">-- Chọn sản phẩm --</option>
+               @php
+                    $now = Carbon::now()->toDateString();
+                @endphp
                 @foreach($products as $product)
-                    @if(is_null($product->discount_id))
-                        <option value="{{ $product->id }}">{{ $product->name }}</option>
-                    @else
-                        <option disabled class="text-gray-400">{{ $product->name }} (Đang trong chương trình giảm giá)</option>
-                    @endif
+                    @php
+                        $discount = $product->discount ?? null;
+                        $isDiscountActive = $discount && $discount->start_day <= $now && $discount->end_day >= $now;
+                    @endphp
+                    <option value="{{ $product->id }}" @if($isDiscountActive) disabled class="text-gray-400" @endif>
+                        {{ $product->name }}
+                        @if($isDiscountActive)
+                            (Đang trong chương trình giảm giá)
+                        @endif
+                    </option>
                 @endforeach
             </select>
         </div>

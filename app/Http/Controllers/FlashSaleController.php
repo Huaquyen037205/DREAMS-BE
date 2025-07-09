@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Discount;
 use App\Models\Flash_Sale;
 use App\Models\Flash_Sale_Variant;
 use App\Models\Variant;
@@ -46,16 +47,25 @@ class FlashSaleController extends Controller
 
     // Hiển thị danh sách sản phẩm để thêm vào chương trình
     public function showProducts($id)
-        {
-            $flashSale = Flash_Sale::findOrFail($id);
+    {
+        $flashSale = Flash_Sale::findOrFail($id);
 
-            // Lấy danh sách sản phẩm duy nhất có variant
-            $products = Product::whereIn('id',
-                Variant::pluck('product_id')->unique()
-            )->with('img')->get();
+        $now = now()->toDateString();
+        $activeDiscountIds = Discount::where('start_day', '<=', $now)
+        ->where('end_day', '>=', $now)
+        ->pluck('id');
 
-            return view('Admin.Fl_addp', compact('flashSale', 'products'));
-        }
+        // Lấy id các sản phẩm đang thuộc discount đang hoạt động
+        $discountProductIds = Product::whereIn('discount_id', $activeDiscountIds)
+        ->pluck('id');
+
+        // Lấy danh sách sản phẩm duy nhất có variant
+        $products = Product::with('discount', 'img')
+        ->whereIn('id', Variant::pluck('product_id')->unique())
+        ->get();
+
+        return view('Admin.Fl_addp', compact('flashSale', 'products'));
+    }
 
     // Lưu sản phẩm vào chương trình Flash Sale
     public function addProduct(Request $request, $id)
