@@ -43,13 +43,11 @@
     <h2 class="text-lg font-semibold mb-4">Sản Phẩm Bán Chạy</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         @foreach($hotProduct as $product)
-        <div class="border rounded p-2 flex flex-col items-center text-center text-sm">
-            <img src="{{ asset('img/' . ($product->img[0]->name ?? 'no-image.png')) }}"
-                 alt="{{ $product->name }}"
-                 class="w-full h-20 object-contain rounded mb-2 bg-white">
-            <div class="font-medium truncate w-full text-xs">{{ $product->name }}</div>
-            <div class="text-gray-500 text-xs">Lượt mua: {{ $product->hot }}</div>
-        </div>
+            <div class="border rounded p-2 flex flex-col items-center text-center text-sm">
+                <img src="{{ asset('img/' . ($product->img[0]->name ?? 'no-image.png')) }}" alt="{{ $product->name }}" class="w-full h-20 object-contain rounded mb-2 bg-white">
+                <div class="font-medium truncate w-full text-xs">{{ $product->name }}</div>
+                <div class="text-gray-500 text-xs">Lượt mua: {{ $product->hot }}</div>
+            </div>
         @endforeach
     </div>
 </div>
