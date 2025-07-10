@@ -418,7 +418,7 @@ class AdminManageController extends Controller
             ->paginate(8);
 
         $hotProduct = Product::with('variant', 'img')
-            ->orderByDesc('hot', 'desc')
+            ->orderBy('hot', 'desc')
             ->take(6)
             ->get();
 

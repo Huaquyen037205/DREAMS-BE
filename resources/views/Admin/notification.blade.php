@@ -55,5 +55,8 @@
             <div class="text-gray-400">Không có thông báo nào.</div>
         @endforelse
     </div>
+    <div class="mt-4">
+        {{ $notifications ->links() }}
+    </div>
 </div>
 @endsection
