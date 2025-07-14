@@ -108,7 +108,7 @@
           </div> --}}
         </div>
         <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
-            <a href="/admin/message"><i class="ph ph-chat-circle-text"></i> Tin nhắn</a>
+            <a href="/admin/posts/manage"><i class="ph ph-chat-circle-text"></i> Tin Tức</a>
         </li>
         <li class="px-6 py-3 hover:bg-purple-50 cursor-pointer flex items-center gap-2">
             <i class="ph ph-copy"></i> Pages

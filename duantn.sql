@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th7 08, 2025 lúc 04:01 AM
+-- Thời gian đã tạo: Th7 07, 2025 lúc 09:13 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `duantn`
+-- Cơ sở dữ liệu: `duantn2`
 --
 
 -- --------------------------------------------------------
@@ -1016,22 +1016,7 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 (162, 'App\\Models\\User', 9, 'API Token', '689565f4a6a4ad1976454ce54a76a06e50929af581930848004459aa1e0fbaad', '[\"*\"]', '2025-07-07 04:47:53', NULL, '2025-07-07 04:44:24', '2025-07-07 04:47:53'),
 (163, 'App\\Models\\User', 9, 'API Token', '2c725fd4d2c0de053fb5aff4165d98b7b3f3a89f3df8e6a373a0b9eba28562e4', '[\"*\"]', '2025-07-07 06:51:45', NULL, '2025-07-07 04:48:00', '2025-07-07 06:51:45'),
 (164, 'App\\Models\\User', 9, 'API Token', 'dd012167df213024b8ea7bf66c03908e90e26bb3e0da0bbd21a318635775daba', '[\"*\"]', '2025-07-07 06:56:19', NULL, '2025-07-07 06:55:43', '2025-07-07 06:56:19'),
-(165, 'App\\Models\\User', 15, 'API Token', '905948524582cd362a071af1b545e8f9bda1db0b6b8741fd53672c5466bfef3e', '[\"*\"]', '2025-07-07 07:16:22', NULL, '2025-07-07 07:04:55', '2025-07-07 07:16:22'),
-(166, 'App\\Models\\User', 15, 'API Token', 'cd3bad7dbd7f3139190515dc02711917a7febdd66ab0e7b9b228286b7d426a75', '[\"*\"]', '2025-07-07 07:35:23', NULL, '2025-07-07 07:25:22', '2025-07-07 07:35:23'),
-(167, 'App\\Models\\User', 18, 'API Token', 'a18c46d512317d63f74e6249dd300ace3676271131b8eb531f58fec0f94ed1fd', '[\"*\"]', '2025-07-07 07:55:00', NULL, '2025-07-07 07:37:06', '2025-07-07 07:55:00'),
-(168, 'App\\Models\\User', 9, 'API Token', '07ddbe2d48faf4b0cf28a89163a1011505e41aa3748cb900b2413f9b70638bed', '[\"*\"]', '2025-07-07 07:40:04', NULL, '2025-07-07 07:38:58', '2025-07-07 07:40:04'),
-(169, 'App\\Models\\User', 18, 'API Token', '2464ae254e67951aa4139436f4619066c0fdff6c19ee71808560b5a9ddbfafd1', '[\"*\"]', '2025-07-07 08:04:41', NULL, '2025-07-07 07:55:10', '2025-07-07 08:04:41'),
-(170, 'App\\Models\\User', 18, 'API Token', '1f34e6055131f747e9e46175882b2d52e34d2aab45d0aae296312fb782297499', '[\"*\"]', NULL, NULL, '2025-07-07 08:04:57', '2025-07-07 08:04:57'),
-(171, 'App\\Models\\User', 18, 'API Token', '4ab4e2228ff7a88f8ff0492670831516a63c68408b5c1cb81d58b65b14dd60fa', '[\"*\"]', '2025-07-07 09:29:58', NULL, '2025-07-07 08:04:58', '2025-07-07 09:29:58'),
-(172, 'App\\Models\\User', 9, 'API Token', 'b10446ea4becab4e5868229eccd441b0f78dfc6eafc654223a576bc60558f953', '[\"*\"]', NULL, NULL, '2025-07-07 08:22:47', '2025-07-07 08:22:47'),
-(173, 'App\\Models\\User', 9, 'API Token', '7407f4b7dc5e9ff4d39bded2f56b916b6f1dc4ca70b088349872e670f49b841a', '[\"*\"]', '2025-07-07 09:17:21', NULL, '2025-07-07 09:16:50', '2025-07-07 09:17:21'),
-(174, 'App\\Models\\User', 18, 'API Token', '5e38eb2c352bb3c2165de6930130fc2608ac497ab86494448bb41ac4ef079db9', '[\"*\"]', NULL, NULL, '2025-07-07 09:45:03', '2025-07-07 09:45:03'),
-(175, 'App\\Models\\User', 18, 'API Token', '7bf4e29aa7319a68bf984bfa2fa0c3e023766f1e30fa4a69900849675d66e51a', '[\"*\"]', '2025-07-07 09:50:39', NULL, '2025-07-07 09:45:08', '2025-07-07 09:50:39'),
-(176, 'App\\Models\\User', 19, 'API Token', 'f9c02f9fbad68ef766cf4ae4ca3632404bcc4157fbab09fef98538709ba3fc4d', '[\"*\"]', '2025-07-07 10:26:00', NULL, '2025-07-07 09:51:33', '2025-07-07 10:26:00'),
-(177, 'App\\Models\\User', 8, 'google_token', '2423efaa3a48ebd47feb67da89a69531eeb2bbd42ff41e76dd47d20ba91a56e8', '[\"*\"]', NULL, NULL, '2025-07-08 01:58:58', '2025-07-08 01:58:58'),
-(178, 'App\\Models\\User', 20, 'google_token', '52479d709ec70d2b67d1f7d8cb0df48cf644d3b6aa6a01014b5f6dea0e30abb2', '[\"*\"]', NULL, NULL, '2025-07-08 02:00:06', '2025-07-08 02:00:06'),
-(179, 'App\\Models\\User', 20, 'google_token', 'ed38d3c0a03eef34f29f499f5ccd4e01beb670232c6c42b634296cca8627571a', '[\"*\"]', NULL, NULL, '2025-07-08 02:00:17', '2025-07-08 02:00:17'),
-(180, 'App\\Models\\User', 20, 'google_token', '078b01ae89ccaec10a9f5b13c518f66ffcf3824c3d7909d81818b400d9f0ef3f', '[\"*\"]', NULL, NULL, '2025-07-08 02:00:33', '2025-07-08 02:00:33');
+(165, 'App\\Models\\User', 15, 'API Token', '905948524582cd362a071af1b545e8f9bda1db0b6b8741fd53672c5466bfef3e', '[\"*\"]', '2025-07-07 07:11:31', NULL, '2025-07-07 07:04:55', '2025-07-07 07:11:31');
 
 -- --------------------------------------------------------
 
@@ -1095,46 +1080,7 @@ INSERT INTO `product_views` (`id`, `user_id`, `product_id`, `viewed_at`) VALUES
 (1, 9, 1, '2025-07-07 04:48:11'),
 (2, 9, 1, '2025-07-07 04:48:14'),
 (3, 9, 1, '2025-07-07 06:55:54'),
-(4, 9, 3, '2025-07-07 06:55:59'),
-(5, 9, 3, '2025-07-07 07:39:21'),
-(6, 9, 3, '2025-07-07 07:39:46'),
-(7, 18, 5, '2025-07-07 09:10:37'),
-(8, 18, 5, '2025-07-07 09:10:38'),
-(9, 18, 8, '2025-07-07 09:12:01'),
-(10, 18, 8, '2025-07-07 09:12:02'),
-(11, 18, 5, '2025-07-07 09:13:13'),
-(12, 18, 5, '2025-07-07 09:13:14'),
-(13, 18, 6, '2025-07-07 09:13:48'),
-(14, 18, 6, '2025-07-07 09:13:49'),
-(15, 18, 9, '2025-07-07 09:16:09'),
-(16, 18, 9, '2025-07-07 09:16:10'),
-(17, 9, 3, '2025-07-07 09:17:03'),
-(18, 18, 3, '2025-07-07 09:22:20'),
-(19, 18, 3, '2025-07-07 09:22:21'),
-(20, 18, 3, '2025-07-07 09:27:19'),
-(21, 18, 3, '2025-07-07 09:27:19'),
-(22, 18, 3, '2025-07-07 09:28:02'),
-(23, 18, 3, '2025-07-07 09:28:03'),
-(24, 18, 8, '2025-07-07 09:28:23'),
-(25, 18, 8, '2025-07-07 09:28:24'),
-(26, 18, 8, '2025-07-07 09:28:52'),
-(27, 18, 8, '2025-07-07 09:28:53'),
-(28, 18, 8, '2025-07-07 09:29:40'),
-(29, 18, 8, '2025-07-07 09:29:41'),
-(30, 18, 7, '2025-07-07 09:47:20'),
-(31, 18, 7, '2025-07-07 09:47:20'),
-(32, 18, 7, '2025-07-07 09:47:45'),
-(33, 18, 7, '2025-07-07 09:47:46'),
-(34, 18, 7, '2025-07-07 09:48:00'),
-(35, 18, 7, '2025-07-07 09:48:04'),
-(36, 18, 2, '2025-07-07 09:48:20'),
-(37, 18, 2, '2025-07-07 09:48:21'),
-(38, 18, 2, '2025-07-07 09:50:23'),
-(39, 19, 1, '2025-07-07 09:52:00'),
-(40, 19, 6, '2025-07-07 09:54:59'),
-(41, 19, 12, '2025-07-07 09:58:13'),
-(42, 19, 12, '2025-07-07 10:00:25'),
-(43, 19, 3, '2025-07-07 10:01:09');
+(4, 9, 3, '2025-07-07 06:55:59');
 
 -- --------------------------------------------------------
 
@@ -1197,7 +1143,6 @@ CREATE TABLE `users` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `name` varchar(255) NOT NULL,
   `google_id` varchar(255) DEFAULT NULL,
-  `avatar` varchar(255) DEFAULT NULL,
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `password` varchar(255) NOT NULL,
   `phone` varchar(255) DEFAULT NULL,
@@ -1213,23 +1158,20 @@ CREATE TABLE `users` (
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `google_id`, `avatar`, `email`, `password`, `phone`, `day_of_birth`, `role`, `is_active`, `remember_token`, `created_at`, `updated_at`) VALUES
-(2, 'Nhật Vinh', NULL, NULL, 'vinh@gmail.com', '$2y$12$CH4nbf7vJqL/XBmg7to2pecsbspdMpgJTIBpeDVYWM7W9Ec0DFTny', '0123456789', NULL, 'admin', 'on', NULL, '2025-05-13 00:01:50', '2025-07-02 10:25:28'),
-(3, 'baogia', NULL, NULL, 'baogia@gmail.com', '$2y$12$FOzRZYv3muZV2qXw8ZxMjuMBXefQ50fKNRvBl8fD9/r9CySW4.2cC', '0123456789', NULL, 'user', 'on', NULL, '2025-05-13 00:38:12', '2025-06-03 06:33:59'),
-(4, 'Van Sang', NULL, NULL, 'VanSang@gmail.com', '$2y$12$79mijuodcdx31SorXmyzcehzEINNkraYbLGmmWlScWrloyy2Ypi2C', '19001009', NULL, 'user', 'on', NULL, '2025-05-13 01:54:38', '2025-05-13 19:22:43'),
-(7, 'Hứa Quyền', NULL, NULL, 'quyenhhps38740@gmail.com', '$2y$12$jyV6ZAq8qcS9b.jEC9GrJuL63oaAv05alOEehSIw/QpDdbQ2Tyoe6', '19001009', NULL, 'admin', 'on', NULL, '2025-05-15 20:33:02', '2025-05-23 20:12:55'),
-(8, 'nhat vinh', '101191664774897914327', 'https://lh3.googleusercontent.com/a/ACg8ocIbvgFqeXkXK30pklI_uqU-qYxcIzcGcmzK88be4rBEDOtGdcKizA=s96-c', 'nhatvinh01102000@gmail.com', '$2y$12$Nea01BuwHdXViS9BcBE4Dun3j8kjqzqQx5scpsfonXRyQ1vORAzdu', '0123456789', NULL, 'admin', 'on', NULL, '2025-05-22 19:09:42', '2025-07-08 01:58:58'),
-(9, 'Quyền', NULL, NULL, 'huaq2961@gmail.com', '$2y$12$QIS/li2XpS0IjFQLKBqx7O7ii7gdAzHooK.SHZePAJP.FJvNYK95G', '0898388767', '2005-07-03', 'user', 'on', NULL, '2025-05-22 19:10:52', '2025-06-20 08:38:24'),
-(10, 'NgocHan', NULL, NULL, 'Han@gmail.com', '$2y$12$5VIi4K/ndRYfLlkfLx7eeOog7dSqD1FKL./nPBzXfqejItYBZTL3i', '0905751907', '2025-07-20', 'user', 'on', NULL, '2025-06-04 02:21:24', '2025-06-24 02:07:41'),
-(11, 'bao nhu', NULL, NULL, 'nhun4073@gmail.com', '$2y$12$ozpSRw1LQNQXrGzewxMWkuKLzFtvpSfmBSHzUoWmzcPnmlWQ4KST.', '0392179948', '2025-06-28', 'user', 'on', NULL, '2025-06-28 13:07:10', '2025-06-28 13:07:46'),
-(13, 'sang sang', NULL, NULL, 'sanggamer1042005@gmail.com', '$2y$12$I59Xp0G733sinc/ytTSdJuv8M6yRNcbMDNy1ZUjdWRbNCNF9WzmWi', '0392179948', '2025-06-28', 'user', 'on', NULL, '2025-06-28 13:16:14', '2025-06-30 03:47:26'),
-(14, 'sang van', NULL, NULL, 'datgamer1042005@gmail.com', '$2y$12$o2mwk0MPuTj7Mko9eN3M1.aoStBEu.OAwgcWgD6tGicmOUW9AIBmi', '1234567890', NULL, 'user', 'on', NULL, '2025-06-30 08:54:18', '2025-06-30 08:54:18'),
-(15, 'sang sang', NULL, NULL, 'sanggamer10420052@gmail.com', '$2y$12$8Wt/hQ8ddmTUi8LjLpOxKu9Ov.Au/mAgEmSSF6kcfSVQIWkPpopey', '0392179948', NULL, 'user', 'on', NULL, '2025-07-02 09:13:16', '2025-07-02 09:13:16'),
-(16, 'sang', NULL, NULL, 'nguyenvansang1042005@gmail.com', '$2y$12$edxGcb0S1/Cha2766aHTQObIJYmFBIZ0HZrSMy18.ytIuzwJTYKSa', '0392179948', '2025-07-06', 'user', 'on', NULL, '2025-07-06 06:30:36', '2025-07-06 06:31:45'),
-(17, 'sang sang', NULL, NULL, 'sanggamer10420053@gmail.com', '$2y$12$aEyBHE4ZkEUWVetKHVmPG.aoaXpjRQD58nwjECG71ct8c8b8Cv4S.', '0392179948', NULL, 'user', 'on', NULL, '2025-07-06 06:31:03', '2025-07-06 06:31:03'),
-(18, 'sang van', NULL, NULL, 'sanggamer10420056@gmail.com', '$2y$12$2.DxLOfPfS/A6fkKQXR8Fe3wiyjnwitQled8fMibrWE/bfc4QjkQa', '1234567890', NULL, 'user', 'on', NULL, '2025-07-07 07:36:49', '2025-07-07 07:36:49'),
-(19, 'sang van', NULL, NULL, 'sanggamer10420059@gmail.com', '$2y$12$n585Oq.rqOvDaK240G9Da.o4QEsv0v0BHWuxQqeuYzSDG1/B/E7Ji', '1234567890', NULL, 'user', 'on', NULL, '2025-07-07 09:51:18', '2025-07-07 09:51:18'),
-(20, 'Phạm Nhật Vinh Võ', '102506286156113715146', 'https://lh3.googleusercontent.com/a/ACg8ocI2lz1bi6JekLlQB3kG16lkyymDyNP-s8r2anasV8hm6xsmpQ=s96-c', 'vinhvpnps38805@gmail.com', '$2y$12$LcW2BYMH7Iwc4Efgx5kTPe3Dpp4i0TlHfO0c4Y0ofFCOCx3d17FQq', NULL, NULL, 'user', 'on', NULL, '2025-07-08 02:00:05', '2025-07-08 02:00:17');
+INSERT INTO `users` (`id`, `name`, `google_id`, `email`, `password`, `phone`, `day_of_birth`, `role`, `is_active`, `remember_token`, `created_at`, `updated_at`) VALUES
+(2, 'Nhật Vinh', NULL, 'vinh@gmail.com', '$2y$12$CH4nbf7vJqL/XBmg7to2pecsbspdMpgJTIBpeDVYWM7W9Ec0DFTny', '0123456789', NULL, 'admin', 'on', NULL, '2025-05-13 00:01:50', '2025-07-02 10:25:28'),
+(3, 'baogia', NULL, 'baogia@gmail.com', '$2y$12$FOzRZYv3muZV2qXw8ZxMjuMBXefQ50fKNRvBl8fD9/r9CySW4.2cC', '0123456789', NULL, 'user', 'on', NULL, '2025-05-13 00:38:12', '2025-06-03 06:33:59'),
+(4, 'Van Sang', NULL, 'VanSang@gmail.com', '$2y$12$79mijuodcdx31SorXmyzcehzEINNkraYbLGmmWlScWrloyy2Ypi2C', '19001009', NULL, 'user', 'on', NULL, '2025-05-13 01:54:38', '2025-05-13 19:22:43'),
+(7, 'Hứa Quyền', NULL, 'quyenhhps38740@gmail.com', '$2y$12$jyV6ZAq8qcS9b.jEC9GrJuL63oaAv05alOEehSIw/QpDdbQ2Tyoe6', '19001009', NULL, 'admin', 'on', NULL, '2025-05-15 20:33:02', '2025-05-23 20:12:55'),
+(8, 'nhat vinh', NULL, 'nhatvinh01102000@gmail.com', '$2y$12$Nea01BuwHdXViS9BcBE4Dun3j8kjqzqQx5scpsfonXRyQ1vORAzdu', '0123456789', NULL, 'admin', 'on', NULL, '2025-05-22 19:09:42', '2025-06-02 00:57:56'),
+(9, 'Quyền', NULL, 'huaq2961@gmail.com', '$2y$12$QIS/li2XpS0IjFQLKBqx7O7ii7gdAzHooK.SHZePAJP.FJvNYK95G', '0898388767', '2005-07-03', 'user', 'on', NULL, '2025-05-22 19:10:52', '2025-06-20 08:38:24'),
+(10, 'NgocHan', NULL, 'Han@gmail.com', '$2y$12$5VIi4K/ndRYfLlkfLx7eeOog7dSqD1FKL./nPBzXfqejItYBZTL3i', '0905751907', '2025-07-20', 'user', 'on', NULL, '2025-06-04 02:21:24', '2025-06-24 02:07:41'),
+(11, 'bao nhu', NULL, 'nhun4073@gmail.com', '$2y$12$ozpSRw1LQNQXrGzewxMWkuKLzFtvpSfmBSHzUoWmzcPnmlWQ4KST.', '0392179948', '2025-06-28', 'user', 'on', NULL, '2025-06-28 13:07:10', '2025-06-28 13:07:46'),
+(13, 'sang sang', NULL, 'sanggamer1042005@gmail.com', '$2y$12$I59Xp0G733sinc/ytTSdJuv8M6yRNcbMDNy1ZUjdWRbNCNF9WzmWi', '0392179948', '2025-06-28', 'user', 'on', NULL, '2025-06-28 13:16:14', '2025-06-30 03:47:26'),
+(14, 'sang van', NULL, 'datgamer1042005@gmail.com', '$2y$12$o2mwk0MPuTj7Mko9eN3M1.aoStBEu.OAwgcWgD6tGicmOUW9AIBmi', '1234567890', NULL, 'user', 'on', NULL, '2025-06-30 08:54:18', '2025-06-30 08:54:18'),
+(15, 'sang sang', NULL, 'sanggamer10420052@gmail.com', '$2y$12$8Wt/hQ8ddmTUi8LjLpOxKu9Ov.Au/mAgEmSSF6kcfSVQIWkPpopey', '0392179948', NULL, 'user', 'on', NULL, '2025-07-02 09:13:16', '2025-07-02 09:13:16'),
+(16, 'sang', NULL, 'nguyenvansang1042005@gmail.com', '$2y$12$edxGcb0S1/Cha2766aHTQObIJYmFBIZ0HZrSMy18.ytIuzwJTYKSa', '0392179948', '2025-07-06', 'user', 'on', NULL, '2025-07-06 06:30:36', '2025-07-06 06:31:45'),
+(17, 'sang sang', NULL, 'sanggamer10420053@gmail.com', '$2y$12$aEyBHE4ZkEUWVetKHVmPG.aoaXpjRQD58nwjECG71ct8c8b8Cv4S.', '0392179948', NULL, 'user', 'on', NULL, '2025-07-06 06:31:03', '2025-07-06 06:31:03');
 
 -- --------------------------------------------------------
 
@@ -1608,7 +1550,7 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT cho bảng `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=181;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=166;
 
 --
 -- AUTO_INCREMENT cho bảng `products`
@@ -1620,7 +1562,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT cho bảng `product_views`
 --
 ALTER TABLE `product_views`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `reviews`
@@ -1638,7 +1580,7 @@ ALTER TABLE `shippings`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT cho bảng `variant`

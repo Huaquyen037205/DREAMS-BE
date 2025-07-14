@@ -1,8 +1,10 @@
 <?php
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
+# File: DREAMS-BE\routes\web.php
+
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductController; // Giữ nguyên các imports hiện có
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\PageController;
@@ -12,6 +14,9 @@ use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\FlashSaleController;
 use App\Http\Controllers\CateList;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\PostController; // Đảm bảo đã import PostController
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\PostReactionController;
 
 // Web Routes
 Route::get('/test/product', [PageController::class, 'product']);
@@ -146,6 +151,37 @@ Route::get('/admin/categories/{id}', [CateList::class, 'show'])->name('categorie
 Route::put('/admin/categories/{id}', [CateList::class, 'update']);
 
 
+// bai viet
+Route::prefix('admin')->name('admin.')->group(function () {
+    // ... (các route admin hiện có của bạn như product, user, discount, order, variant, notification, coupons) ...
 
+    // =====================================================================
+    // CÁC ROUTES QUẢN LÝ BÀI VIẾT (POSTS) - ĐÂY LÀ PHẦN CẦN CHÚ Ý
+    // =====================================================================
 
+    // Route để hiển thị trang quản lý tất cả bài viết
+    Route::get('/posts/manage', [PostController::class, 'managePosts'])->name('posts.manage');
 
+    // Route để hiển thị form tạo bài viết mới
+    Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+
+    // Route để xử lý lưu bài viết mới từ form
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+
+    // Route để hiển thị form chỉnh sửa bài viết cụ thể
+    Route::get('/posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
+
+    // Route để xử lý cập nhật bài viết cụ thể từ form
+    // ĐÂY LÀ ROUTE BỊ LỖI: Đảm bảo nó được định nghĩa chính xác như dưới đây
+    Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
+
+    // Route để xử lý xóa bài viết (nếu bạn muốn thêm chức năng xóa sau này)
+    // Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    // =====================================================================
+    // KẾT THÚC CÁC ROUTES QUẢN LÝ BÀI VIẾT
+    // =====================================================================
+});
+
+Route::post('/admin/posts/gemini-suggestions', [PostController::class, 'getAISuggestions'])
+    ->name('admin.posts.gemini-suggestions');
