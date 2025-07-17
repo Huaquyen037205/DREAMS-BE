@@ -62,4 +62,16 @@ class WishlistController extends Controller
         'product' => $productArr
     ]);
 }
+public function destroy($productId)
+{
+    $user = auth()->user();
+    // Kiểm tra sản phẩm có trong wishlist không
+    if (!$user->wishlist()->where('product_id', $productId)->exists()) {
+        return response()->json(['message' => 'Sản phẩm không tồn tại trong danh sách yêu thích'], 404);
+    }
+    $user->wishlist()->detach($productId);
+
+    return response()->json(['message' => 'Đã xóa khỏi danh sách yêu thích']);
+}
+
 }
