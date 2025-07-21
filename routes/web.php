@@ -185,3 +185,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::post('/admin/posts/gemini-suggestions', [PostController::class, 'getAISuggestions'])
     ->name('admin.posts.gemini-suggestions');
+
+Route::get('/starAverage/{id}', [AdminManageController::class, 'starAverage']);
