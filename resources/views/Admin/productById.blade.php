@@ -129,10 +129,12 @@
     @endforeach
 </div>
 
-
-
 <!-- Hiển thị đánh giá và bình luận -->
 <h2 class="text-xl font-semibold mt-8 mb-3 text-gray-800">Đánh giá & Bình luận của khách hàng</h2>
+<p class="text-sm text-gray-600 mt-2">
+    Trung bình sao: {{ number_format($product->reviews->avg('rating'), 1) }} ⭐ |
+    Lượt đánh giá: {{ $product->reviews->count() }}
+</p>
 <div class="mb-6">
     @if($product->reviews && count($product->reviews))
         @foreach($product->reviews as $review)
@@ -153,27 +155,5 @@
         <p class="text-gray-500 italic">Chưa có đánh giá nào cho sản phẩm này.</p>
     @endif
 </div>
-
-<!-- Form gửi đánh giá -->
-{{-- <div class="bg-gray-50 p-4 rounded shadow mb-8">
-    <h3 class="font-semibold mb-2">Gửi đánh giá của bạn</h3>
-    <form action="{{ url('/product/'.$product->id.'/review') }}" method="POST">
-        @csrf
-        <div class="mb-2">
-            <label class="block mb-1 font-medium">Số sao</label>
-            <select name="rating" class="border px-2 py-1 rounded" required>
-                <option value="">Chọn số sao</option>
-                @for($i=5; $i>=1; $i--)
-                    <option value="{{ $i }}">{{ $i }} sao</option>
-                @endfor
-            </select>
-        </div>
-        <div class="mb-2">
-            <label class="block mb-1 font-medium">Bình luận</label>
-            <textarea name="comment" rows="3" class="w-full border px-2 py-1 rounded" required></textarea>
-        </div>
-        <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Gửi đánh giá</button>
-    </form>
-</div> --}}
 
 @endsection

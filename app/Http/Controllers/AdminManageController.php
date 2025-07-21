@@ -375,6 +375,22 @@ class AdminManageController extends Controller
         ], 200);
     }
 
+    public function starAverage(){
+        $starAverage = Review::select('product_id', DB::raw('AVG(rating) as average_star'))
+            ->groupBy('product_id')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->product_id => round($item->average_star, 1)];
+            });
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Trung bình sao của sản phẩm',
+            'data' => $starAverage
+        ], 200);
+    }
+
+
     public function Chart(){
         $user = User::all();
         $userCount = $user->count();
