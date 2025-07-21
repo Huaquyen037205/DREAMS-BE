@@ -19,7 +19,9 @@ use App\Http\Controllers\ImageSearchController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\VoiceOrderController;
 use App\Http\Controllers\AIChatController;
-
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\PostReactionController;
 
 
 
@@ -211,3 +213,38 @@ Route::post('/chat-ai', [AIChatController::class, 'chat']);
 //AI xem chi tiết sẽ gợi ý sản phẩm
 Route::middleware('auth:sanctum')->get('/user/viewed-products', [ProductController::class, 'viewedProducts']);
 Route::middleware('auth:sanctum')->get('/user/ai-recommend', [ProductController::class, 'aiRecommend']);
+
+
+//api bai viet
+// Route::apiResource('posts', PostController::class);
+// Danh sách bài viết
+Route::get('/posts', [PostController::class, 'index']);
+
+// Xem chi tiết bài viết
+Route::get('/posts/{id}', [PostController::class, 'show']);
+
+// Tạo mới bài viết
+Route::post('/posts', [PostController::class, 'store']);
+
+// Cập nhật bài viết
+Route::put('/posts/{id}', [PostController::class, 'update']);
+Route::patch('/posts/{id}', [PostController::class, 'update']);
+
+// Xóa bài viết
+Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+
+// Bình luận
+Route::middleware('auth:sanctum')->post('/posts/{post}/comments', [CommentController::class, 'store']);
+
+// Biểu cảm
+Route::middleware('auth:sanctum')->post('/posts/{post}/react', [PostReactionController::class, 'react']);
+
+// Lấy bình luận của bài viết
+Route::get('/posts/{post}/comments', [CommentController::class, 'index']);
+
+// Lấy biểu cảm của bài viết
+Route::get('/posts/{post}/react', [PostReactionController::class, 'index']);
+Route::put('/admin/posts/{id}/toggle-status', [PostController::class, 'toggleStatus']);
+// Route API để lấy gợi ý từ Gemini
+
+Route::post('/posts/gemini-suggestions', [PostController::class, 'getGeminiSuggestions']);
