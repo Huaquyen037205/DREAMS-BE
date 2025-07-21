@@ -59,6 +59,10 @@
                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-sm inline-flex items-center">
                                 ✏️ <span class="ml-1">Sửa</span>
                             </a>
+<a href="{{ route('admin.posts.adminDetail', $post->id) }}"
+   class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-1 px-3 rounded text-sm inline-flex items-center">
+    👁 <span class="ml-1">Xem chi tiết</span>
+</a>
                         </div>
                     </td>
                 </tr>

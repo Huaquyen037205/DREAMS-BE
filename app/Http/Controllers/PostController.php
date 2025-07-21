@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User; // Đảm bảo import model User nếu bạn sử dụng quan hệ author
 use Illuminate\Support\Facades\Http;
+
 class PostController extends Controller
 {
     /**
@@ -249,82 +250,101 @@ class PostController extends Controller
         return response()->json(['message' => 'Trạng thái bài viết đã được cập nhật.', 'new_status' => $post->status]);
     }
 
-  public function getAISuggestions(Request $request)
+
+public function adminDetail($id)
+{
+    $post = Post::with(['author', 'product'])->findOrFail($id);
+
+    // Tổng số reaction theo loại
+    // $reactions = \App\Models\PostReaction::where('post_id', $id)
+    //     ->select('reaction', \DB::raw(value: 'count(*) as total'))
+    //     ->groupBy('reaction')
+    //     ->get();
+$reactionTypes = ['like', 'love', 'haha', 'wow', 'sad', 'angry', 'dislike'];
+
+$reactionCounts = \App\Models\PostReaction::where('post_id', $id)
+    ->select('reaction', \DB::raw('count(*) as total'))
+    ->groupBy('reaction')
+    ->pluck('total', 'reaction') // lấy dạng key-value
+    ->toArray();
+
+// Merge vào để đảm bảo có đủ các loại reaction, nếu không có thì mặc định là 0
+$reactions = [];
+foreach ($reactionTypes as $type) {
+    $reactions[$type] = $reactionCounts[$type] ?? 0;
+}
+
+    // Tổng số comment
+    $commentsCount = \App\Models\Comment::where('post_id', $id)->count();
+
+    // Danh sách comment chi tiết
+    $comments = \App\Models\Comment::with('user')->where('post_id', $id)->orderByDesc('created_at')->get();
+
+    return view('Admin.post_detail', compact('post', 'reactions', 'commentsCount', 'comments'));
+}
+
+public function getAISuggestions(Request $request)
 {
     $request->validate([
         'keyword' => 'required|string|min:3|max:255',
     ]);
 
     $keyword = $request->input('keyword');
-    $openaiApiKey = env('OPENAI_API_KEY');
+    $apiKey = env('OPENROUTER_API_KEY');
 
-    if (empty($openaiApiKey)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'OPENAI_API_KEY chưa được cấu hình.'
-        ], 500);
+    if (empty($apiKey)) {
+        return response()->json(['success' => false, 'message' => 'API key chưa cấu hình'], 500);
     }
 
-    // Prompt rõ ràng: Yêu cầu trả đúng JSON, không text thừa
     $prompt = <<<EOT
-Viết một bài viết với tiêu đề: "{$keyword}".
-Chỉ trả về **JSON THUẦN TÚY** theo đúng format sau, không thêm bất kỳ văn bản nào khác:
+Viết một bài viết với tiêu đề: "{$keyword}". Trả về JSON đúng định dạng sau:
 
 {
-  "excerpt": "Tóm tắt bài viết",
-  "content": "Nội dung chi tiết",
+  "excerpt": "Tóm tắt",
+  "content": "Nội dung bài viết",
   "tags": "tag1, tag2, tag3",
   "meta_title": "Tiêu đề SEO",
   "meta_description": "Mô tả SEO"
 }
+Chỉ trả về JSON, không có bất kỳ văn bản nào khác.
 EOT;
 
     try {
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $openaiApiKey,
-        ])->post('https://api.openai.com/v1/chat/completions', [
-            'model' => 'gpt-3.5-turbo',
+            'Authorization' => 'Bearer ' . $apiKey,
+            'HTTP-Referer' => 'http://localhost:8000',
+            'X-Title' => 'Laravel Post AI',
+        ])->post('https://openrouter.ai/api/v1/chat/completions', [
+            'model' => 'mistral/mixtral-8x7b-instruct',
             'messages' => [
-                ['role' => 'system', 'content' => 'Bạn là một chuyên gia SEO & viết bài content. Luôn trả về JSON thuần túy, không bao giờ thêm văn bản thừa.'],
                 ['role' => 'user', 'content' => $prompt],
             ],
-            'temperature' => 0.7,
         ]);
 
         $result = $response->json();
         $text = $result['choices'][0]['message']['content'] ?? null;
 
-        // Gỡ bỏ những ký tự markdown không mong muốn nếu có
-        $start = strpos($text, '{');
-        $end = strrpos($text, '}');
+        // Sửa chỗ parse JSON bằng regex
+        preg_match('/\{(?:[^{}]|(?R))*\}/', $text, $matches);
+        $json = $matches[0] ?? null;
 
-        if ($start !== false && $end !== false) {
-            $jsonString = substr($text, $start, $end - $start + 1);
-            $parsed = json_decode($jsonString, true);
-
-            if (json_last_error() === JSON_ERROR_NONE) {
-                return response()->json([
-                    'success' => true,
-                    'suggestions' => [$parsed],
-                ]);
-            }
+        if ($json === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy JSON trong phản hồi AI',
+                'raw' => $text
+            ], 422);
         }
 
-        // Nếu lỗi thì log lại raw response để debug
-        \Log::warning('GPT trả kết quả không đúng JSON:', ['text' => $text]);
+        $parsed = json_decode($json, true);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Không thể phân tích kết quả từ AI. Vui lòng thử lại.',
-            'raw' => $text,
-        ], 422);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return response()->json(['success' => true, 'suggestions' => [$parsed]]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Lỗi JSON khi decode', 'raw' => $text], 422);
     } catch (\Exception $e) {
-        \Log::error('Lỗi khi gọi OpenAI: ' . $e->getMessage());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Lỗi kết nối AI: ' . $e->getMessage(),
-        ], 500);
+        return response()->json(['success' => false, 'message' => 'Lỗi AI: ' . $e->getMessage()], 500);
     }
 }
 

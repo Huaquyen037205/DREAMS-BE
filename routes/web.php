@@ -185,3 +185,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::post('/admin/posts/gemini-suggestions', [PostController::class, 'getAISuggestions'])
     ->name('admin.posts.gemini-suggestions');
+Route::get('/admin/posts/{id}/detail', [PostController::class, 'adminDetail'])->name('admin.posts.adminDetail');
+Route::post('/admin/posts/ai-suggest', [PostController::class, 'getAISuggestions']);
