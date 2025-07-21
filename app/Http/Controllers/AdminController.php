@@ -23,18 +23,18 @@ class AdminController extends Controller
         ],200);
     }
 
-   public function productById(Request $request, $id) {
-    $product = Product::with(['variant.img'])->find($id);
-    if (!$product) {
-        return response()->json([
-            'status' => 404,
-            'message' => 'Không tìm thấy sản phẩm',
-        ], 404);
+    public function productById(Request $request, $id) {
+        $product = Product::with(['variant.img'])->find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ], 404);
+        }
+        return view('Admin.productById', [
+            'product' => $product
+        ]);
     }
-    return view('Admin.productById', [
-        'product' => $product
-    ]);
-}
 
     public function addProduct(Request $request){
         $product = Product::create($request->all());
@@ -47,7 +47,7 @@ class AdminController extends Controller
             ],200);
 
             return redirect()->back()->with('success', 'Thêm sản phẩm thành công');
-         } else {
+        } else {
             if($request->expectsJson() || $request->wantsJson()){
                 return response()->json([
                 'status' => 404,

@@ -84,7 +84,7 @@
             <!-- Submit -->
             <div class="mt-6">
                 <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded">Thêm Sản Phẩm</button>
-                <a href="#" class="ml-3 text-gray-600 hover:text-indigo-500">Hủy</a>
+                <a href="/admin/product/list" class="ml-3 text-gray-600 hover:text-indigo-500">Hủy</a>
             </div>
         </form>
     </div>
