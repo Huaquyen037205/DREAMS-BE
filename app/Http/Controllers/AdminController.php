@@ -37,26 +37,27 @@ class AdminController extends Controller
     }
 
     public function addProduct(Request $request){
+    try {
         $product = Product::create($request->all());
-        return view('Admin.add_product', ['product' => $product]);
-        if($request->wantsJson() || $request->expectsJson()){
-            return response()->json([
-                'status' => 200,
-                'message' => 'Thêm sản phẩm thành công',
-                'data' => $product
-            ],200);
-
-            return redirect()->back()->with('success', 'Thêm sản phẩm thành công');
-        } else {
-            if($request->expectsJson() || $request->wantsJson()){
-                return response()->json([
-                'status' => 404,
-                'message' => 'Thêm sản phẩm thất bại',
-                ],404);
-            }
+        if(!$request->wantsJson() && !$request->expectsJson()){
+            return redirect()->back()->with('success', 'Thêm sản phẩm thành công')->with('product', $product);
+        }
+        return response()->json([
+            'status' => 200,
+            'message' => 'Thêm sản phẩm thành công',
+            'data' => $product
+        ],200);
+    } catch (Exception $e) {
+        if(!$request->wantsJson() && !$request->expectsJson()){
             return redirect()->back()->with('error', 'Thêm sản phẩm thất bại');
         }
+        return response()->json([
+            'status' => 500,
+            'message' => 'Thêm sản phẩm thất bại',
+            'error' => $e->getMessage()
+        ],500);
     }
+}
 
     public function editProduct(Request $request, $id){
         $request->validate([
