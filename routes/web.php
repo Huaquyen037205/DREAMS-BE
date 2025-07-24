@@ -38,7 +38,7 @@ route::get('/search', [ProductController::class, 'searchProduct']);
 
 // Admin Routes
 //Auth Routes
-Route::get('/admin/login', [PageController::class, 'loginAdmin'])->name('Admin.Login');
+Route::get('/admin/login', [PageController::class, 'loginAdmin'])->name('login');
 Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);
 Route::post('/logout', [AdminUserController::class, 'logoutAdmin']);
 Route::get('/forgotPassword', [PageController::class, 'forgotPasswordEmail']);

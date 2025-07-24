@@ -37,27 +37,27 @@ class AdminController extends Controller
     }
 
     public function addProduct(Request $request){
-    try {
-        $product = Product::create($request->all());
-        if(!$request->wantsJson() && !$request->expectsJson()){
-            return redirect()->back()->with('success', 'Thêm sản phẩm thành công')->with('product', $product);
+        try {
+            $product = Product::create($request->all());
+            if(!$request->wantsJson() && !$request->expectsJson()){
+                return redirect()->back()->with('success', 'Thêm sản phẩm thành công')->with('product', $product);
+            }
+            return response()->json([
+                'status' => 200,
+                'message' => 'Thêm sản phẩm thành công',
+                'data' => $product
+            ],200);
+        } catch (Exception $e) {
+            if(!$request->wantsJson() && !$request->expectsJson()){
+                return redirect()->back()->with('error', 'Thêm sản phẩm thất bại');
+            }
+            return response()->json([
+                'status' => 500,
+                'message' => 'Thêm sản phẩm thất bại',
+                'error' => $e->getMessage()
+            ],500);
         }
-        return response()->json([
-            'status' => 200,
-            'message' => 'Thêm sản phẩm thành công',
-            'data' => $product
-        ],200);
-    } catch (Exception $e) {
-        if(!$request->wantsJson() && !$request->expectsJson()){
-            return redirect()->back()->with('error', 'Thêm sản phẩm thất bại');
-        }
-        return response()->json([
-            'status' => 500,
-            'message' => 'Thêm sản phẩm thất bại',
-            'error' => $e->getMessage()
-        ],500);
     }
-}
 
     public function editProduct(Request $request, $id){
         $request->validate([
@@ -383,7 +383,7 @@ class AdminController extends Controller
                     'data' => $variant
                 ],200);
             }
-        }
+    }
 
     public function editVariant(Request $request, $id){
         $request->validate([
