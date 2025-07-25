@@ -151,39 +151,61 @@ Route::get('/admin/categories/{id}', [CateList::class, 'show'])->name('categorie
 Route::put('/admin/categories/{id}', [CateList::class, 'update']);
 
 
-// bai viet
-Route::prefix('admin')->name('admin.')->group(function () {
+// // bai viet
+// Route::prefix('admin')->name('admin.')->group(function () {
+//     // ... (các route admin hiện có của bạn như product, user, discount, order, variant, notification, coupons) ...
+
+//     // =====================================================================
+//     // CÁC ROUTES QUẢN LÝ BÀI VIẾT (POSTS) - ĐÂY LÀ PHẦN CẦN CHÚ Ý
+//     // =====================================================================
+
+//     // Route để hiển thị trang quản lý tất cả bài viết
+//     Route::get('/posts/manage', [PostController::class, 'managePosts'])->name('posts.manage');
+
+//     // Route để hiển thị form tạo bài viết mới
+//     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+
+//     // Route để xử lý lưu bài viết mới từ form
+//     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+
+//     // Route để hiển thị form chỉnh sửa bài viết cụ thể
+//     Route::get('/posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
+
+//     // Route để xử lý cập nhật bài viết cụ thể từ form
+//     // ĐÂY LÀ ROUTE BỊ LỖI: Đảm bảo nó được định nghĩa chính xác như dưới đây
+//     Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
+
+//     // Route để xử lý xóa bài viết (nếu bạn muốn thêm chức năng xóa sau này)
+//     // Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+//     // =====================================================================
+//     // KẾT THÚC CÁC ROUTES QUẢN LÝ BÀI VIẾT
+//     // =====================================================================
+// });
+
+// Route::post('/admin/posts/gemini-suggestions', [PostController::class, 'getAISuggestions'])
+//     ->name('admin.posts.gemini-suggestions');
+// Route::get('/admin/posts/{id}/detail', [PostController::class, 'adminDetail'])->name('admin.posts.adminDetail');
+// Route::post('/admin/posts/ai-suggest', [PostController::class, 'getAISuggestions']);
+
+Route::prefix('admin')->middleware(['auth', CheckAdmin::class])->name('admin.')->group(function () {
     // ... (các route admin hiện có của bạn như product, user, discount, order, variant, notification, coupons) ...
 
     // =====================================================================
-    // CÁC ROUTES QUẢN LÝ BÀI VIẾT (POSTS) - ĐÂY LÀ PHẦN CẦN CHÚ Ý
+    // CÁC ROUTES QUẢN LÝ BÀI VIẾT (POSTS)
     // =====================================================================
 
-    // Route để hiển thị trang quản lý tất cả bài viết
     Route::get('/posts/manage', [PostController::class, 'managePosts'])->name('posts.manage');
-
-    // Route để hiển thị form tạo bài viết mới
     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
-
-    // Route để xử lý lưu bài viết mới từ form
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-
-    // Route để hiển thị form chỉnh sửa bài viết cụ thể
     Route::get('/posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
-
-    // Route để xử lý cập nhật bài viết cụ thể từ form
-    // ĐÂY LÀ ROUTE BỊ LỖI: Đảm bảo nó được định nghĩa chính xác như dưới đây
     Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
-
-    // Route để xử lý xóa bài viết (nếu bạn muốn thêm chức năng xóa sau này)
     // Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
 
-    // =====================================================================
-    // KẾT THÚC CÁC ROUTES QUẢN LÝ BÀI VIẾT
-    // =====================================================================
+    // Route AI Suggestion và Detail cũng phải bắt đăng nhập
+    Route::post('/posts/gemini-suggestions', [PostController::class, 'getAISuggestions'])->name('posts.gemini-suggestions');
+    Route::get('/posts/{id}/detail', [PostController::class, 'adminDetail'])->name('posts.adminDetail');
+    Route::post('/posts/ai-suggest', [PostController::class, 'getAISuggestions']);
 });
-
-Route::post('/admin/posts/gemini-suggestions', [PostController::class, 'getAISuggestions'])
-    ->name('admin.posts.gemini-suggestions');
-
 Route::get('/starAverage/{id}', [AdminManageController::class, 'starAverage']);
+

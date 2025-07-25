@@ -4,7 +4,10 @@
 <main class="p-6">
     <h2 class="text-2xl font-bold mb-4">Chỉnh sửa bài viết: {{ $post->title }}</h2>
 
-    <form action="{{ route('admin.posts.update', $post->id) }}" method="POST" enctype="multipart/form-data">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {{-- Form bên trái --}}
+
+    <form id="post-form" action="{{ route('admin.posts.update', $post->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT') {{-- Quan trọng: Sử dụng phương thức PUT cho cập nhật --}}
 
@@ -134,5 +137,140 @@
             Hủy
         </a>
     </form>
+
+        {{-- Preview bên phải --}}
+        <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+            {{-- Avatar + info --}}
+            <div class="flex items-center px-6 pt-6 pb-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white flex items-center justify-center text-base font-bold shadow-md">
+                    {{ strtoupper(substr($post->author_name ?? 'U', 0, 1)) }}
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-900">{{ $post->author_name ?? 'Tác giả không xác định' }}</p>
+                    <p class="text-xs text-gray-500">{{ now()->format('d/m/Y H:i') }}</p>
+                </div>
+                <div class="ml-auto text-xs text-gray-400 italic">#{{ $post->slug }}</div>
+            </div>
+
+            {{-- Ảnh chính --}}
+            <img id="preview-image" class="w-full h-[300px] object-cover {{ $post->image ? '' : 'hidden' }}" src="{{ $post->image ? asset('storage/' . $post->image) : '' }}" alt="preview" />
+
+            {{-- Nội dung bài viết --}}
+            <div class="px-6 py-5">
+                <h2 id="preview-title" class="text-xl font-bold mb-2 text-gray-800">{{ $post->title }}</h2>
+                <p id="preview-meta-description" class="text-gray-500 italic text-sm mb-4">{{ $post->meta_description }}</p>
+
+                <div id="preview-content" class="prose prose-sm prose-indigo max-w-none text-gray-800 mb-5">{!! $post->content !!}</div>
+
+                {{-- Tags --}}
+                <div id="preview-tags" class="flex flex-wrap gap-2 text-xs text-gray-600 mb-4">
+                    @foreach(explode(',', $post->tags) as $tag)
+                        <span class="bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full transition text-xs">#{{ trim($tag) }}</span>
+                    @endforeach
+                </div>
+
+                <hr class="my-3">
+                <div class="text-sm text-gray-400 italic">
+                    <div id="preview-meta-title">Meta Title: {{ $post->meta_title }}</div>
+                    <div id="preview-date-range">
+                        @if ($post->start_date || $post->end_date)
+                            Thời gian: {{ $post->start_date ? \Carbon\Carbon::parse($post->start_date)->format('Y-m-d') : '...' }} →
+                            {{ $post->end_date ? \Carbon\Carbon::parse($post->end_date)->format('Y-m-d') : '...' }}
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
+
+@endsection
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const bind = (id, cb) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', () => cb(el.value));
+            }
+        };
+
+        // === Title ===
+        bind('title', val => {
+            document.getElementById('preview-title').innerText = val || 'Tiêu đề bài viết';
+        });
+
+        // === Content (hiển thị dưới dạng HTML) ===
+        bind('content', val => {
+            document.getElementById('preview-content').innerHTML = val || 'Nội dung bài viết sẽ hiển thị ở đây...';
+        });
+
+        // === Tags dạng #pill ===
+        bind('tags', val => {
+            const tagEl = document.getElementById('preview-tags');
+            tagEl.innerHTML = '';
+            if (val) {
+                val.split(',').forEach(tag => {
+                    const span = document.createElement('span');
+                    span.className = 'bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full transition text-xs';
+                    span.innerText = `#${tag.trim()}`;
+                    tagEl.appendChild(span);
+                });
+            }
+        });
+
+        // === Meta Title ===
+        bind('meta_title', val => {
+            const el = document.getElementById('preview-meta-title');
+            el.innerText = val ? `Meta Title: ${val}` : '';
+        });
+
+        // === Meta Description ===
+        bind('meta_description', val => {
+            const el = document.getElementById('preview-meta-description');
+            el.innerText = val ? val : '';
+        });
+
+        // === Date range ===
+        const start = document.getElementById('start_date');
+        const end = document.getElementById('end_date');
+        const dateEl = document.getElementById('preview-date-range');
+
+        const updateDateRange = () => {
+            const startVal = start.value;
+            const endVal = end.value;
+            if (startVal || endVal) {
+                dateEl.innerText = `Thời gian: ${startVal || '...'} → ${endVal || '...'}`;
+            } else {
+                dateEl.innerText = '';
+            }
+        };
+
+        if (start && end) {
+            start.addEventListener('input', updateDateRange);
+            end.addEventListener('input', updateDateRange);
+        }
+
+        // === Preview ảnh ===
+        const imageInput = document.getElementById('image');
+        const previewImg = document.getElementById('preview-image');
+
+        if (imageInput && previewImg) {
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        previewImg.src = event.target.result;
+                        previewImg.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewImg.src = '';
+                    previewImg.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
 @endsection
