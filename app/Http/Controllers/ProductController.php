@@ -192,6 +192,7 @@ public function hotProduct() {
         return asset('img/' . $img->name);
     });
 
+
     return response()->json([
         'status' => 200,
         'message' => 'Chi tiết sản phẩm',
