@@ -68,6 +68,11 @@ public function hotProduct() {
         ->orderByDesc('hot')
         ->get();
 
+    $product->getCollection()->transform(function ($product) {
+        $product->images = $product->img->map(function ($img) {
+            return asset('img/' . $img->name);
+        });
+    });
     return response()->json([
         'status' => 200,
         'message' => 'Hot sản phẩm',
