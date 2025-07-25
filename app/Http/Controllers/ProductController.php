@@ -49,36 +49,38 @@ class ProductController extends Controller
     }
 
 
-public function hotProduct() {
-    $now = now();
+    public function hotProduct() {
+        $now = now();
 
-    // Lấy danh sách product_id đang thuộc flash sale đang hoạt động
-    $flashSaleProductIds = DB::table('flash_sale_variants')
-        ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
-        ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
-        ->where('flash_sales.start_time', '<=', $now)
-        ->where('flash_sales.end_time', '>=', $now)
-        ->pluck('variant.product_id')
-        ->unique();
+        // Lấy danh sách product_id đang thuộc flash sale đang hoạt động
+        $flashSaleProductIds = DB::table('flash_sale_variants')
+            ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
+            ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
+            ->where('flash_sales.start_time', '<=', $now)
+            ->where('flash_sales.end_time', '>=', $now)
+            ->pluck('variant.product_id')
+            ->unique();
 
-    // Lấy nhiều sản phẩm có lượt hot >= 10, KHÔNG nằm trong chương trình flash sale, sắp xếp theo hot giảm dần
-    $products = Product::with('img', 'variant', 'category')
-        ->where('hot', '>=', 10)
-        ->whereNotIn('id', $flashSaleProductIds)
-        ->orderByDesc('hot')
-        ->get();
+        // Lấy sản phẩm hot, KHÔNG nằm trong chương trình flash sale
+        $products = Product::with('img', 'variant', 'category')
+            ->where('hot', '>=', 10)
+            ->whereNotIn('id', $flashSaleProductIds)
+            ->orderByDesc('hot')
+            ->get();
 
-    $product->getCollection()->transform(function ($product) {
-        $product->images = $product->img->map(function ($img) {
-            return asset('img/' . $img->name);
+        $products->transform(function ($product) {
+            $product->images = $product->img->map(function ($img) {
+                return asset('img/' . $img->name);
+            });
+            return $product;
         });
-    });
-    return response()->json([
-        'status' => 200,
-        'message' => 'Hot sản phẩm',
-        'data' => $products
-    ], 200);
-}
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Hot sản phẩm',
+            'data' => $products
+        ], 200);
+    }
 
     public function viewProduct(){
         $product = Product::with('img', 'variant', 'category')->where('view', 1)->get();
