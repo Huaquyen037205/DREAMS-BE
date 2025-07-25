@@ -84,13 +84,14 @@ public function hotProduct() {
         ],200);
     }
 
-    public function category(){
-        $category = Category::with('product')->get();
+    public function category()
+    {
+        $category = Category::with('product')->where('status', 1)->get();
         return response()->json([
             'status' => 200,
             'message' => 'Danh sách danh mục',
             'data' => $category
-        ],200);
+        ], 200);
     }
 
     public function discountUser(Request $request){
@@ -190,27 +191,34 @@ public function hotProduct() {
         'data' => $product
     ], 200);
 }
+public function searchProduct(Request $request)
+{
+    $search = $request->input('search');
 
-    public function searchProduct(Request $request){
-        $search = $request->input('search');
-        $product = Product::with('img', 'variant', 'category')
-            ->where('name', 'LIKE', "%{$search}%")
-            ->orWhere('description', 'LIKE', "%{$search}%")
-            ->paginate(12);
-            return view('Admin.productList', ['products' => $product]);
-        if($product->isEmpty()){
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy sản phẩm',
-            ],404);
-        }else{
-            return response()->json([
-                'status' => 200,
-                'message' => 'Tôi đai',
-                'data' => $product
-            ],200);
-        }
+    // Tìm sản phẩm có chứa từ khoá trong tên hoặc mô tả
+    $products = Product::with('img', 'variant', 'category')
+        ->where(function($query) use ($search) {
+            $query->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%");
+        })
+        ->get(); // <-- Đổi từ paginate() sang get()
+
+    if ($products->isEmpty()) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Không tìm thấy sản phẩm nào phù hợp.',
+        ], 404);
     }
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Tìm thấy sản phẩm.',
+        'data' => $products, // <-- Trả về mảng đơn giản
+    ]);
+}
+
+
+
 
         public function productByPrice(Request $request)
     {
