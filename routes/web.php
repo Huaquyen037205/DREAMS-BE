@@ -59,7 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 });
-;
+
 Route::post('/review', [ProductController::class, 'reviews']);
 
 Route::prefix('/admin')->middleware(['auth', CheckAdmin::class])->group(function () {

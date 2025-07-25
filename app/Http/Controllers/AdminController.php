@@ -500,14 +500,20 @@ class AdminController extends Controller
         ]);
 
         $currentImageCount = Img::where('product_id', $request->product_id)->count();
-            if ($currentImageCount >= 5) {
-                return redirect()->back()->withErrors(['name' => 'Sản phẩm này đã có đủ 5 ảnh.']);
+        if ($currentImageCount >= 5) {
+            if ($request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'Sản phẩm này đã có đủ 5 ảnh.',
+                ], 400);
+            }
+            return redirect()->back()->withErrors(['name' => 'Sản phẩm này đã có đủ 5 ảnh.']);
         }
 
         if ($request->hasFile('name')) {
             $file = $request->file('name');
             $filename = time() . '_' .  $file->getClientOriginalName();
-            $path = $file->storeAs('public/img', $filename);
+            $file->storeAs('public/img', $filename);
             $file->move(public_path('img'), $filename);
 
             $img = new Img();
@@ -515,14 +521,16 @@ class AdminController extends Controller
             $img->name = $filename;
 
             if ($img->save()) {
+                if ($request->wantsJson() || $request->expectsJson()) {
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'Thêm hình ảnh thành công',
+                        'data' => $img,
+                        'image_url' => asset('img/' . $filename)
+                    ]);
+                }
                 return redirect()->route('product.detail', ['id' => $request->product_id])
-                ->with('success', 'Thêm hình ảnh thành công!');
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'Thêm hình ảnh thành công',
-                    'data' => $img,
-                    'image_url' => asset('public/img/' . $filename)
-                ]);
+                    ->with('success', 'Thêm hình ảnh thành công!');
             } else {
                 return response()->json([
                     'status' => 500,
