@@ -37,24 +37,25 @@ class AdminController extends Controller
     }
 
     public function addProduct(Request $request){
-        $product = Product::create($request->all());
-        return view('Admin.add_product', ['product' => $product]);
-        if($request->wantsJson() || $request->expectsJson()){
+        try {
+            $product = Product::create($request->all());
+            if(!$request->wantsJson() && !$request->expectsJson()){
+                return redirect()->back()->with('success', 'Thêm sản phẩm thành công')->with('product', $product);
+            }
             return response()->json([
                 'status' => 200,
                 'message' => 'Thêm sản phẩm thành công',
                 'data' => $product
             ],200);
-
-            return redirect()->back()->with('success', 'Thêm sản phẩm thành công');
-        } else {
-            if($request->expectsJson() || $request->wantsJson()){
-                return response()->json([
-                'status' => 404,
-                'message' => 'Thêm sản phẩm thất bại',
-                ],404);
+        } catch (Exception $e) {
+            if(!$request->wantsJson() && !$request->expectsJson()){
+                return redirect()->back()->with('error', 'Thêm sản phẩm thất bại');
             }
-            return redirect()->back()->with('error', 'Thêm sản phẩm thất bại');
+            return response()->json([
+                'status' => 500,
+                'message' => 'Thêm sản phẩm thất bại',
+                'error' => $e->getMessage()
+            ],500);
         }
     }
 
@@ -382,7 +383,7 @@ class AdminController extends Controller
                     'data' => $variant
                 ],200);
             }
-        }
+    }
 
     public function editVariant(Request $request, $id){
         $request->validate([
@@ -499,14 +500,20 @@ class AdminController extends Controller
         ]);
 
         $currentImageCount = Img::where('product_id', $request->product_id)->count();
-            if ($currentImageCount >= 5) {
-                return redirect()->back()->withErrors(['name' => 'Sản phẩm này đã có đủ 5 ảnh.']);
+        if ($currentImageCount >= 5) {
+            if ($request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'Sản phẩm này đã có đủ 5 ảnh.',
+                ], 400);
+            }
+            return redirect()->back()->withErrors(['name' => 'Sản phẩm này đã có đủ 5 ảnh.']);
         }
 
         if ($request->hasFile('name')) {
             $file = $request->file('name');
             $filename = time() . '_' .  $file->getClientOriginalName();
-            $path = $file->storeAs('public/img', $filename);
+            $file->storeAs('public/img', $filename);
             $file->move(public_path('img'), $filename);
 
             $img = new Img();
@@ -514,14 +521,16 @@ class AdminController extends Controller
             $img->name = $filename;
 
             if ($img->save()) {
+                if ($request->wantsJson() || $request->expectsJson()) {
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'Thêm hình ảnh thành công',
+                        'data' => $img,
+                        'image_url' => asset('img/' . $filename)
+                    ]);
+                }
                 return redirect()->route('product.detail', ['id' => $request->product_id])
-                ->with('success', 'Thêm hình ảnh thành công!');
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'Thêm hình ảnh thành công',
-                    'data' => $img,
-                    'image_url' => asset('public/img/' . $filename)
-                ]);
+                    ->with('success', 'Thêm hình ảnh thành công!');
             } else {
                 return response()->json([
                     'status' => 500,

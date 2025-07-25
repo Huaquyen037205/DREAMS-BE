@@ -3,7 +3,7 @@
 @section('content')
 <main class="flex-1 p-6 overflow-y-auto">
     <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow">
-         <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold mb-4">Thêm Sản Phẩm</h2>
             <a href="{{ url('/admin/product/list') }}" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
                 Danh sách sản phẩm
@@ -65,8 +65,6 @@
                 </select>
             </div>
 
-
-
             <div class="mb-4">
                 <label class="block text-gray-700 mb-1">Tình Trạng</label>
                 <select name="status" class="w-full border px-3 py-2 rounded">
@@ -74,12 +72,6 @@
                     <option value="hết hàng" {{ $product->status == 'hết hàng' ? 'selected' : '' }}>hết hàng</option>
                 </select>
             </div>
-
-            <!-- Image Upload -->
-            {{-- <div class="mb-4">
-                <label class="block text-gray-700 mb-1">Ảnh Sản Phẩm</label>
-                <input type="file" name="image" class="w-full border px-3 py-2 rounded">
-            </div> --}}
 
             <!-- Submit -->
             <div class="mt-6">

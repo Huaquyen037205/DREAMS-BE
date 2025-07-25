@@ -50,8 +50,9 @@ Route::post('/login', [AuthController::class, 'login']);
 route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/forgotPassword', [AuthController::class, 'forgotPassword']);
 route::post('/resetPassword', [AuthController::class, 'resetPassword']);
-
 Route::get('/review/{id}', [ProductController::class, 'reviewByProductId']);
+
+
 Route::middleware('auth:sanctum')->group(function () {
     //discount
     Route::post('/discount', [ProductController::class, 'discountUser']);
@@ -65,14 +66,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
     Route::get('/starAverage/{id}', [AdminManageController::class, 'starAverage']);
 });
-
-
-
-//Img
-Route::post('/admin/addImg', [AdminController::class, 'addImg']);
-Route::patch('/admin/editImg/{id}', [AdminController::class, 'editImg']);
-Route::delete('/admin/deleteImg/{id}', [AdminController::class, 'deleteImg']);
-
 
 // Admin Routes
 Route::post('/admin/login', [AdminUserController::class, 'loginAdmin']);
@@ -88,6 +81,11 @@ Route::middleware(['auth:sanctum'])->group(function (){
     Route::patch('/admin/productActive/{id}', [AdminController::class, 'setActiveProduct']);
     Route::post('/admin/addProduct', [AdminController::class, 'addProduct']);
     Route::delete('/admin/product/{id}', [AdminController::class, 'deleteProduct']);
+
+    //Img
+    Route::post('/admin/addImg', [AdminController::class, 'addImg']);
+    Route::patch('/admin/editImg/{id}', [AdminController::class, 'editImg']);
+    Route::delete('/admin/deleteImg/{id}', [AdminController::class, 'deleteImg']);
 
     //Category
     Route::get('/admin/category', [AdminController::class, 'categoryAdmin']);
