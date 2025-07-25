@@ -183,6 +183,9 @@ public function hotProduct() {
 
     // Lọc trùng theo 'size' để tránh lặp lại size giống nhau
     $product->variant = $product->variant->unique('size')->values();
+    $product->images = $product->img->map(function ($img) {
+        return asset('img/' . $img->name);
+    });
 
     return response()->json([
         'status' => 200,
