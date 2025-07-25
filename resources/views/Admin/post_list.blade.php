@@ -174,7 +174,7 @@
                 val.split(',').forEach(tag => {
                     const span = document.createElement('span');
                     span.className = 'bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full transition text-xs';
-                    span.innerText = `#${tag.trim()}`;
+                    span.innerText = #${tag.trim()};
                     tagEl.appendChild(span);
                 });
             }
@@ -183,7 +183,7 @@
         // === Meta Title ===
         bind('meta_title', val => {
             const el = document.getElementById('preview-meta-title');
-            el.innerText = val ? `Meta Title: ${val}` : '';
+            el.innerText = val ? Meta Title: ${val} : '';
         });
 
         // === Meta Description ===
@@ -201,7 +201,7 @@
             const startVal = start.value;
             const endVal = end.value;
             if (startVal || endVal) {
-                dateEl.innerText = `Thời gian: ${startVal || '...'} → ${endVal || '...'}`;
+                dateEl.innerText = Thời gian: ${startVal || '...'} → ${endVal || '...'};
             } else {
                 dateEl.innerText = '';
             }

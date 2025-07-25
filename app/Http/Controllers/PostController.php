@@ -5,8 +5,9 @@ use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use App\Models\User; // Đảm bảo import model User nếu bạn sử dụng quan hệ author
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class PostController extends Controller
 {
@@ -27,7 +28,6 @@ class PostController extends Controller
      */
     public function index()
     {
-        // Chỉ lấy các bài viết có trạng thái là 'published' cho API công khai
         $posts = Post::with(['product.variant', 'product.img', 'author'])
                      ->where('status', 'published')
                      ->orderByDesc('created_at')
@@ -43,11 +43,10 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        // Chỉ hiển thị bài viết đã công khai
         $post = Post::with(['product.variants', 'product.img', 'author'])
                     ->where('id', $id)
                     ->where('status', 'published')
-                    ->firstOrFail(); // Sử dụng firstOrFail để áp dụng điều kiện where
+                    ->firstOrFail();
         return response()->json($post);
     }
 
@@ -81,28 +80,24 @@ class PostController extends Controller
             $validated['slug'] = Str::slug($validated['title']);
         }
 
-        // Lấy ID của người dùng hiện tại, hoặc null nếu không có
         $validated['author_id'] = auth()->id() ?? null;
 
         // Xử lý tải lên hình ảnh chính
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('posts', 'public'); // Lưu vào thư mục 'posts' trên đĩa 'public'
+            $validated['image'] = $request->file('image')->store('posts', 'public');
         } else {
-            // Nếu không có file được tải lên, và trường 'image' không được gửi hoặc gửi là null, đảm bảo nó là null
             $validated['image'] = $request->input('image') === null ? null : ($validated['image'] ?? null);
         }
 
         // Xử lý tải lên hình ảnh thumbnail
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail'] = $request->file('thumbnail')->store('posts/thumbnails', 'public'); // Lưu vào thư mục 'posts/thumbnails'
+            $validated['thumbnail'] = $request->file('thumbnail')->store('posts/thumbnails', 'public');
         } else {
-            // Tương tự cho thumbnail
             $validated['thumbnail'] = $request->input('thumbnail') === null ? null : ($validated['thumbnail'] ?? null);
         }
 
         $post = Post::create($validated);
 
-        // Chuyển hướng về trang quản lý bài viết sau khi tạo thành công
         return redirect()->route('admin.posts.manage')->with('success', 'Bài viết đã được tạo thành công!');
     }
 
@@ -151,48 +146,40 @@ class PostController extends Controller
             $validated['slug'] = Str::slug($validated['title']);
         }
 
-        // Giữ nguyên author_id nếu không có người dùng đăng nhập, hoặc cập nhật nếu có
         $validated['author_id'] = auth()->id() ?? $post->author_id;
 
         // Xử lý cập nhật hình ảnh chính
         if ($request->hasFile('image')) {
-            // Xóa hình ảnh cũ nếu tồn tại
             if ($post->image) {
                 Storage::disk('public')->delete($post->image);
             }
             $validated['image'] = $request->file('image')->store('posts', 'public');
         } elseif ($request->input('image') === null) {
-            // Nếu trường 'image' được gửi rõ ràng là null, xóa hình ảnh cũ và đặt là null
             if ($post->image) {
                 Storage::disk('public')->delete($post->image);
             }
             $validated['image'] = null;
         } else {
-            // Nếu trường 'image' không được gửi trong request, giữ nguyên giá trị hiện có
             unset($validated['image']);
         }
 
         // Xử lý cập nhật hình ảnh thumbnail
         if ($request->hasFile('thumbnail')) {
-            // Xóa thumbnail cũ nếu tồn tại
             if ($post->thumbnail) {
                 Storage::disk('public')->delete($post->thumbnail);
             }
             $validated['thumbnail'] = $request->file('thumbnail')->store('posts/thumbnails', 'public');
         } elseif ($request->input('thumbnail') === null) {
-            // Nếu trường 'thumbnail' được gửi rõ ràng là null, xóa thumbnail cũ và đặt là null
             if ($post->thumbnail) {
                 Storage::disk('public')->delete($post->thumbnail);
             }
             $validated['thumbnail'] = null;
         } else {
-            // Nếu trường 'thumbnail' không được gửi trong request, giữ nguyên giá trị hiện có
             unset($validated['thumbnail']);
         }
 
         $post->update($validated);
 
-        // Chuyển hướng về trang quản lý bài viết sau khi cập nhật thành công
         return redirect()->route('admin.posts.manage')->with('success', 'Bài viết đã được cập nhật thành công!');
     }
 
@@ -206,7 +193,6 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
-        // Xóa hình ảnh liên quan khi xóa bài viết
         if ($post->image) {
             Storage::disk('public')->delete($post->image);
         }
@@ -225,7 +211,6 @@ class PostController extends Controller
      */
     public function managePosts()
     {
-        // Lấy tất cả bài viết cùng với thông tin sản phẩm và tác giả (không lọc trạng thái để quản lý)
         $posts = Post::with(['product.variant', 'product.img', 'author'])->orderByDesc('created_at')->get();
         return view('Admin.post_manage', compact('posts'));
     }
@@ -242,7 +227,7 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
 
         $validated = $request->validate([
-            'status' => 'required|in:draft,published', // Chỉ chấp nhận 'draft' hoặc 'published'
+            'status' => 'required|in:draft,published',
         ]);
 
         $post->update(['status' => $validated['status']]);
@@ -250,103 +235,182 @@ class PostController extends Controller
         return response()->json(['message' => 'Trạng thái bài viết đã được cập nhật.', 'new_status' => $post->status]);
     }
 
+    public function adminDetail($id)
+    {
+        $post = Post::with(['author', 'product'])->findOrFail($id);
 
-public function adminDetail($id)
-{
-    $post = Post::with(['author', 'product'])->findOrFail($id);
+        $reactionTypes = ['like', 'love', 'haha', 'wow', 'sad', 'angry', 'dislike'];
 
-    // Tổng số reaction theo loại
-    // $reactions = \App\Models\PostReaction::where('post_id', $id)
-    //     ->select('reaction', \DB::raw(value: 'count(*) as total'))
-    //     ->groupBy('reaction')
-    //     ->get();
-$reactionTypes = ['like', 'love', 'haha', 'wow', 'sad', 'angry', 'dislike'];
+        $reactionCounts = \App\Models\PostReaction::where('post_id', $id)
+            ->select('reaction', \DB::raw('count(*) as total'))
+            ->groupBy('reaction')
+            ->pluck('total', 'reaction')
+            ->toArray();
 
-$reactionCounts = \App\Models\PostReaction::where('post_id', $id)
-    ->select('reaction', \DB::raw('count(*) as total'))
-    ->groupBy('reaction')
-    ->pluck('total', 'reaction') // lấy dạng key-value
-    ->toArray();
+        $reactions = [];
+        foreach ($reactionTypes as $type) {
+            $reactions[$type] = $reactionCounts[$type] ?? 0;
+        }
 
-// Merge vào để đảm bảo có đủ các loại reaction, nếu không có thì mặc định là 0
-$reactions = [];
-foreach ($reactionTypes as $type) {
-    $reactions[$type] = $reactionCounts[$type] ?? 0;
-}
+        $commentsCount = \App\Models\Comment::where('post_id', $id)->count();
+        $comments = \App\Models\Comment::with('user')->where('post_id', $id)->orderByDesc('created_at')->get();
 
-    // Tổng số comment
-    $commentsCount = \App\Models\Comment::where('post_id', $id)->count();
-
-    // Danh sách comment chi tiết
-    $comments = \App\Models\Comment::with('user')->where('post_id', $id)->orderByDesc('created_at')->get();
-
-    return view('Admin.post_detail', compact('post', 'reactions', 'commentsCount', 'comments'));
-}
-
-public function getAISuggestions(Request $request)
-{
-    $request->validate([
-        'keyword' => 'required|string|min:3|max:255',
-    ]);
-
-    $keyword = $request->input('keyword');
-    $apiKey = env('OPENROUTER_API_KEY');
-
-    if (empty($apiKey)) {
-        return response()->json(['success' => false, 'message' => 'API key chưa cấu hình'], 500);
+        return view('Admin.post_detail', compact('post', 'reactions', 'commentsCount', 'comments'));
     }
 
-    $prompt = <<<EOT
-Viết một bài viết với tiêu đề: "{$keyword}". Trả về JSON đúng định dạng sau:
+    /**
+     * Tải ảnh từ URL và lưu vào storage
+     *
+     * @param  string  $imageUrl
+     * @param  string  $folder
+     * @return string|null
+     */
+    private function downloadAndSaveImage($imageUrl, $folder = 'posts/ai-generated')
+    {
+        try {
+            // Tải ảnh từ URL
+            $response = Http::timeout(30)->get($imageUrl);
+
+            if (!$response->successful()) {
+                return null;
+            }
+
+            // Tạo tên file unique
+            $extension = 'jpg'; // Mặc định là jpg
+            $filename = uniqid() . '_' . time() . '.' . $extension;
+            $path = $folder . '/' . $filename;
+
+            // Lưu ảnh vào storage
+            Storage::disk('public')->put($path, $response->body());
+
+            return $path;
+        } catch (\Exception $e) {
+            Log::error('Error downloading image', [
+                'url' => $imageUrl,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Lấy gợi ý AI cho bài viết từ Google AI (Gemini) bao gồm cả ảnh
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAISuggestions(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|min:3|max:255',
+            ]);
+
+            $title = $validated['title'];
+            $apiKey = env('POST_KEY');
+
+            if (empty($apiKey)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'API key chưa được cấu hình'
+                ], 500);
+            }
+
+            // Tạo prompt cho Google AI
+            $prompt = "Dựa vào tiêu đề '{$title}', hãy tạo nội dung cho một bài viết blog. Trả về JSON với định dạng sau:
 
 {
-  "excerpt": "Tóm tắt",
-  "content": "Nội dung bài viết",
-  "tags": "tag1, tag2, tag3",
-  "meta_title": "Tiêu đề SEO",
-  "meta_description": "Mô tả SEO"
+  \"content\": \"Nội dung bài viết chi tiết, ít nhất 3 đoạn văn\",
+  \"tags\": \"tag1, tag2, tag3, tag4, tag5\",
+  \"meta_title\": \"Tiêu đề SEO tối ưu\",
+  \"meta_description\": \"Mô tả SEO ngắn gọn và hấp dẫn\",
+  \"image_prompt\": \"Mô tả chi tiết cho ảnh minh họa bài viết bằng tiếng Anh\"
 }
-Chỉ trả về JSON, không có bất kỳ văn bản nào khác.
-EOT;
 
-    try {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
-            'HTTP-Referer' => 'http://localhost:8000',
-            'X-Title' => 'Laravel Post AI',
-        ])->post('https://openrouter.ai/api/v1/chat/completions', [
-            'model' => 'mistral/mixtral-8x7b-instruct',
-            'messages' => [
-                ['role' => 'user', 'content' => $prompt],
-            ],
-        ]);
+Viết bằng tiếng Việt, nội dung chuyên nghiệp và hữu ích. image_prompt phải bằng tiếng Anh và mô tả cụ thể. Chỉ trả về JSON, không có văn bản khác.";
 
-        $result = $response->json();
-        $text = $result['choices'][0]['message']['content'] ?? null;
+            // Gọi Google AI API (Gemini)
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            [
+                                'text' => $prompt
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
 
-        // Sửa chỗ parse JSON bằng regex
-        preg_match('/\{(?:[^{}]|(?R))*\}/', $text, $matches);
-        $json = $matches[0] ?? null;
+            if (!$response->successful()) {
+                Log::error('Google AI API Error', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
 
-        if ($json === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lỗi khi gọi API Google AI'
+                ], 500);
+            }
+
+            $result = $response->json();
+
+            if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Phản hồi API không hợp lệ'
+                ], 422);
+            }
+
+            $generatedText = $result['candidates'][0]['content']['parts'][0]['text'];
+            $suggestions = null;
+
+            // Tìm và parse JSON từ response
+            if (preg_match('/\{(?:[^{}]|(?R))*\}/', $generatedText, $matches)) {
+                $jsonString = $matches[0];
+                $suggestions = json_decode($jsonString, true);
+            }
+
+            // Nếu không parse được JSON hoặc thiếu nội dung, tạo fallback
+            if (json_last_error() !== JSON_ERROR_NONE || !isset($suggestions['content'])) {
+                $suggestions = [
+                    'content' => "Đây là nội dung chi tiết về \"{$title}\". Bài viết này sẽ cung cấp thông tin hữu ích và chuyên sâu về chủ đề này.\n\nNội dung được viết một cách dễ hiểu và thu hút người đọc, bao gồm các thông tin cần thiết và quan trọng.\n\nKết luận: \"{$title}\" là một chủ đề đáng quan tâm và có nhiều giá trị thực tiễn.",
+                    'tags' => str_replace(' ', ', ', strtolower($title)) . ', thông tin, hữu ích, chuyên sâu',
+                    'meta_title' => $title . ' - Thông tin chi tiết và hữu ích',
+                    'meta_description' => "Tìm hiểu chi tiết về {$title}. Bài viết cung cấp thông tin đầy đủ, chính xác và hữu ích cho người đọc.",
+                    'image_prompt' => "High quality professional image related to " . $title . ", modern style, clean background"
+                ];
+            }
+
+            // Tạo ảnh từ Unsplash API (miễn phí) hoặc service khác
+            $imageUrls = $this->generateImages($suggestions['image_prompt'] ?? $title);
+
+            return response()->json([
+                'success' => true,
+                'suggestions' => $suggestions,
+                'images' => $imageUrls
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy JSON trong phản hồi AI',
-                'raw' => $text
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $e->errors()
             ], 422);
+        } catch (\Exception $e) {
+            Log::error('AI Suggestions Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi không mong muốn: ' . $e->getMessage()
+            ], 500);
         }
-
-        $parsed = json_decode($json, true);
-
-        if (json_last_error() === JSON_ERROR_NONE) {
-            return response()->json(['success' => true, 'suggestions' => [$parsed]]);
-        }
-
-        return response()->json(['success' => false, 'message' => 'Lỗi JSON khi decode', 'raw' => $text], 422);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Lỗi AI: ' . $e->getMessage()], 500);
     }
-}
-
-
 }
