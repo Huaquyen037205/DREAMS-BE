@@ -23,38 +23,39 @@ class AdminController extends Controller
         ],200);
     }
 
-   public function productById(Request $request, $id) {
-    $product = Product::with(['variant.img'])->find($id);
-    if (!$product) {
-        return response()->json([
-            'status' => 404,
-            'message' => 'Không tìm thấy sản phẩm',
-        ], 404);
+    public function productById(Request $request, $id) {
+        $product = Product::with(['variant.img'])->find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ], 404);
+        }
+        return view('Admin.productById', [
+            'product' => $product
+        ]);
     }
-    return view('Admin.productById', [
-        'product' => $product
-    ]);
-}
 
     public function addProduct(Request $request){
-        $product = Product::create($request->all());
-        return view('Admin.add_product', ['product' => $product]);
-        if($request->wantsJson() || $request->expectsJson()){
+        try {
+            $product = Product::create($request->all());
+            if(!$request->wantsJson() && !$request->expectsJson()){
+                return redirect()->back()->with('success', 'Thêm sản phẩm thành công')->with('product', $product);
+            }
             return response()->json([
                 'status' => 200,
                 'message' => 'Thêm sản phẩm thành công',
                 'data' => $product
             ],200);
-
-            return redirect()->back()->with('success', 'Thêm sản phẩm thành công');
-         } else {
-            if($request->expectsJson() || $request->wantsJson()){
-                return response()->json([
-                'status' => 404,
-                'message' => 'Thêm sản phẩm thất bại',
-                ],404);
+        } catch (Exception $e) {
+            if(!$request->wantsJson() && !$request->expectsJson()){
+                return redirect()->back()->with('error', 'Thêm sản phẩm thất bại');
             }
-            return redirect()->back()->with('error', 'Thêm sản phẩm thất bại');
+            return response()->json([
+                'status' => 500,
+                'message' => 'Thêm sản phẩm thất bại',
+                'error' => $e->getMessage()
+            ],500);
         }
     }
 
@@ -382,7 +383,7 @@ class AdminController extends Controller
                     'data' => $variant
                 ],200);
             }
-        }
+    }
 
     public function editVariant(Request $request, $id){
         $request->validate([

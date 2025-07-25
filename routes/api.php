@@ -59,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/review', [ProductController::class, 'reviews']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
     Route::delete('/review/{id}', [ProductController::class, 'deleteReview']);
+    Route::get('/starAverage/{id}', [AdminManageController::class, 'starAverage']);
 });
 
 

@@ -1,12 +1,12 @@
 <?php
 
 namespace App\Http\Middleware;
-
+use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class Authenticate
+class Authenticate extends Middleware
 {
     /**
      * Handle an incoming request.
@@ -21,7 +21,9 @@ class Authenticate
    protected function redirectTo($request)
 {
     if (! $request->expectsJson()) {
-        return response()->json(['message' => 'Unauthorized'], 401);
+        session()->flash('error', 'Bạn cần đăng nhập để thực hiện những quyền hạn admin này!');
+        return route('Admin.Login');
+        // return response()->json(['message' => 'Unauthorized'], 401);
     }
 }
 }
