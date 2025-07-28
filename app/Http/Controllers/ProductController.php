@@ -83,12 +83,23 @@ class ProductController extends Controller
     }
 
     public function viewProduct(){
-        $product = Product::with('img', 'variant', 'category')->where('view', 1)->get();
+        $products = Product::with('img', 'variant', 'category')
+        ->orderByDesc('created_at')
+        ->take(6)
+        ->get();
+
+        $products->transform(function ($product) {
+            $product->images = $product->img->map(function ($img) {
+                return asset('img/' . $img->name);
+            });
+            return $product;
+        });
+
         return response()->json([
             'status' => 200,
-            'message' => 'View sản phẩm',
-            'data' => $product
-        ],200);
+            'message' => '6 sản phẩm mới nhất',
+            'data' => $products
+        ], 200);
     }
 
     public function category(){
