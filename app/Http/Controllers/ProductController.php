@@ -206,6 +206,7 @@ class ProductController extends Controller
         'data' => $product
     ], 200);
 }
+
 public function searchProduct(Request $request)
 {
     $search = $request->input('search');
