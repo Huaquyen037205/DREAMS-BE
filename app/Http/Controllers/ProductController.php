@@ -94,9 +94,9 @@ class ProductController extends Controller
     public function category(){
         $category = Category::with('product')->get();
         $category->transform(function ($category) {
-        $category->image_url_full = $category->image_url ? asset('img/' . $category->image_url) : null;
-        return $category;
-    });
+            $category->image_url_full = $category->image_url ? asset('img/' . $category->image_url) : null;
+            return $category;
+        });
 
         return response()->json([
             'status' => 200,
@@ -319,6 +319,14 @@ public function searchProduct(Request $request)
 
         $products = $query->get();
 
+        // ✅ Thêm đoạn này để gán trường 'images' là URL đầy đủ
+        $products->transform(function ($product) {
+            $product->images = $product->img->map(function ($img) {
+                return asset('img/' . $img->name);
+            });
+            return $product;
+        });
+
         if ($products->isEmpty()) {
             return response()->json([
                 'status' => 404,
@@ -332,6 +340,7 @@ public function searchProduct(Request $request)
             'data' => $products
         ], 200);
     }
+
 
     public function filterBySize(Request $request)
     {
@@ -366,7 +375,6 @@ public function searchProduct(Request $request)
             'data' => $products
         ], 200);
     }
-
 
     public function getReviews(Request $request)
     {

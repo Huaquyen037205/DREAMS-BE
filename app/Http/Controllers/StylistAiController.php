@@ -31,10 +31,13 @@ class StylistAiController extends Controller
     if ($productName) {
         $product = Product::where('name', $productName)->first();
         if ($product) {
-            // Lấy tất cả ảnh của sản phẩm
-            $images = DB::table('img')->where('product_id', $product->id)->orderBy('id')->pluck('name')->map(function ($img) {
-                return url('uploads/' . $img);
-            });
+             $images = DB::table('img')
+                ->where('product_id', $product->id)
+                ->orderBy('id')
+                ->pluck('name')
+                ->map(function ($img) {
+                    return asset('img/' . $img);
+                });
             // Lấy tất cả biến thể
             $variants = $product->variant()->orderBy('price')->get()->map(function ($variant) {
                 return [
