@@ -312,6 +312,14 @@ class ProductController extends Controller
 
         $products = $query->get();
 
+        // ✅ Thêm đoạn này để gán trường 'images' là URL đầy đủ
+        $products->transform(function ($product) {
+            $product->images = $product->img->map(function ($img) {
+                return asset('img/' . $img->name);
+            });
+            return $product;
+        });
+
         if ($products->isEmpty()) {
             return response()->json([
                 'status' => 404,
@@ -325,6 +333,7 @@ class ProductController extends Controller
             'data' => $products
         ], 200);
     }
+
 
     public function filterBySize(Request $request)
     {
@@ -359,7 +368,6 @@ class ProductController extends Controller
             'data' => $products
         ], 200);
     }
-
 
     public function getReviews(Request $request)
     {
