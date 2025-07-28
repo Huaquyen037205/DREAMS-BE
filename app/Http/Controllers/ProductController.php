@@ -91,9 +91,13 @@ class ProductController extends Controller
         ],200);
     }
 
-    public function category()
-    {
-        $category = Category::with('product')->where('status', 1)->get();
+    public function category(){
+        $category = Category::with('product')->get();
+        $category->transform(function ($category) {
+        $category->image_url_full = $category->image_url ? asset('img/' . $category->image_url) : null;
+        return $category;
+    });
+
         return response()->json([
             'status' => 200,
             'message' => 'Danh sách danh mục',
