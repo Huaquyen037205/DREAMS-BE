@@ -182,7 +182,10 @@ public function apiActiveFlashSales()
                 // Lấy danh sách ảnh của sản phẩm
                 $variant->images = DB::table('img')
                     ->where('product_id', $variant->product_id)
-                    ->pluck('name');
+                    ->pluck('name')
+                    ->map(function ($img) {
+                        return asset('img/' . $img);
+                });
 
                 // Tính phần trăm giảm giá
                 if ($variant->original_price > 0) {
