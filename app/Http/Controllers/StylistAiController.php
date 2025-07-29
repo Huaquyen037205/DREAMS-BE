@@ -30,6 +30,7 @@ class StylistAiController extends Controller
 
     if ($productName) {
         $product = Product::where('name', $productName)->first();
+        $product = Product::whereRaw('LOWER(name) = ?', [mb_strtolower($productName)])->first();
         if ($product) {
              $images = DB::table('img')
                 ->where('product_id', $product->id)
@@ -49,6 +50,43 @@ class StylistAiController extends Controller
                     'status' => $variant->status,
                 ];
             });
+
+            $answers = $request->input('answers', []);
+            $sizeAsked = null;
+            if (is_array($answers)) {
+                foreach ($answers as $ans) {
+                    // Tìm size được hỏi
+                    if (preg_match('/size\s*([A-Za-z0-9]+)/iu', $ans, $m)) {
+                        $sizeAsked = strtoupper(trim($m[1]));
+                    }
+                    // Tìm tên sản phẩm
+                    if (preg_match('/sản phẩm\s+(.*?)\s+(?:còn|có)\s+size/i', $ans, $m)) {
+                        $productName = trim($m[1]);
+                    } elseif (preg_match('/sản phẩm\s+(.+)/iu', $ans, $m)) {
+                        $productName = trim($m[1]);
+                    }
+                }
+            }
+
+            if ($sizeAsked) {
+                $variant = $product->variant()->where('size', $sizeAsked)->first();
+                if ($variant) {
+                    return response()->json([
+                        'message' => "Sản phẩm {$product->name} size {$sizeAsked} còn {$variant->stock_quantity} sản phẩm trong kho.",
+                        'stock_quantity' => $variant->stock_quantity,
+                        'size' => $sizeAsked,
+                        'status' => $variant->status,
+                    ]);
+                } else {
+                    return response()->json([
+                        'message' => "Sản phẩm {$product->name} không có size {$sizeAsked}.",
+                        'stock_quantity' => 0,
+                        'size' => $sizeAsked,
+                        'status' => 'not_found',
+                    ]);
+                }
+            }
+
             return response()->json([
                 'product' => [
                     'id' => $product->id,
@@ -76,6 +114,14 @@ class StylistAiController extends Controller
             }
         }
 
+        if (is_array($answers)) {
+            foreach ($answers as $ans) {
+                if (preg_match('/(phối đồ|set đồ|đi chơi|du lịch|outfit|mix and match)/iu', $ans)) {
+                    $mixAndMatch = true;
+                    break;
+                }
+            }
+        }
         $discounts = DB::table('discounts')
             ->where('start_day', '<=', now())
             ->where('end_day', '>=', now())
@@ -143,11 +189,40 @@ class StylistAiController extends Controller
 
             if ($mixAndMatch) {
                 $prompt .= "
-                - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong cửa hàng, mỗi loại sản phẩm chỉ xuất hiện 1 lần, ví dụ: nếu đã có áo khoác thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit)";
+                - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong cửa hàng, mỗi loại sản phẩm chỉ xuất hiện 1 lần mỗi loại sản phẩm chỉ xuất hiện 1 lần, ví dụ: nếu đã có áo khoác, hoodie thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit, ví dụ: nếu đã có áo khoác thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit)";
             }
-            $prompt .= "
-                Trả về JSON có 5 trường: name, desc, keywords, message" . ($mixAndMatch ? ", mix_and_match" : "") . ".
+            else {
+                $shopProducts = Product::with('category')->get()->map(function($p) {
+                    return [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                        'category' => optional($p->category)->name,
+                        'description' => $p->description,
+                    ];
+                });
+
+                // Đưa vào đầu prompt
+                $prompt = "Danh sách sản phẩm hiện có trong shop, đề suất phối đồ cho người dùng (chỉ được đề xuất các sản phẩm này): " . json_encode($shopProducts, JSON_UNESCAPED_UNICODE) . "\n";
+                $prompt .= "Dưới đây là thông tin gu thời trang của một người dùng: " . json_encode($answers, JSON_UNESCAPED_UNICODE) . "\n";
+                $prompt .= "Dựa vào đó, hãy:
+                    - Đặt tên gu thật sang chảnh (tiếng Việt)
+                    - Mô tả ngắn phong cách này
+                    - Gợi ý tối đa 3 từ khóa style (tiếng Việt hoặc tiếng Anh, định dạng mảng)
+                    - Viết một lời nhận xét thân thiện, tự nhiên như một stylist đang trò chuyện với khách (tiếng Việt)
+                    - Nếu khách hàng hỏi về chương trình giảm giá, flash sale hoặc ưu đãi, hãy trả lời chi tiết về các chương trình này nếu có (lưu ý không tự bịa ra).
+                    Dữ liệu chương trình giảm giá hiện tại: $discountInfo
+                    Dữ liệu flash sale hiện tại: $flashSaleInfo
+                    Trả về JSON có 4 trường: name, desc, keywords, message.
+                    Chỉ trả JSON, không thêm giải thích, không bọc ```json```.";
+                if ($mixAndMatch) {
+                    $prompt .= "
+                        - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong danh sách trên, mỗi loại sản phẩm chỉ xuất hiện 1 lần, ví dụ: nếu đã có áo khoác thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit).";
+                }
+                $prompt .= "
+                Lưu ý: Chỉ được đề xuất sản phẩm có trong danh sách trên, không tự bịa hoặc lấy sản phẩm ngoài shop.
+                Trả về JSON có 5 trường: name, desc, message" . ($mixAndMatch ? ", mix_and_match" : "") . ".
                 Chỉ trả JSON, không thêm giải thích, không bọc ```json```.";
+            }
         }
 
         $apiKey = env('GEMINI_API_KEY');
@@ -222,7 +297,7 @@ class StylistAiController extends Controller
                 'name' => $product->name,
                 'description' => $product->description,
                 'price' => optional($product->variant()->orderBy('price')->first())->price,
-                'image' => $image ? url('uploads/' . $image) : null,
+                'image' => $image ? url('img/' . $image) : null,
             ];
         });
 
@@ -232,7 +307,7 @@ class StylistAiController extends Controller
             'description' => $result['desc'] ?? '',
             'keywords' => $rawKeywords,
             'products' => $productsWithImage,
-
+            'mix_and_match' => $result['mix_and_match'] ?? null,
         ]);
     }
 }
