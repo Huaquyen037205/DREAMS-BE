@@ -103,7 +103,20 @@ class StylistAiController extends Controller
         $answers = $request->input('answers');
         $mixAndMatch = $request->input('mix_and_match', false);
 
-        // Kiểm tra nếu khách chỉ hỏi về giảm giá hoặc flash sale thì chỉ trả lời, không sinh từ khóa và không đề xuất sản phẩm
+    if (is_array($answers)) {
+            foreach ($answers as $ans) {
+                if (preg_match('/(phối đồ|set đồ|đi chơi|du lịch|outfit|mix and match)/iu', $ans)) {
+                    $mixAndMatch = true;
+                    break;
+                }
+            }
+        }
+
+    $answers = $request->input('answers', []);
+        if (!is_array($answers)) {
+            $answers = [$answers];
+        }
+
         $isDiscountQuestion = false;
         if (is_array($answers)) {
             foreach ($answers as $ans) {
@@ -114,14 +127,6 @@ class StylistAiController extends Controller
             }
         }
 
-        if (is_array($answers)) {
-            foreach ($answers as $ans) {
-                if (preg_match('/(phối đồ|set đồ|đi chơi|du lịch|outfit|mix and match)/iu', $ans)) {
-                    $mixAndMatch = true;
-                    break;
-                }
-            }
-        }
         $discounts = DB::table('discounts')
             ->where('start_day', '<=', now())
             ->where('end_day', '>=', now())
@@ -147,6 +152,7 @@ class StylistAiController extends Controller
             : "Hiện tại chưa có chương trình flash sale nào đang diễn ra.";
 
         if ($isDiscountQuestion) {
+            $mixAndMatch = false;
             $prompt = "Khách hàng hỏi về chương trình giảm giá hoặc flash sale.
                 Dữ liệu chương trình giảm giá hiện tại: $discountInfo
                 Dữ liệu flash sale hiện tại: $flashSaleInfo
@@ -194,7 +200,6 @@ class StylistAiController extends Controller
             else {
                 $shopProducts = Product::with('category')->get()->map(function($p) {
                     return [
-                        'id' => $p->id,
                         'name' => $p->name,
                         'category' => optional($p->category)->name,
                         'description' => $p->description,
@@ -300,9 +305,11 @@ class StylistAiController extends Controller
                 'image' => $image ? url('img/' . $image) : null,
             ];
         });
+        $message = $result['message'] ?? '';
+        $message = preg_replace('/\*+\s*/u', '', $message);
 
         return response()->json([
-            'message' => $result['message'] ?? '',
+            'message' => $message,
             'style_name' => $result['name'] ?? 'Gu thời trang của bạn',
             'description' => $result['desc'] ?? '',
             'keywords' => $rawKeywords,
