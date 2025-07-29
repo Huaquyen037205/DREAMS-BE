@@ -100,7 +100,6 @@ class StylistAiController extends Controller
             })->implode("\n")
             : "Hiện tại chưa có chương trình flash sale nào đang diễn ra.";
 
-        // Nếu chỉ hỏi về giảm giá/flash sale thì prompt chỉ trả lời về chương trình, không sinh từ khóa, không đề xuất sản phẩm
         if ($isDiscountQuestion) {
             $prompt = "Khách hàng hỏi về chương trình giảm giá hoặc flash sale.
                 Dữ liệu chương trình giảm giá hiện tại: $discountInfo
