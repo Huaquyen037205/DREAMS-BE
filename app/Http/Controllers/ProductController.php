@@ -81,7 +81,6 @@ class ProductController extends Controller
             'data' => $products
         ], 200);
     }
-
     public function viewProduct(){
         $products = Product::with('img', 'variant', 'category')
         ->orderByDesc('created_at')
@@ -511,7 +510,7 @@ public function searchProduct(Request $request)
     }
 
 
-    public function viewedProducts(Request $request)
+ public function viewedProducts(Request $request)
 {
     $userId = $request->user()->id;
     $productIds = \DB::table('product_views')
@@ -525,12 +524,20 @@ public function searchProduct(Request $request)
         ->whereIn('id', $productIds)
         ->get();
 
+    // Chuyển đổi hình ảnh thành URL đầy đủ
+    $products->transform(function ($product) {
+        $product->images = $product->img->map(function ($img) {
+            return asset('img/' . $img->name);
+        });
+        return $product;
+    });
+
     return response()->json([
         'status' => 200,
+        'message' => 'Danh sách sản phẩm đã xem',
         'products' => $products
-    ]);
+    ], 200);
 }
-
 
 public function aiRecommend(Request $request)
 {
@@ -544,7 +551,7 @@ public function aiRecommend(Request $request)
 
     $products = Product::whereIn('id', $viewed)->pluck('name')->toArray();
 
-    // Lấy thêm danh sách sản phẩm mới nhất để AI gợi ý
+    // Lấy danh sách sản phẩm mới nhất để AI gợi ý
     $allProducts = Product::orderByDesc('created_at')->take(20)->pluck('name')->toArray();
 
     $prompt = "Dựa trên lịch sử người dùng đã xem các sản phẩm: " . implode(', ', $products) .
@@ -574,8 +581,10 @@ public function aiRecommend(Request $request)
     // Nếu Gemini trả về không đúng mảng, trả về rỗng
     if (!is_array($suggestedNames)) {
         return response()->json([
+            'status' => 200,
+            'message' => 'Không có gợi ý sản phẩm',
             'suggested' => []
-        ]);
+        ], 200);
     }
 
     // Lấy đầy đủ thông tin sản phẩm theo tên
@@ -583,8 +592,18 @@ public function aiRecommend(Request $request)
         ->whereIn('name', $suggestedNames)
         ->get();
 
+    // Chuyển đổi hình ảnh thành URL đầy đủ
+    $suggestedProducts->transform(function ($product) {
+        $product->images = $product->img->map(function ($img) {
+            return asset('img/' . $img->name);
+        });
+        return $product;
+    });
+
     return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm được gợi ý',
         'suggested' => $suggestedProducts
-    ]);
+    ], 200);
 }
 }
