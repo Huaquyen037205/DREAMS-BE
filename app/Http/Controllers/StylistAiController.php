@@ -22,19 +22,26 @@ class StylistAiController extends Controller
             foreach ($answers as $ans) {
                 if (preg_match('/sản phẩm\s+(.+)/iu', $ans, $m)) {
                     $productName = trim($m[1]);
+                    $productName = preg_replace('/(còn\s+size\s+\w+\s*không.*)/iu', '', $productName);
+                    $productName = preg_replace('/(size\s+\w+)/iu', '', $productName);
                     $productName = trim($productName);
                     break;
                 }
             }
 
             if (!$productName && !empty($answers[0]) && !preg_match('/(phối|set đồ|đi chơi|du lịch|outfit|mix and match|giảm giá|flash sale|ưu đãi)/iu', $answers[0])) {
-            $productName = trim($answers[0]);
+                $productName = trim($answers[0]);
+                $productName = preg_replace('/(còn\s+size\s+\w+\s*không.*)/iu', '', $productName);
+                $productName = preg_replace('/(size\s+\w+)/iu', '', $productName);
+                $productName = trim($productName);
             }
 
             if (!$sizeAsked) {
                 foreach ($answers as $ans) {
                    if (preg_match('/sản phẩm\s+(.+)/iu', $ans, $m)) {
                         $productName = trim($m[1]);
+                        $productName = preg_replace('/(còn\s+size\s+\w+\s*không.*)/iu', '', $productName);
+                        $productName = preg_replace('/(size\s+\w+)/iu', '', $productName);
                         $productName = trim($productName);
                         break;
                     }
@@ -42,7 +49,18 @@ class StylistAiController extends Controller
             }
         }
 
+        foreach ($answers as $ans) {
+            if (preg_match('/size\s+(\w+)/iu', $ans, $match)) {
+                $sizeAsked = strtoupper(trim($match[1]));
+                break;
+            } elseif (preg_match('/cỡ\s+(\w+)/iu', $ans, $match)) {
+                $sizeAsked = strtoupper(trim($match[1]));
+                break;
+            }
+        }
+
         if ($productName) {
+                // Log::info("Product name guessed: " . $productName);
             $product = Product::whereRaw('LOWER(name) = ?', [mb_strtolower(trim($productName))])->first();
             if ($product) {
                 $images = DB::table('img')
@@ -65,14 +83,14 @@ class StylistAiController extends Controller
                     $variant = $product->variant()->where('size', $sizeAsked)->first();
                     if ($variant) {
                         return response()->json([
-                            'message' => "Sản phẩm {$product->name} size {$sizeAsked} còn {$variant->stock_quantity} sản phẩm trong kho.",
+                            'message' => "Sản phẩm {$product->name} size {$sizeAsked} còn {$variant->stock_quantity} sản phẩm trong kho nha khách iu ơiiiiii. Khách yêu tranh thủ lựa chọn ngay nha.",
                             'stock_quantity' => $variant->stock_quantity,
                             'size' => $sizeAsked,
                             'status' => $variant->status,
                         ]);
                     } else {
                         return response()->json([
-                            'message' => "Sản phẩm {$product->name} không có size {$sizeAsked}.",
+                            'message' => "Sản phẩm {$product->name} hiện tại không có size {$sizeAsked}.",
                             'stock_quantity' => 0,
                             'size' => $sizeAsked,
                             'status' => 'not_found',
@@ -228,11 +246,14 @@ class StylistAiController extends Controller
                 Chỉ trả JSON, không thêm giải thích, không bọc ```json```.";
             if ($mixAndMatch) {
                 $prompt .= "
-                    - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong danh sách trên, mỗi loại sản phẩm chỉ xuất hiện 1 lần, ví dụ: nếu đã có áo khoác thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit).";
+                - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong cửa hàng, mỗi loại sản phẩm chỉ xuất hiện 1 lần, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit)
+                - Trả về JSON có 5 trường: name, desc, keywords, message, mix_and_match (mix_and_match là mảng các tên sản phẩm đề xuất).";
+            } else {
+                $prompt .= "
+                - Trả về JSON có 4 trường: name, desc, keywords, message.";
             }
+
             $prompt .= "
-            Lưu ý: Chỉ được đề xuất sản phẩm có trong danh sách trên, không tự bịa hoặc lấy sản phẩm ngoài shop.
-            Trả về JSON có 5 trường: name, desc, message" . ($mixAndMatch ? ", mix_and_match" : "") . ".
             Chỉ trả JSON, không thêm giải thích, không bọc ```json```.";
         }
 
@@ -245,6 +266,7 @@ class StylistAiController extends Controller
         ]);
 
         $text = $response->json('candidates.0.content.parts.0.text');
+        Log::info("Gemini raw response: " . $text);
 
         if (preg_match('/```json(.*?)```/s', $text, $matches)) {
             $json = trim($matches[1]);
