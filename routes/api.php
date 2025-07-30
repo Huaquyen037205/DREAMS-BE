@@ -22,7 +22,7 @@ use App\Http\Controllers\AIChatController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostReactionController;
-
+use App\Http\Controllers\CateList;
 
 
 // use App\Http\Middleware\CheckAdmin;
@@ -31,9 +31,9 @@ Route::get('/product', [ProductController::class, 'product']);
 Route::get('/hotProduct', [ProductController::class, 'hotProduct']);
 Route::get('/viewProduct', [ProductController::class, 'viewProduct']);
 Route::get('/product/{id}', [ProductController::class, 'productById']);
-use App\Http\Controllers\Api\CategoryController;
 
-Route::get('/category', [CategoryController::class, 'category']);
+
+Route::get('/category', [CateList::class, 'category']);
 
 // Route::middleware('auth:sanctum')->get('/product/{id}', [ProductController::class, 'productById']);
 Route::get('/search', [ProductController::class, 'searchProduct']);

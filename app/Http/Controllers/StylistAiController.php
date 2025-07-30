@@ -14,145 +14,119 @@ class StylistAiController extends Controller
     public function analyzeStyle(Request $request)
     {
         $productName = $request->input('product_name');
-
-    // Nếu không có product_name, thử lấy từ answers nếu có câu hỏi về sản phẩm
-    if (!$productName) {
+        $sizeAsked = null;
         $answers = $request->input('answers', []);
-        if (is_array($answers)) {
+        if (!is_array($answers)) $answers = [$answers];
+
+        if (!$productName) {
             foreach ($answers as $ans) {
                 if (preg_match('/sản phẩm\s+(.+)/iu', $ans, $m)) {
                     $productName = trim($m[1]);
+                    $productName = trim($productName);
                     break;
                 }
             }
-        }
-    }
 
-    if ($productName) {
-        $product = Product::where('name', $productName)->first();
-        $product = Product::whereRaw('LOWER(name) = ?', [mb_strtolower($productName)])->first();
-        if ($product) {
-             $images = DB::table('img')
-                ->where('product_id', $product->id)
-                ->orderBy('id')
-                ->pluck('name')
-                ->map(function ($img) {
-                    return asset('img/' . $img);
-                });
-            // Lấy tất cả biến thể
-            $variants = $product->variant()->orderBy('price')->get()->map(function ($variant) {
-                return [
-                    'id' => $variant->id,
-                    'size' => $variant->size,
-                    'stock_quantity' => $variant->stock_quantity,
-                    'price' => $variant->price,
-                    'sale_price' => $variant->sale_price,
-                    'status' => $variant->status,
-                ];
-            });
+            if (!$productName && !empty($answers[0]) && !preg_match('/(phối|set đồ|đi chơi|du lịch|outfit|mix and match|giảm giá|flash sale|ưu đãi)/iu', $answers[0])) {
+            $productName = trim($answers[0]);
+            }
 
-            $answers = $request->input('answers', []);
-            $sizeAsked = null;
-            if (is_array($answers)) {
+            if (!$sizeAsked) {
                 foreach ($answers as $ans) {
-                    // Tìm size được hỏi
-                    if (preg_match('/size\s*([A-Za-z0-9]+)/iu', $ans, $m)) {
-                        $sizeAsked = strtoupper(trim($m[1]));
-                    }
-                    // Tìm tên sản phẩm
-                    if (preg_match('/sản phẩm\s+(.*?)\s+(?:còn|có)\s+size/i', $ans, $m)) {
+                   if (preg_match('/sản phẩm\s+(.+)/iu', $ans, $m)) {
                         $productName = trim($m[1]);
-                    } elseif (preg_match('/sản phẩm\s+(.+)/iu', $ans, $m)) {
-                        $productName = trim($m[1]);
+                        $productName = trim($productName);
+                        break;
                     }
                 }
             }
+        }
 
-            if ($sizeAsked) {
-                $variant = $product->variant()->where('size', $sizeAsked)->first();
-                if ($variant) {
-                    return response()->json([
-                        'message' => "Sản phẩm {$product->name} size {$sizeAsked} còn {$variant->stock_quantity} sản phẩm trong kho.",
+        if ($productName) {
+            $product = Product::whereRaw('LOWER(name) = ?', [mb_strtolower(trim($productName))])->first();
+            if ($product) {
+                $images = DB::table('img')
+                    ->where('product_id', $product->id)
+                    ->orderBy('id')
+                    ->pluck('name')
+                    ->map(fn($img) => asset('img/' . $img));
+                $variants = $product->variant()->orderBy('price')->get()->map(function ($variant) {
+                    return [
+                        'id' => $variant->id,
+                        'size' => $variant->size,
                         'stock_quantity' => $variant->stock_quantity,
-                        'size' => $sizeAsked,
+                        'price' => $variant->price,
+                        'sale_price' => $variant->sale_price,
                         'status' => $variant->status,
-                    ]);
-                } else {
-                    return response()->json([
-                        'message' => "Sản phẩm {$product->name} không có size {$sizeAsked}.",
-                        'stock_quantity' => 0,
-                        'size' => $sizeAsked,
-                        'status' => 'not_found',
-                    ]);
+                    ];
+                });
+
+                if ($sizeAsked) {
+                    $variant = $product->variant()->where('size', $sizeAsked)->first();
+                    if ($variant) {
+                        return response()->json([
+                            'message' => "Sản phẩm {$product->name} size {$sizeAsked} còn {$variant->stock_quantity} sản phẩm trong kho.",
+                            'stock_quantity' => $variant->stock_quantity,
+                            'size' => $sizeAsked,
+                            'status' => $variant->status,
+                        ]);
+                    } else {
+                        return response()->json([
+                            'message' => "Sản phẩm {$product->name} không có size {$sizeAsked}.",
+                            'stock_quantity' => 0,
+                            'size' => $sizeAsked,
+                            'status' => 'not_found',
+                        ]);
+                    }
                 }
-            }
 
-            return response()->json([
-                'product' => [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'description' => $product->description,
-                    'images' => $images,
-                    'variants' => $variants,
-                ]
-            ]);
-        } else {
-            return response()->json(['message' => 'Không tìm thấy sản phẩm!'], 404);
-        }
-    }
-        $answers = $request->input('answers');
-        $mixAndMatch = $request->input('mix_and_match', false);
-
-    if (is_array($answers)) {
-            foreach ($answers as $ans) {
-                if (preg_match('/(phối đồ|set đồ|đi chơi|du lịch|outfit|mix and match)/iu', $ans)) {
-                    $mixAndMatch = true;
-                    break;
-                }
+                return response()->json([
+                    'product' => [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'images' => $images,
+                        'variants' => $variants,
+                    ]
+                ]);
+            } else {
+                return response()->json(['message' => 'Không tìm thấy sản phẩm!'], 404);
             }
         }
 
-    $answers = $request->input('answers', []);
-        if (!is_array($answers)) {
-            $answers = [$answers];
-        }
-
+        //  giảm giá/flash sale
         $isDiscountQuestion = false;
-        if (is_array($answers)) {
-            foreach ($answers as $ans) {
-                if (preg_match('/(giảm giá|flash sale|ưu đãi)/iu', $ans)) {
-                    $isDiscountQuestion = true;
-                    break;
-                }
+        foreach ($answers as $ans) {
+            if (preg_match('/(giảm giá|flash sale|ưu đãi)/iu', $ans)) {
+                $isDiscountQuestion = true;
+                break;
             }
         }
-
-        $discounts = DB::table('discounts')
-            ->where('start_day', '<=', now())
-            ->where('end_day', '>=', now())
-            ->whereNull('deleted_at')
-            ->get(['name', 'percentage', 'start_day', 'end_day']);
-
-        $flashSales = DB::table('flash_sales')
-            ->where('start_time', '<=', now())
-            ->where('end_time', '>=', now())
-            ->where('status', 1)
-            ->get(['name', 'start_time', 'end_time']);
-
-        $discountInfo = $discounts->isNotEmpty()
-            ? $discounts->map(function($d) {
-                return "Chương trình: {$d->name}, giảm {$d->percentage}%, từ {$d->start_day} đến {$d->end_day}";
-            })->implode("\n")
-            : "Hiện tại chưa có chương trình giảm giá nào đang diễn ra.";
-
-        $flashSaleInfo = $flashSales->isNotEmpty()
-            ? $flashSales->map(function($f) {
-                return "Flash Sale: {$f->name}, từ {$f->start_time} đến {$f->end_time}";
-            })->implode("\n")
-            : "Hiện tại chưa có chương trình flash sale nào đang diễn ra.";
-
         if ($isDiscountQuestion) {
-            $mixAndMatch = false;
+            $discounts = DB::table('discounts')
+                ->where('start_day', '<=', now())
+                ->where('end_day', '>=', now())
+                ->whereNull('deleted_at')
+                ->get(['name', 'percentage', 'start_day', 'end_day']);
+
+            $flashSales = DB::table('flash_sales')
+                ->where('start_time', '<=', now())
+                ->where('end_time', '>=', now())
+                ->where('status', 1)
+                ->get(['name', 'start_time', 'end_time']);
+
+            $discountInfo = $discounts->isNotEmpty()
+                ? $discounts->map(function($d) {
+                    return "Chương trình: {$d->name}, giảm {$d->percentage}%, từ {$d->start_day} đến {$d->end_day}";
+                })->implode("\n")
+                : "Hiện tại chưa có chương trình giảm giá nào đang diễn ra.";
+
+            $flashSaleInfo = $flashSales->isNotEmpty()
+                ? $flashSales->map(function($f) {
+                    return "Flash Sale: {$f->name}, từ {$f->start_time} đến {$f->end_time}";
+                })->implode("\n")
+                : "Hiện tại chưa có chương trình flash sale nào đang diễn ra.";
+
             $prompt = "Khách hàng hỏi về chương trình giảm giá hoặc flash sale.
                 Dữ liệu chương trình giảm giá hiện tại: $discountInfo
                 Dữ liệu flash sale hiện tại: $flashSaleInfo
@@ -160,7 +134,7 @@ class StylistAiController extends Controller
                 Trả về JSON có 1 trường: message (chỉ trả lời về chương trình, không đề xuất sản phẩm, không sinh từ khóa).
                 Chỉ trả JSON, không thêm giải thích, không bọc ```json```.";
 
-                 $apiKey = env('GEMINI_API_KEY');
+            $apiKey = env('GEMINI_API_KEY');
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
             ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $apiKey, [
@@ -180,7 +154,42 @@ class StylistAiController extends Controller
             return response()->json([
                 'message' => $result['message'] ?? '',
             ]);
-        } else {
+        }
+
+        // phối đồ (mix and match)
+        $mixAndMatch = false;
+            foreach ($answers as $ans) {
+                if (preg_match('/(phối đồ|set đồ|đi chơi|du lịch|outfit|mix and match)/iu', $ans)) {
+                    $mixAndMatch = true;
+                    break;
+                }
+            }
+
+            // AI phối đồ hoặc style
+            $discounts = DB::table('discounts')
+                ->where('start_day', '<=', now())
+                ->where('end_day', '>=', now())
+                ->whereNull('deleted_at')
+                ->get(['name', 'percentage', 'start_day', 'end_day']);
+
+            $flashSales = DB::table('flash_sales')
+                ->where('start_time', '<=', now())
+                ->where('end_time', '>=', now())
+                ->where('status', 1)
+                ->get(['name', 'start_time', 'end_time']);
+
+            $discountInfo = $discounts->isNotEmpty()
+                ? $discounts->map(function($d) {
+                    return "Chương trình: {$d->name}, giảm {$d->percentage}%, từ {$d->start_day} đến {$d->end_day}";
+                })->implode("\n")
+                : "Hiện tại chưa có chương trình giảm giá nào đang diễn ra.";
+
+            $flashSaleInfo = $flashSales->isNotEmpty()
+                ? $flashSales->map(function($f) {
+                    return "Flash Sale: {$f->name}, từ {$f->start_time} đến {$f->end_time}";
+                })->implode("\n")
+                : "Hiện tại chưa có chương trình flash sale nào đang diễn ra.";
+
             $prompt = "Dưới đây là thông tin gu thời trang của một người dùng: " . json_encode($answers, JSON_UNESCAPED_UNICODE) . "
                 Dựa vào đó, hãy:
                 - Đặt tên gu thật sang chảnh (tiếng Việt)
@@ -195,39 +204,36 @@ class StylistAiController extends Controller
 
             if ($mixAndMatch) {
                 $prompt .= "
-                - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong cửa hàng, mỗi loại sản phẩm chỉ xuất hiện 1 lần mỗi loại sản phẩm chỉ xuất hiện 1 lần, ví dụ: nếu đã có áo khoác, hoodie thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit, ví dụ: nếu đã có áo khoác thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit)";
-            }
-            else {
-                $shopProducts = Product::with('category')->get()->map(function($p) {
-                    return [
-                        'name' => $p->name,
-                        'category' => optional($p->category)->name,
-                        'description' => $p->description,
-                    ];
-                });
+                - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong cửa hàng, mỗi loại sản phẩm chỉ xuất hiện 1 lần, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit)";
+            }else {
+            $shopProducts = Product::with('category')->get()->map(function($p) {
+                return [
+                    'name' => $p->name,
+                    'category' => optional($p->category)->name,
+                    'description' => $p->description,
+                ];
+            });
 
-                // Đưa vào đầu prompt
-                $prompt = "Danh sách sản phẩm hiện có trong shop, đề suất phối đồ cho người dùng (chỉ được đề xuất các sản phẩm này): " . json_encode($shopProducts, JSON_UNESCAPED_UNICODE) . "\n";
-                $prompt .= "Dưới đây là thông tin gu thời trang của một người dùng: " . json_encode($answers, JSON_UNESCAPED_UNICODE) . "\n";
-                $prompt .= "Dựa vào đó, hãy:
-                    - Đặt tên gu thật sang chảnh (tiếng Việt)
-                    - Mô tả ngắn phong cách này
-                    - Gợi ý tối đa 3 từ khóa style (tiếng Việt hoặc tiếng Anh, định dạng mảng)
-                    - Viết một lời nhận xét thân thiện, tự nhiên như một stylist đang trò chuyện với khách (tiếng Việt)
-                    - Nếu khách hàng hỏi về chương trình giảm giá, flash sale hoặc ưu đãi, hãy trả lời chi tiết về các chương trình này nếu có (lưu ý không tự bịa ra).
-                    Dữ liệu chương trình giảm giá hiện tại: $discountInfo
-                    Dữ liệu flash sale hiện tại: $flashSaleInfo
-                    Trả về JSON có 4 trường: name, desc, keywords, message.
-                    Chỉ trả JSON, không thêm giải thích, không bọc ```json```.";
-                if ($mixAndMatch) {
-                    $prompt .= "
-                        - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong danh sách trên, mỗi loại sản phẩm chỉ xuất hiện 1 lần, ví dụ: nếu đã có áo khoác thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit).";
-                }
-                $prompt .= "
-                Lưu ý: Chỉ được đề xuất sản phẩm có trong danh sách trên, không tự bịa hoặc lấy sản phẩm ngoài shop.
-                Trả về JSON có 5 trường: name, desc, message" . ($mixAndMatch ? ", mix_and_match" : "") . ".
+            $prompt = "Danh sách sản phẩm hiện có trong shop, đề suất phối đồ cho người dùng (chỉ được đề xuất các sản phẩm này): " . json_encode($shopProducts, JSON_UNESCAPED_UNICODE) . "\n";
+            $prompt .= "Dưới đây là thông tin gu thời trang của một người dùng: " . json_encode($answers, JSON_UNESCAPED_UNICODE) . "\n";
+            $prompt .= "Dựa vào đó, hãy:
+                - Đặt tên gu thật sang chảnh (tiếng Việt)
+                - Mô tả ngắn phong cách này
+                - Gợi ý tối đa 3 từ khóa style (tiếng Việt hoặc tiếng Anh, định dạng mảng)
+                - Viết một lời nhận xét thân thiện, tự nhiên như một stylist đang trò chuyện với khách (tiếng Việt)
+                - Nếu khách hàng hỏi về chương trình giảm giá, flash sale hoặc ưu đãi, hãy trả lời chi tiết về các chương trình này nếu có (lưu ý không tự bịa ra).
+                Dữ liệu chương trình giảm giá hiện tại: $discountInfo
+                Dữ liệu flash sale hiện tại: $flashSaleInfo
+                Trả về JSON có 4 trường: name, desc, keywords, message.
                 Chỉ trả JSON, không thêm giải thích, không bọc ```json```.";
+            if ($mixAndMatch) {
+                $prompt .= "
+                    - Gợi ý một set phối đồ hoàn chỉnh (chỉ gồm các sản phẩm có trong danh sách trên, mỗi loại sản phẩm chỉ xuất hiện 1 lần, ví dụ: nếu đã có áo khoác thì không thêm áo khoác thứ 2, phối hợp phụ kiện như túi, mũ nếu phù hợp. Đảm bảo set đồ hợp lý, đủ các món cơ bản cho 1 outfit).";
             }
+            $prompt .= "
+            Lưu ý: Chỉ được đề xuất sản phẩm có trong danh sách trên, không tự bịa hoặc lấy sản phẩm ngoài shop.
+            Trả về JSON có 5 trường: name, desc, message" . ($mixAndMatch ? ", mix_and_match" : "") . ".
+            Chỉ trả JSON, không thêm giải thích, không bọc ```json```.";
         }
 
         $apiKey = env('GEMINI_API_KEY');
@@ -238,27 +244,18 @@ class StylistAiController extends Controller
             'contents' => [[ 'parts' => [['text' => $prompt]] ]]
         ]);
 
-        Log::info('Gemini API raw response:', $response->json());
-
         $text = $response->json('candidates.0.content.parts.0.text');
-        Log::info('Gemini API raw text:', ['text' => $text]);
 
-        // Tách JSON ra nếu Gemini vẫn bọc ```json
         if (preg_match('/```json(.*?)```/s', $text, $matches)) {
             $json = trim($matches[1]);
-            Log::info('Matched ```json block```:', ['json' => $json]);
         } elseif (preg_match('/```(.*?)```/s', $text, $matches)) {
             $json = trim($matches[1]);
-            Log::info('Matched ``` block```:', ['json' => $json]);
         } else {
             $json = trim($text);
-            Log::info('No wrapping, using raw:', ['json' => $json]);
         }
-
         $result = json_decode($json, true);
 
         if (!is_array($result)) {
-            Log::warning('JSON decode failed.', ['json' => $json]);
             $result = [
                 'name' => null,
                 'desc' => $text,
@@ -266,7 +263,6 @@ class StylistAiController extends Controller
             ];
         }
 
-        // --- Giai đoạn tách từ ---
         $rawKeywords = $result['keywords'] ?? [];
         $finalKeywords = [];
 
@@ -282,7 +278,6 @@ class StylistAiController extends Controller
 
         $finalKeywords = array_unique($finalKeywords);
 
-        // Log::info('Expanded keywords for search:', $finalKeywords);
         $products = Product::query()
             ->where(function ($q) use ($finalKeywords) {
                 foreach ($finalKeywords as $word) {
@@ -293,9 +288,7 @@ class StylistAiController extends Controller
             ->take(12)
             ->get();
 
-        Log::info('Products found:', $products->pluck('name')->toArray());
-
-            $productsWithImage = $products->map(function ($product) {
+        $productsWithImage = $products->map(function ($product) {
             $image = DB::table('img')->where('product_id', $product->id)->orderBy('id')->value('name');
             return [
                 'id' => $product->id,
@@ -305,6 +298,7 @@ class StylistAiController extends Controller
                 'image' => $image ? url('img/' . $image) : null,
             ];
         });
+
         $message = $result['message'] ?? '';
         $message = preg_replace('/\*+\s*/u', '', $message);
 
