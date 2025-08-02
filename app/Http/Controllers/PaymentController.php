@@ -241,10 +241,21 @@ class PaymentController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        $ordersArr = $orders->map(function ($order) {
+        $orderArr = $order->toArray();
+        foreach ($orderArr['order_items'] as &$item) {
+            $product = $order->order_items->where('id', $item['id'])->first()->product ?? null;
+            $image = $product && $product->img->first() ? $product->img->first()->name : null;
+            $item['image_url'] = $image ? url('img/' . $image) : null;
+        }
+        $orderArr['order_items'] = $orderArr['order_items'];
+        return $orderArr;
+    });
+
         return response()->json([
             'status' => 200,
             'message' => 'Danh sách đơn hàng của bạn',
-            'data' => $orders
+            'data' => $ordersArr
         ], 200);
     }
 
