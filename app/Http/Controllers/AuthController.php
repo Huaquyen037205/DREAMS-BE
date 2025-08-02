@@ -67,10 +67,7 @@ class AuthController extends Controller
                         'message' => 'Tài khoản đã bị khóa',
                     ], 403);
                 }
-
-                // Tạo access token
                 $token = $user->createToken('API Token')->plainTextToken;
-
                 return response()->json([
                     'status' => 200,
                     'message' => 'Đăng nhập thành công',
@@ -180,12 +177,10 @@ class AuthController extends Controller
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Xử lý ngày sinh
         if (!empty($validated['day_of_birth'])) {
             $date = date_create($validated['day_of_birth']);
             $validated['day_of_birth'] = $date ? $date->format('Y-m-d') : null;
         }
-
         // Xử lý ảnh
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');

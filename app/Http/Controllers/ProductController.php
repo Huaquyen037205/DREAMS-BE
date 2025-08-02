@@ -51,7 +51,6 @@ class ProductController extends Controller
 
     public function hotProduct() {
         $now = now();
-
         // Lấy danh sách product_id đang thuộc flash sale đang hoạt động
         $flashSaleProductIds = DB::table('flash_sale_variants')
             ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
@@ -165,14 +164,12 @@ class ProductController extends Controller
             'message' => 'Không tìm thấy sản phẩm',
         ], 404);
     }
-
-    // Nếu có token (user đăng nhập) thì lưu lịch sử xem
     $user = $request->user();
     if (!$user && $request->bearerToken()) {
-        $user = \Laravel\Sanctum\PersonalAccessToken::findToken($request->bearerToken())?->tokenable;
+        $user = PersonalAccessToken::findToken($request->bearerToken())?->tokenable;
     }
     if ($user) {
-        \DB::table('product_views')->insert([
+        DB::table('product_views')->insert([
             'user_id' => $user->id,
             'product_id' => $id,
             'viewed_at' => now(),
@@ -181,7 +178,6 @@ class ProductController extends Controller
     $now = now();
     $variantIds = $product->variant->pluck('id')->toArray();
 
-    // Lấy tất cả flash sale variant của sản phẩm này
     $flashSaleVariants = DB::table('flash_sale_variants')
         ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
         ->whereIn('flash_sale_variants.variant_id', $variantIds)
@@ -204,12 +200,10 @@ class ProductController extends Controller
         }
     }
 
-    // Lọc trùng theo 'size' để tránh lặp lại size giống nhau
     $product->variant = $product->variant->unique('size')->values();
     $product->images = $product->img->map(function ($img) {
         return asset('img/' . $img->name);
     });
-
 
     return response()->json([
         'status' => 200,
@@ -221,14 +215,12 @@ class ProductController extends Controller
 public function searchProduct(Request $request)
 {
     $search = $request->input('search');
-
-    // Tìm sản phẩm có chứa từ khoá trong tên hoặc mô tả
     $products = Product::with('img', 'variant', 'category')
         ->where(function($query) use ($search) {
             $query->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('description', 'LIKE', "%{$search}%");
         })
-        ->get(); // <-- Đổi từ paginate() sang get()
+        ->get();
 
     if ($products->isEmpty()) {
         return response()->json([
@@ -240,7 +232,7 @@ public function searchProduct(Request $request)
     return response()->json([
         'status' => 200,
         'message' => 'Tìm thấy sản phẩm.',
-        'data' => $products, // <-- Trả về mảng đơn giản
+        'data' => $products,
     ]);
 }
 
