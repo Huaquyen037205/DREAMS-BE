@@ -87,12 +87,6 @@ Route::middleware(['auth:sanctum'])->group(function (){
     Route::patch('/admin/editImg/{id}', [AdminController::class, 'editImg']);
     Route::delete('/admin/deleteImg/{id}', [AdminController::class, 'deleteImg']);
 
-    //Category
-    Route::get('/admin/category', [AdminController::class, 'categoryAdmin']);
-    Route::post('/admin/addCategory', [AdminController::class, 'addCategory']);
-    Route::patch('/admin/editCategory/{id}', [AdminController::class, 'editCategory']);
-    Route::delete('/admin/deleteCategory/{id}', [AdminController::class, 'deleteCategory']);
-
     //Variant
     Route::get('/admin/variant', [AdminController::class, 'variantAdmin']);
     Route::post('/admin/addVariant', [AdminController::class, 'addVariant']);
