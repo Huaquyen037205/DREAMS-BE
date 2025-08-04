@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Img;
 use App\Models\Category;
+use Illuminate\Support\Str;
 
 class CateList extends Controller
 {
@@ -27,10 +29,19 @@ class CateList extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'status' => 'required|boolean',
         ]);
 
-        Category::create($request->only('name', 'image_url', 'status'));
+        $data = $request->only('name', 'status');
+        if ($request->hasFile('image_url')) {
+        $file = $request->file('image_url');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('img/'), $filename);
+            $data['image_url'] = $filename;
+        } else {
+            $data['image_url'] = null;
+        }
+
+    Category::create($data);
 
         return redirect()->route('categories.index')->with('success', 'Tạo danh mục thành công!');
     }
