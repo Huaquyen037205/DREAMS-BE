@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -12,6 +11,24 @@ use Illuminate\Support\Facades\Cache;
 
 class VoiceOrderController extends Controller
 {
+    // Hàm tính phí ship dựa vào địa chỉ
+    private function calculateShippingFee($address)
+    {
+        $addr = mb_strtolower($address->adress);
+        if (
+            str_contains($addr, 'quận 1') ||
+            str_contains($addr, 'quận 3') ||
+            str_contains($addr, 'quận 7') ||
+            str_contains($addr, 'quận 9') ||
+            str_contains($addr, 'quận 12') ||
+            str_contains($addr, 'tp.hcm') ||
+            str_contains($addr, 'thành phố hồ chí minh')
+        ) {
+            return 10000;
+        }
+        return 50000;
+    }
+
     // 1. Phân tích text từ voice
     public function parseVoiceOrder(Request $request)
     {
@@ -50,6 +67,11 @@ class VoiceOrderController extends Controller
             'is_default' => 0,
         ]);
 
+        $shipping_fee = $this->calculateShippingFee($address);
+        $unit_price = $variant->price;
+        $subtotal = $unit_price * $data['quantity'];
+        $total_amount = $subtotal + $shipping_fee;
+
         $paymentId = $data['payment_id'] ?? 1;
 
         if ($paymentId == 1) {
@@ -60,7 +82,8 @@ class VoiceOrderController extends Controller
                 'payment_id' => 1,
                 'address_id' => $address->id,
                 'status' => 'pending',
-                'total_price' => $variant->price * $data['quantity'],
+                'total_price' => $total_amount,
+                'shipping_fee' => $shipping_fee,
                 'order_code' => 'COD' . strtoupper(uniqid()),
             ]);
 
@@ -68,12 +91,21 @@ class VoiceOrderController extends Controller
                 'order_id' => $order->id,
                 'variant_id' => $variant->id,
                 'quantity' => $data['quantity'],
-                'price' => $variant->price,
+                'price' => $unit_price,
             ]);
 
             return response()->json([
                 'order_id' => $order->id,
-                'message' => "Bạn đã đặt $data[quantity] $product->name size $data[size] giao về $address->adress. Thanh toán khi nhận hàng.",
+                'product_name' => $product->name,
+                'quantity' => $data['quantity'],
+                'size' => $data['size'],
+                'unit_price' => number_format($unit_price) . 'đ',
+                'subtotal' => number_format($subtotal) . 'đ',
+                'shipping_fee' => number_format($shipping_fee) . 'đ',
+                'total_amount' => number_format($total_amount) . 'đ',
+                'address' => $address->adress,
+                'payment_method' => 'Thanh toán khi nhận hàng (COD)',
+                'message' => "Đặt hàng thành công! $data[quantity] $product->name size $data[size] - Đơn giá: " . number_format($unit_price) . "đ - Tổng tiền sản phẩm: " . number_format($subtotal) . "đ - Phí ship: " . number_format($shipping_fee) . "đ - Tổng cộng: " . number_format($total_amount) . "đ",
             ]);
         }
 
@@ -82,11 +114,8 @@ class VoiceOrderController extends Controller
             $cart = [[
                 'variant_id' => $variant->id,
                 'quantity' => $data['quantity'],
-                'price' => $variant->price,
+                'price' => $unit_price,
             ]];
-
-            $total = $variant->price * $data['quantity'];
-            $totalAfterDiscount = $total;
 
             $vnp_TxnRef = uniqid('voice_');
             Cache::put('vnpay_' . $vnp_TxnRef, [
@@ -96,11 +125,12 @@ class VoiceOrderController extends Controller
                 'shipping_id' => 1,
                 'address_id' => $address->id,
                 'payment_id' => 2,
-                'totalAfterDiscount' => $totalAfterDiscount,
+                'totalAfterDiscount' => $total_amount,
+                'shipping_fee' => $shipping_fee,
             ], now()->addMinutes(30));
 
             // Tạo link thanh toán VNPAY
-            $vnp_Amount = $totalAfterDiscount * 100;
+            $vnp_Amount = $total_amount * 100;
             $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
             $vnp_TmnCode = env('VNP_TMN_CODE');
             $vnp_HashSecret = env('VNP_HASH_SECRET');
@@ -130,8 +160,17 @@ class VoiceOrderController extends Controller
 
             return response()->json([
                 'payment_url' => $vnpUrlFinal,
-                'message' => 'Chuyển đến trang thanh toán VNPAY.',
                 'vnp_TxnRef' => $vnp_TxnRef,
+                'product_name' => $product->name,
+                'quantity' => $data['quantity'],
+                'size' => $data['size'],
+                'unit_price' => number_format($unit_price) . 'đ',
+                'subtotal' => number_format($subtotal) . 'đ',
+                'shipping_fee' => number_format($shipping_fee) . 'đ',
+                'total_amount' => number_format($total_amount) . 'đ',
+                'address' => $address->adress,
+                'payment_method' => 'VNPAY',
+                'message' => "Chuyển đến trang thanh toán VNPAY. Tổng tiền: " . number_format($total_amount) . 'đ (Bao gồm phí ship: ' . number_format($shipping_fee) . 'đ)',
             ]);
         }
 

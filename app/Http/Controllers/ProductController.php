@@ -497,7 +497,8 @@ public function deleteReview(Request $request, $id){
     ], 200);
 }
 
-public function viewedProducts(Request $request)
+ public function viewedProducts(Request $request)
+
 {
     $userId = $request->user()->id;
     $productIds = \DB::table('product_views')
