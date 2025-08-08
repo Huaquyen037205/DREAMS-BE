@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Models\Product;
 use App\Models\Img;
 use App\Models\Variant;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class ProductController extends Controller
 {
@@ -20,7 +22,6 @@ class ProductController extends Controller
     public function product() {
         $now = now();
 
-        // Lấy danh sách product_id đang thuộc flash sale đang hoạt động
         $flashSaleProductIds = DB::table('flash_sale_variants')
             ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
             ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
@@ -29,7 +30,6 @@ class ProductController extends Controller
             ->pluck('variant.product_id')
             ->unique();
 
-        // Lấy sản phẩm KHÔNG nằm trong chương trình flash sale đang hoạt động
         $product = Product::with('img', 'variant', 'category')
             ->whereNotIn('id', $flashSaleProductIds)
             ->paginate(12);
@@ -51,7 +51,6 @@ class ProductController extends Controller
 
     public function hotProduct() {
         $now = now();
-        // Lấy danh sách product_id đang thuộc flash sale đang hoạt động
         $flashSaleProductIds = DB::table('flash_sale_variants')
             ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
             ->join('variant', 'flash_sale_variants.variant_id', '=', 'variant.id')
@@ -60,7 +59,6 @@ class ProductController extends Controller
             ->pluck('variant.product_id')
             ->unique();
 
-        // Lấy sản phẩm hot, KHÔNG nằm trong chương trình flash sale
         $products = Product::with('img', 'variant', 'category')
             ->where('hot', '>=', 10)
             ->whereNotIn('id', $flashSaleProductIds)
@@ -80,7 +78,6 @@ class ProductController extends Controller
             'data' => $products
         ], 200);
     }
-
     public function viewProduct(){
         $products = Product::with('img', 'variant', 'category')
         ->orderByDesc('created_at')
@@ -89,7 +86,7 @@ class ProductController extends Controller
 
         $products->transform(function ($product) {
             $product->images = $product->img->map(function ($img) {
-                return asset('img/' . $img->name);
+return asset('img/' . $img->name);
             });
             return $product;
         });
@@ -120,7 +117,11 @@ class ProductController extends Controller
             'code' => 'required|string|max:255',
         ]);
 
-        $user = auth()->user;
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
+        }
+
         $discount = Discount::where('code', $request->code)
         ->whereDate('start_day', '<=', now())
         ->whereDate('end_day', '>=', now())
@@ -179,7 +180,7 @@ class ProductController extends Controller
     $variantIds = $product->variant->pluck('id')->toArray();
 
     $flashSaleVariants = DB::table('flash_sale_variants')
-        ->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
+->join('flash_sales', 'flash_sale_variants.flash_sale_id', '=', 'flash_sales.id')
         ->whereIn('flash_sale_variants.variant_id', $variantIds)
         ->where('flash_sales.start_time', '<=', $now)
         ->where('flash_sales.end_time', '>=', $now)
@@ -236,274 +237,267 @@ public function searchProduct(Request $request)
     ]);
 }
 
+public function productByPrice(Request $request)
+{
+    $min = $request->input('min', 0);
+    $max = $request->input('max', null);
 
-
-
-        public function productByPrice(Request $request)
-    {
-        $min = $request->input('min', 0);
-        $max = $request->input('max', null);
-
-        if (!is_numeric($min) || ($max !== null && !is_numeric($max))) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Giá không hợp lệ',
-            ], 400);
-        }
-
-        $products = Product::with(['img', 'variant', 'category'])
-            ->whereHas('variant', function($query) use ($min, $max) {
-                $query->whereRaw('COALESCE(sale_price, price) >= ?', [$min]);
-                if ($max !== null) {
-                    $query->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
-                }
-            })
-            ->get();
-
-        if ($products->isEmpty()) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy sản phẩm',
-            ], 404);
-        }
-
+    if (!is_numeric($min) || ($max !== null && !is_numeric($max))) {
         return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách sản phẩm theo khoảng giá',
-            'data' => $products
-        ], 200);
+            'status' => 400,
+            'message' => 'Giá không hợp lệ',
+        ], 400);
     }
 
-    public function filterAll(Request $request)
-    {
-        $size = strtoupper($request->input('size', null));
-        $min = $request->input('min', 0);
-        $max = $request->input('max', null);
-        $sort = $request->input('sort', 'asc'); // 'asc' hoặc 'desc'
-
-        if (!in_array($sort, ['asc', 'desc'])) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Tham số sắp xếp không hợp lệ. Chỉ chấp nhận asc hoặc desc.',
-            ], 400);
-        }
-
-        if ($size && !in_array($size, ['S', 'M', 'L', 'XL'])) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Size không hợp lệ. Chỉ chấp nhận S, M, L, XL.',
-            ], 400);
-        }
-
-        $query = Product::with([
-            'img',
-            'category',
-            'variant' => function ($q) use ($size, $sort) {
-                if ($size) {
-                    $q->where('size', $size);
-                }
-                $q->orderByRaw('COALESCE(sale_price, price) ' . $sort);
-            }
-        ]);
-
-        // Lọc theo size
-        if ($size) {
-            $query->whereHas('variant', function ($q) use ($size) {
-                $q->where('size', $size);
-            });
-        }
-
-        // Lọc theo giá
-        $query->whereHas('variant', function ($q) use ($min, $max) {
-            $q->whereRaw('COALESCE(sale_price, price) >= ?', [$min]);
+    $products = Product::with(['img', 'variant', 'category'])
+        ->whereHas('variant', function($query) use ($min, $max) {
+            $query->whereRaw('COALESCE(sale_price, price) >= ?', [$min]);
             if ($max !== null) {
-                $q->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
+                $query->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
             }
-        });
-
-        $products = $query->get();
-
-        // ✅ Thêm đoạn này để gán trường 'images' là URL đầy đủ
-        $products->transform(function ($product) {
-            $product->images = $product->img->map(function ($img) {
-                return asset('img/' . $img->name);
-            });
-            return $product;
-        });
-
-        if ($products->isEmpty()) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy sản phẩm phù hợp.',
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách sản phẩm đã lọc.',
-            'data' => $products
-        ], 200);
-    }
-
-
-    public function filterBySize(Request $request)
-    {
-        $size = strtoupper($request->input('size'));
-
-        // Chỉ cho phép S, M, L
-        if (!in_array($size, ['S', 'M', 'L', 'XL'])) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Size không hợp lệ. Chỉ chấp nhận S, M, L, XL',
-            ], 400);
-        }
-
-        $products = Product::with(['img', 'variant' => function($query) use ($size) {
-                $query->where('size', $size);
-            }, 'category'])
-            ->whereHas('variant', function($query) use ($size) {
-                $query->where('size', $size);
-            })
-            ->get();
-
-        if ($products->isEmpty()) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy sản phẩm với size này',
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách sản phẩm theo size',
-            'data' => $products
-        ], 200);
-    }
-
-    public function getReviews(Request $request)
-    {
-        $product_id = $request->query('product_id');
-        $query = Review::with('user');
-        if ($product_id) {
-            $query->where('product_id', $product_id);
-        }
-        $reviews = $query->orderByDesc('created_at')->get();
-        return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách đánh giá',
-            'data' => $reviews
-        ], 200);
-    }
-
-    public function reviewByProductId($product_id)
-    {
-        $reviews = Review::with('user')
-            ->where('product_id', $product_id)
-            ->orderByDesc('created_at')
-            ->get();
-
-        if ($reviews->isEmpty()) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không có đánh giá cho sản phẩm này',
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách đánh giá cho sản phẩm',
-            'data' => $reviews
-        ], 200);
-    }
-
-    public function reviews(Request $request){
-        $request->validate([
-            'product_id' => 'required|integer|exists:products,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:1000'
-        ]);
-
-        $user = $request->user();
-        if (!$user) {
-            return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
-        }
-
-       $hasPurchased = Order::where('user_id', $user->id)
-        ->where('status', 'paid')
-        ->whereHas('order_items', function($query) use ($request) {
-            $query->whereHas('variant', function($q) use ($request) {
-                $q->where('product_id', $request->product_id);
-            });
         })
+        ->get();
+
+    if ($products->isEmpty()) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Không tìm thấy sản phẩm',
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm theo khoảng giá',
+        'data' => $products
+], 200);
+}
+
+public function filterAll(Request $request)
+{
+    $size = strtoupper($request->input('size', null));
+    $min = $request->input('min', 0);
+    $max = $request->input('max', null);
+    $sort = $request->input('sort', 'asc'); // 'asc' hoặc 'desc'
+
+    if (!in_array($sort, ['asc', 'desc'])) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Tham số sắp xếp không hợp lệ. Chỉ chấp nhận asc hoặc desc.',
+        ], 400);
+    }
+
+    if ($size && !in_array($size, ['S', 'M', 'L', 'XL'])) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Size không hợp lệ. Chỉ chấp nhận S, M, L, XL.',
+        ], 400);
+    }
+
+    $query = Product::with([
+        'img',
+        'category',
+        'variant' => function ($q) use ($size, $sort) {
+            if ($size) {
+                $q->where('size', $size);
+            }
+            $q->orderByRaw('COALESCE(sale_price, price) ' . $sort);
+        }
+    ]);
+
+    // Lọc theo size
+    if ($size) {
+        $query->whereHas('variant', function ($q) use ($size) {
+            $q->where('size', $size);
+        });
+    }
+
+    // Lọc theo giá
+    $query->whereHas('variant', function ($q) use ($min, $max) {
+        $q->whereRaw('COALESCE(sale_price, price) >= ?', [$min]);
+        if ($max !== null) {
+            $q->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
+        }
+    });
+
+    $products = $query->get();
+
+    $products->transform(function ($product) {
+        $product->images = $product->img->map(function ($img) {
+            return asset('img/' . $img->name);
+        });
+        return $product;
+    });
+
+    if ($products->isEmpty()) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Không tìm thấy sản phẩm phù hợp.',
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm đã lọc.',
+        'data' => $products
+    ], 200);
+}
+
+public function filterBySize(Request $request)
+{
+    $size = strtoupper($request->input('size'));
+
+    if (!in_array($size, ['S', 'M', 'L', 'XL'])) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Size không hợp lệ. Chỉ chấp nhận S, M, L, XL',
+        ], 400);
+    }
+
+    $products = Product::with(['img', 'variant' => function($query) use ($size) {
+            $query->where('size', $size);
+        }, 'category'])
+        ->whereHas('variant', function($query) use ($size) {
+            $query->where('size', $size);
+        })
+        ->get();
+
+    if ($products->isEmpty()) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Không tìm thấy sản phẩm với size này',
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm theo size',
+'data' => $products
+    ], 200);
+}
+
+public function getReviews(Request $request)
+{
+    $product_id = $request->query('product_id');
+    $query = Review::with('user');
+    if ($product_id) {
+        $query->where('product_id', $product_id);
+    }
+    $reviews = $query->orderByDesc('created_at')->get();
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách đánh giá',
+        'data' => $reviews
+    ], 200);
+}
+
+public function reviewByProductId($product_id)
+{
+    $reviews = Review::with('user')
+        ->where('product_id', $product_id)
+        ->orderByDesc('created_at')
+        ->get();
+
+    if ($reviews->isEmpty()) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Không có đánh giá cho sản phẩm này',
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách đánh giá cho sản phẩm',
+        'data' => $reviews
+    ], 200);
+}
+
+public function reviews(Request $request){
+    $request->validate([
+        'product_id' => 'required|integer|exists:products,id',
+        'rating' => 'required|integer|min:1|max:5',
+        'comment' => 'nullable|string|max:1000'
+    ]);
+
+    $user = $request->user();
+    if (!$user) {
+        return response()->json(['status' => 401, 'message' => 'Unauthenticated'], 401);
+    }
+
+    $hasPurchased = Order::where('user_id', $user->id)
+    ->where('status', 'paid')
+    ->whereHas('order_items', function($query) use ($request) {
+        $query->whereHas('variant', function($q) use ($request) {
+            $q->where('product_id', $request->product_id);
+        });
+    })
+    ->exists();
+    if (!$hasPurchased) {
+        return response()->json([
+            'status' => 403,
+            'message' => 'Bạn phải mua sản phẩm này mới có thể đánh giá',
+        ], 403);
+    }
+
+     $hasReviewed = Review::where('user_id', $user->id)
+        ->where('product_id', $request->product_id)
         ->exists();
-        if (!$hasPurchased) {
-            return response()->json([
-                'status' => 403,
-                'message' => 'Bạn phải mua sản phẩm này mới có thể đánh giá',
-            ], 403);
-        }
-
-         $hasReviewed = Review::where('user_id', $user->id)
-            ->where('product_id', $request->product_id)
-            ->exists();
-        if ($hasReviewed) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Bạn chỉ được đánh giá sản phẩm này một lần',
-            ], 400);
-        }
-
-        $review = new Review();
-        $review->product_id = $request->product_id;
-        $review->user_id = $user->id;
-        $review->rating = $request->rating;
-        $review->comment = $request->comment;
-        $review->save();
+    if ($hasReviewed) {
         return response()->json([
-            'status' => 201,
-            'message' => 'Đánh giá sản phẩm thành công',
-            'data' => $review
-        ], 200);
+            'status' => 400,
+            'message' => 'Bạn chỉ được đánh giá sản phẩm này một lần',
+        ], 400);
     }
 
-    public function productsByCategoryId(Request $request)
-    {
-        $categoryId = $request->query('category_id');
-        if (!$categoryId) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Thiếu category_id'
-            ], 400);
-        }
+    $review = new Review();
+    $review->product_id = $request->product_id;
+    $review->user_id = $user->id;
+    $review->rating = $request->rating;
+    $review->comment = $request->comment;
+    $review->save();
+    return response()->json([
+        'status' => 201,
+        'message' => 'Đánh giá sản phẩm thành công',
+        'data' => $review
+    ], 200);
+}
 
-        $products = Product::with(['variant', 'img', 'category'])
-            ->where('category_id', $categoryId)
-            ->get();
-
+public function productsByCategoryId(Request $request)
+{
+    $categoryId = $request->query('category_id');
+    if (!$categoryId) {
         return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách sản phẩm theo category',
-            'data' => $products
-        ], 200);
+            'status' => 400,
+            'message' => 'Thiếu category_id'
+        ], 400);
     }
 
-    public function deleteReview(Request $request, $id){
-        $review = Review::findOrFail($id);
-        if ($review->user_id !== auth()->id()) {
-            return response()->json([
-                'status' => 403,
-                'message' => 'Bạn không có quyền xóa đánh giá này',
-            ], 403);
-        }
-        $review->delete();
+    $products = Product::with(['variant', 'img', 'category'])
+->where('category_id', $categoryId)
+        ->get();
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm theo category',
+        'data' => $products
+    ], 200);
+}
+
+public function deleteReview(Request $request, $id){
+    $review = Review::findOrFail($id);
+    if ($review->user_id !== auth()->id()) {
         return response()->json([
-            'status' => 200,
-            'message' => 'Đánh giá đã được xóa thành công',
-        ], 200);
+            'status' => 403,
+            'message' => 'Bạn không có quyền xóa đánh giá này',
+        ], 403);
     }
+    $review->delete();
+    return response()->json([
+        'status' => 200,
+        'message' => 'Đánh giá đã được xóa thành công',
+    ], 200);
+}
 
-
-    public function viewedProducts(Request $request)
+public function viewedProducts(Request $request)
 {
     $userId = $request->user()->id;
     $productIds = \DB::table('product_views')
@@ -517,12 +511,20 @@ public function searchProduct(Request $request)
         ->whereIn('id', $productIds)
         ->get();
 
+    // Chuyển đổi hình ảnh thành URL đầy đủ
+    $products->transform(function ($product) {
+        $product->images = $product->img->map(function ($img) {
+            return asset('img/' . $img->name);
+        });
+        return $product;
+    });
+
     return response()->json([
         'status' => 200,
+        'message' => 'Danh sách sản phẩm đã xem',
         'products' => $products
-    ]);
+    ], 200);
 }
-
 
 public function aiRecommend(Request $request)
 {
@@ -536,7 +538,7 @@ public function aiRecommend(Request $request)
 
     $products = Product::whereIn('id', $viewed)->pluck('name')->toArray();
 
-    // Lấy thêm danh sách sản phẩm mới nhất để AI gợi ý
+    // Lấy danh sách sản phẩm mới nhất để AI gợi ý
     $allProducts = Product::orderByDesc('created_at')->take(20)->pluck('name')->toArray();
 
     $prompt = "Dựa trên lịch sử người dùng đã xem các sản phẩm: " . implode(', ', $products) .
@@ -555,7 +557,7 @@ public function aiRecommend(Request $request)
     // Xử lý nếu Gemini trả về có bọc ```json```
     if (preg_match('/```json(.*?)```/s', $text, $matches)) {
         $json = trim($matches[1]);
-    } elseif (preg_match('/```(.*?)```/s', $text, $matches)) {
+} elseif (preg_match('/```(.*?)```/s', $text, $matches)) {
         $json = trim($matches[1]);
     } else {
         $json = trim($text);
@@ -566,8 +568,10 @@ public function aiRecommend(Request $request)
     // Nếu Gemini trả về không đúng mảng, trả về rỗng
     if (!is_array($suggestedNames)) {
         return response()->json([
+            'status' => 200,
+            'message' => 'Không có gợi ý sản phẩm',
             'suggested' => []
-        ]);
+        ], 200);
     }
 
     // Lấy đầy đủ thông tin sản phẩm theo tên
@@ -575,8 +579,19 @@ public function aiRecommend(Request $request)
         ->whereIn('name', $suggestedNames)
         ->get();
 
+    // Chuyển đổi hình ảnh thành URL đầy đủ
+    $suggestedProducts->transform(function ($product) {
+        $product->images = $product->img->map(function ($img) {
+            return asset('img/' . $img->name);
+        });
+        return $product;
+    });
+
     return response()->json([
+        'status' => 200,
+        'message' => 'Danh sách sản phẩm được gợi ý',
         'suggested' => $suggestedProducts
-    ]);
+    ], 200);
 }
+
 }
